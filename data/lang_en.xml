@@ -1,0 +1,31 @@
+﻿<lang
+	title_game="Find the ethereum"
+
+	address="Address"
+	balance="Balance"
+	congratulations="Congratulations!"
+	continue="Сontinue"
+	continue_game="Place the prize and continue the game."
+	lose="LOSE"
+	new_game="New game"
+	no="No"
+	open_channel_start="Sending BETs into the game."
+	please_wait="Please wait."
+	save="Save"
+	save_prize="Save the profit and finish the game."
+	set_bet="Select a bet SPL for the current game."
+	set_deposit="Select the amount of BET SPL you are ready to play."
+	start="START"
+	win="WIN"
+	win_streak="WIN STREAK"
+	yes="Yes"
+	your_bet="YOUR BET"
+	
+	error_balance_bet="You do not have enough BET."
+	
+	tutor_1="Hello! Choose your deposit and click OK."
+	tutor_2="Now select a bet for one game."
+	tutor_3="Good! Find the ethereum!"
+	tutor_4="It is a pity that you lost, but you can play a new game."
+	tutor_5="Make a decision and select the button."
+/>
