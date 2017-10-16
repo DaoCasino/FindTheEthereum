@@ -13,6 +13,7 @@ var GameLogic = function(params){
 	var _callback;
 	var _address   = "0x";
 	var _balance   = 0;
+	var _nonce = 0;
 	var _debug = true;
 	
 	if(params){
@@ -44,6 +45,7 @@ var GameLogic = function(params){
 	var _arWinSt = [0, 2, 4, 10, 20, 50];
 	
 	_self.setBet = function(_bet){
+		_nonce ++;
 		_objGame = {method:"setBet",
 					result:false, 
 					play:true, 
@@ -63,6 +65,7 @@ var GameLogic = function(params){
 	};
 	
 	_self.clickBox = function(_s, valPlayer){
+		_nonce ++;
 		_objGame.method = "clickBox";
 		_objGame.valueBankroller = createRnd(_s, _objGame.countBox);
 		_objGame.valuePlayer = valPlayer;
@@ -94,6 +97,7 @@ var GameLogic = function(params){
 	};
 	
 	_self.closeGame = function(){
+		_nonce ++;
 		_objGame.method = "closeGame";
 		_objGame.result = true;
 		_objGame.play = false;
@@ -125,6 +129,10 @@ var GameLogic = function(params){
 	
 	_self.balance = function(){
 		return _balance
+	};
+	
+	_self.nonce = function(){
+		return _nonce
 	};
 	
 	return _self;

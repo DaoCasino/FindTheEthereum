@@ -20,6 +20,10 @@ var ScrMenu = function(){
 		bg.scale.x = scaleBack;
 		bg.scale.y = scaleBack;
 		_self.addChild(bg);
+		var bgDark = addObj("bgDark", _W/2, _H/2);
+		bgDark.scale.x = scaleBack;
+		bgDark.scale.y = scaleBack;
+		_self.addChild(bgDark);
 		var tableLogo = addObj("tableLogoMenu");
 		tableLogo.scale.x = scaleBack;
 		tableLogo.scale.y = scaleBack;
@@ -27,7 +31,7 @@ var ScrMenu = function(){
 		tableLogo.y = 546*scaleBack;
 		_self.addChild(tableLogo);
 		
-		var titleGame = addObj("titleGame", 1366, 261);
+		var titleGame = addObj("titleGame", 1550, 220);
 		_self.addChild(titleGame);
 		var pirateTitle = addObj("pirateTitle", 350, 600);
 		_self.addChild(pirateTitle);

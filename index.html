@@ -100,6 +100,19 @@
 		<script src="javascript/WndWin.js"></script>
 	</head>
 	<body onload="init();">
-		
+		<!-- <script>
+            // TEST
+            var _logic = new GameLogic(50); 
+            for (var i = 0; i < 10; i++) {
+				_logic.setBet(1);
+                _logic.clickBox("message", Math.ceil(Math.random()*3));
+                var objBox = _logic.closeGame();
+                
+                console.log("id game:", i+1, 
+                            "bet:", objBox.objGame.betGame, 
+                            "result:", objBox.objGame.win, 
+                            "balance:", _logic.balance()); 
+            }
+        </script> -->
 	</body>
 </html>

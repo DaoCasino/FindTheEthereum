@@ -90,6 +90,7 @@ function loadManifest(){
 	
 	preloader.add("bgMenu", "images/bg/bgMenu.jpg");
 	preloader.add("bgGame", "images/bg/bgGame.jpg");
+	preloader.add("bgDark", "images/bg/bgDark.png");
 	preloader.add("bgWndDeposit", "images/bg/bgWndDeposit.png");
 	preloader.add("bgWndInfo", "images/bg/bgWndInfo.png");
 	preloader.add("bgWndWarning", "images/bg/bgWndWarning.png");
