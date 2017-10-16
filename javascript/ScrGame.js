@@ -10,7 +10,7 @@ var ScrGame = function(){
 	PIXI.Container.call( this );
 	
 	var _self = this;
-	var _logic, _objGame, _objTutor, _blockGame;
+	var _logic, _objGame, _objTutor;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial;
 	var _tfBalance, _tfBet, _tfWinStr;
 	var _fRequestFullScreen, _fCancelFullScreen;
@@ -490,7 +490,7 @@ var ScrGame = function(){
 	
 	// DC
 	_self.getBlock = function() {
-		var state = {
+		/*var state = {
 			playerbalance: _logic.balance(),
 			bankrollbalance: 0,
 			nonce: _logic.nonce(),
@@ -499,7 +499,7 @@ var ScrGame = function(){
 		};
 		
 		return {state:state, 
-				sig:Casino.ABI.soliditySHA3(["bytes32"],[state]};
+				sig:Casino.ABI.soliditySHA3(["bytes32"],[state]};*/
 	}
 	
 	_self.getBetsBalance = function(value) {
