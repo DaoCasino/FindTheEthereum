@@ -56,6 +56,7 @@ var ScrGame = function(){
 		_self.showTutorial(1);
 		
 		this.interactive = true;
+		this.on("mouseup", this.touchHandler);
 		this.on("mousedown", this.touchHandler);
 		this.on("mousemove", this.touchHandler);
 		this.on("touchstart", this.touchHandler);
@@ -490,16 +491,16 @@ var ScrGame = function(){
 	
 	// DC
 	_self.getBlock = function() {
-		/*var state = {
-			playerbalance: _logic.balance(),
-			bankrollbalance: 0,
-			nonce: _logic.nonce(),
-			seed: Casino.getChannelGameRandom(,
-			PlayergameData: _logic.getGame()
-		};
+		// var state = {
+			// playerbalance: _logic.balance(),
+			// bankrollbalance: 0,
+			// nonce: _logic.nonce(),
+			// seed: Casino.getChannelGameRandom(,
+			// PlayergameData: _logic.getGame()
+		// };
 		
-		return {state:state, 
-				sig:Casino.ABI.soliditySHA3(["bytes32"],[state]};*/
+		// return {state:state, 
+				// sig:Casino.ABI.soliditySHA3(["bytes32"],[state]};
 	}
 	
 	_self.getBetsBalance = function(value) {
@@ -763,9 +764,9 @@ var ScrGame = function(){
 	_self.touchHandler = function(evt){
 		var phase = evt.type;
 		
-		if(phase=="mousemove" || phase == "touchmove" || phase == "touchstart"){
+		if(phase=="mousedown" || phase=="mousemove" || phase == "touchmove" || phase == "touchstart"){
 			this.checkButtons(evt);
-		} else if (phase == "mousedown" || phase == "touchend") {
+		} else if (phase == "mouseup" || phase == "touchend") {
 			for (var i = 0; i < _arButtons.length; i++) {
 				var item_mc = _arButtons[i];
 				if(item_mc._selected){

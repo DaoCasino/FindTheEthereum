@@ -170,8 +170,12 @@ function iniSetArt(set_name) {
 		console.log("ERROR: " + set_name + " is undefined");
 		return;
 	}
-	json = json.data;
 	
+	json = json.data;
+	if(json){}else{
+		console.log("ERROR: " + set_name + " data is null");
+		return;
+	}
 	var frames = json.frames;
 	var data = preloader.resources[set_name].textures; 
 	// console.log("set_name:", set_name);
@@ -299,11 +303,17 @@ function addObj(name, _x, _y, _scGr, _scaleX, _scaleY) {
 		if(data){
 			objImg = new PIXI.Sprite(data.texture);
 		} else {
-			return null;
+			objImg = addGraphic(0, 0);
+			var tf = addText(name, 16, "#ffffff");
+			tf.x = 0;
+			tf.y = -tf.height/2;
+			objImg.addChild(tf);
 		}
 	}
-	objImg.anchor.x = 0.5;
-	objImg.anchor.y = 0.5;
+	if(objImg.anchor){
+		objImg.anchor.x = 0.5;
+		objImg.anchor.y = 0.5;
+	}
 	obj.w = objImg.width*obj.scale.x;
 	obj.h = objImg.height*obj.scale.y;
 	obj.addChild(objImg);
@@ -315,14 +325,20 @@ function addObj(name, _x, _y, _scGr, _scaleX, _scaleY) {
 	obj.rr = obj.r*obj.r;
 	
 	obj.setReg0 = function () {
-        objImg.anchor.x = 0;
-        objImg.anchor.y = 0;
+		if(objImg.anchor){
+			objImg.anchor.x = 0;
+			objImg.anchor.y = 0;
+		}
     }
     obj.setRegX = function (procx) {
-        objImg.anchor.x = procx;
+		if(objImg.anchor){
+			objImg.anchor.x = procx;
+		}
     }
     obj.setRegY = function (procy) {
-        objImg.anchor.y = procy;
+		if(objImg.anchor){
+			objImg.anchor.y = procy;
+		}
     }
 	
 	return obj;
@@ -394,7 +410,7 @@ function addText(text, size, color, glow, _align, width, px, font){
 function addGraphic(_x, _y, _w, _h, _color) {
 	if(_w){}else{_w = 100;}
 	if(_h){}else{_h = 100;}
-	if(_color){}else{_color = 0xFFC893;}
+	if(_color){}else{_color = 0xFF0000;}
 	
 	var obj = new PIXI.Container();
 
@@ -594,16 +610,25 @@ function getText(txt) {
 }
 function getXMLDocument(url){  
     var xml;  
+	
     if(window.XMLHttpRequest){   
         xml=new XMLHttpRequest();  
-        xml.open("GET", url, false);  
-        xml.send(null);  
-        return xml.responseXML;  
+        xml.open("GET", url, false);
+		try {
+			xml.send(null);  
+			return xml.responseXML;
+		} catch (err) {
+			return null;
+		}
     } else {
         if(window.ActiveXObject){
             xml=new ActiveXObject("Microsoft.XMLDOM");  
-            xml.async=false;  
-            xml.load(url);  
+            xml.async=false; 
+			try {
+				xml.load(url);
+			} catch (err) {
+				return null;
+			}			
             return xml;  
         } else {  
             console.log("Loading XML is not supported by the browser");  

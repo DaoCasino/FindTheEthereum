@@ -24,7 +24,9 @@ daoLang.prototype.init = function() {
 	this.daoLang_names.jp="Japanese";
 	
 	this.en_xml = getXMLDocument("data/lang_en.xml");
-	this.daoLangObjEn = this.en_xml.childNodes[0];
+	if(this.en_xml){
+		this.daoLangObjEn = this.en_xml.childNodes[0];
+	}
 }
 
 daoLang.prototype.saveSettings = function(){
@@ -57,14 +59,23 @@ daoLang.prototype.setLanguage = function (id){
 		}
 	}
 	var xml = getXMLDocument("data/lang_"+id+".xml");
-	this.daoLangObj = xml.childNodes[0];
-	this.current_id = id;
-	
-	this.saveSettings();
+	if(xml){
+		this.daoLangObj = xml.childNodes[0];
+		this.current_id = id;
+		
+		this.saveSettings();
+	}
 }
 
 daoLang.prototype.get_txt = function (txt){
+	if(this.daoLangObj == null){
+		return txt;
+	}
+	
 	if(this.daoLangObj.getAttribute(txt) == null){
+		if(this.daoLangObjEn == null){
+			return txt;
+		}
 		if(this.daoLangObjEn.getAttribute(txt) == null){
 			return txt;
 		} else {
