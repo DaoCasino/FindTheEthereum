@@ -74,7 +74,7 @@ var WndDeposit = function(prnt){
 		_arButtons.push(_headScroll);
 		
 		_tfDesc = addText("", 26, "#ED9829", undefined, "center", 500, 3)
-		_tfDesc.y = -135;
+		_tfDesc.y = -125;
 		_self.addChild(_tfDesc);
 		_tfBet = addText("0.00 BET", 40, "#FFFFFF", undefined, "center", 350, 4)
 		_tfBet.y = -5- _tfBet.height/2;
@@ -134,7 +134,7 @@ var WndDeposit = function(prnt){
 			_self.scrollHead(evt);
 		}
 	}
-
+	
 	_self.scrollHead = function(evt){
 		var mouseX = evt.data.global.x - this.x;
 		var posX = Math.max(mouseX, _stX);

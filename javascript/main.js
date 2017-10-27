@@ -9,6 +9,7 @@ var arClips = [];
 var language;
 var addressContract = "0x";
 var urlEtherscan = "https://api.etherscan.io/";
+var gameCode = "DC_FindTheEthereum";
 
 var currentScreen, scrContainer;
 var LoadBack, LoadPercent;
@@ -19,19 +20,13 @@ var fontMain = "Archivo Black";
 	fontMain = "Roboto Bold";
 
 // options
-var options_debug = true;
-var options_dc = false;
+var options_debug = false;
 var options_pause = false;
 var options_fullscreen = false;
 
 function init() {
 	if(typeof console === "undefined"){ console = {}; }
 	
-	if(options_dc){
-		window.Casino = new CasinoJS({network: 'ropsten'});
-		window.lightwallet = Casino.Account.lightWallet;
-	}
-
 	// hide scroll
 	var s=document.documentElement.style;
 	s.cssText=s.cssText?"":"overflow:hidden;width:100%;height:100%";
@@ -62,6 +57,19 @@ function init() {
 	
 	createScreenLoader();
 	loadManifest();
+}
+
+function loadLib() {
+	// Wait when DClib loaded
+	DCLib.on('ready', function(){
+		// Create our DApp
+		window.App = new DCLib.DApp({
+			code  : gameCode, // unique DApp code
+			logic : GameLogic, // inject logic constructor in your DApp
+		})
+		
+		init();
+	})
 }
 
 function createScreenLoader(){
@@ -303,11 +311,7 @@ function addObj(name, _x, _y, _scGr, _scaleX, _scaleY) {
 		if(data){
 			objImg = new PIXI.Sprite(data.texture);
 		} else {
-			objImg = addGraphic(0, 0);
-			var tf = addText(name, 16, "#ffffff");
-			tf.x = 0;
-			tf.y = -tf.height/2;
-			objImg.addChild(tf);
+			return null;
 		}
 	}
 	if(objImg.anchor){
@@ -708,3 +712,5 @@ function hideGame() {
 
 visibly.onVisible(visGame);
 visibly.onHidden(hideGame);
+
+document.addEventListener('DOMContentLoaded', loadLib);

@@ -12,6 +12,7 @@ var ScrMenu = function(){
 	var _self = this;
 	var _arButtons = [];
 	var _btnStart;
+	var _wndWarning;
 	
 	// INIT
 	_self.init = function(){
@@ -79,6 +80,36 @@ var ScrMenu = function(){
 		_self.addChild(btnTwitter);
 		_arButtons.push(btnTwitter);
 	};
+	
+	_self.showWndWarning = function(str) {
+		if(_wndWarning == undefined){
+			_wndWarning = new PIXI.Container();
+			_wndWarning.x = _W/2;
+			_wndWarning.y = _H/2;
+			_self.addChild(_wndWarning);
+			
+			var bg = addObj("bgWndWarning");
+			_wndWarning.addChild(bg);
+			var tfTitle = addText(getText("please_wait"), 40, "#FFCC00", "#000000", "center", 500, 3)
+			tfTitle.y = - 90;
+			_wndWarning.addChild(tfTitle);
+			var tf = addText("", 26, "#FFFFFF", "#000000", "center", 500, 3)
+			tf.y = - 30;
+			_wndWarning.addChild(tf);
+			
+			var loading = new ItemLoading();
+			loading.x = 0;
+			loading.y = 60;
+			_wndWarning.addChild(loading);
+			
+			_wndWarning.tf = tf;
+			_wndWarning.loading = loading;
+		}
+		
+		_wndWarning.tf.setText(str);
+		_wndWarning.tf.y = -_wndWarning.tf.height/2;
+		_wndWarning.visible = true;
+	}
 	
 	// CLICK
 	_self.clickStart = function() {
@@ -190,6 +221,12 @@ var ScrMenu = function(){
 	_self.update = function(diffTime) {
 		if(options_pause){
 			return;
+		}
+		
+		if(_wndWarning){
+			if(_wndWarning.visible){
+				_wndWarning.loading.update(diffTime);
+			}
 		}
 	};
 	
