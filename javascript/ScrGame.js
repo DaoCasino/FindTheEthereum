@@ -27,12 +27,14 @@ var ScrGame = function(){
 	_betGame, _balanceBet, _balanceSession, _balanceGame,
 	_timeCloseWnd;
 	// arrays
-	var _arButtons, _arBoxes;
+	var _arBoxes;
 	// strings
 	var _openkey = "0x";
 	
 	// INIT
 	_self.init = function(){
+		_self.initData();
+		
 		var bg = addObj("bgGame", _W/2, _H/2);
 		scaleBack = _W/bg.w;
 		bg.scale.x = scaleBack;
@@ -53,14 +55,6 @@ var ScrGame = function(){
 		_self.createGui();
 		_self.createBtn();
 		_self.refreshData();
-		
-		this.interactive = true;
-		this.on("mouseup", this.touchHandler);
-		this.on("mousedown", this.touchHandler);
-		this.on("mousemove", this.touchHandler);
-		this.on("touchstart", this.touchHandler);
-		this.on("touchmove", this.touchHandler);
-		this.on("touchend", this.touchHandler);
 	};
 	
 	// CREATE
@@ -95,7 +89,7 @@ var ScrGame = function(){
 	}
 	
 	_self.createArrays = function(){
-		_arButtons = [];
+		_self.arButtons = [];
 		_arBoxes = [];
 	}
 	
@@ -178,7 +172,7 @@ var ScrGame = function(){
 		_btnStart.name = "btnStart";
 		_btnStart.visible = false;
 		face_mc.addChild(_btnStart);
-		_arButtons.push(_btnStart);
+		_self.arButtons.push(_btnStart);
 		var tfStart = addText(getText("new_game"), 34, "#FFFFFF", undefined, "center", 240);
 		tfStart.x = 0;
 		tfStart.y = -tfStart.height/2;
@@ -193,7 +187,7 @@ var ScrGame = function(){
 		tfBtnSave.y = -tfBtnSave.height/2;
 		_pirateSave.addChild(tfBtnSave);
 		face_mc.addChild(_pirateSave);
-		_arButtons.push(_pirateSave);
+		_self.arButtons.push(_pirateSave);
 		
 		_pirateContinue = addButton("btnText", _W/2 + 250, 450);
 		_pirateContinue.name = "pirateContinue";
@@ -204,7 +198,7 @@ var ScrGame = function(){
 		tfBtnContinue.y = -tfBtnContinue.height/2;
 		_pirateContinue.addChild(tfBtnContinue);
 		face_mc.addChild(_pirateContinue);
-		_arButtons.push(_pirateContinue);
+		_self.arButtons.push(_pirateContinue);
 		
 		var posX = 1840;
 		var posY = 960;
@@ -212,27 +206,27 @@ var ScrGame = function(){
 		var btnDao = addButton("btnDao", posX-4, posY - 0*offsetY);
 		btnDao.overSc = true;
 		face_mc.addChild(btnDao);
-		_arButtons.push(btnDao);
+		_self.arButtons.push(btnDao);
 		var btnFullscreen = addButton("btnFullscreen", posX, posY - 1*offsetY);
 		btnFullscreen.overSc = true;
 		face_mc.addChild(btnFullscreen);
-		_arButtons.push(btnFullscreen);
+		_self.arButtons.push(btnFullscreen);
 		var btnContract = addButton("btnContract", posX, posY - 2*offsetY);
 		btnContract.overSc = true;
 		face_mc.addChild(btnContract);
-		_arButtons.push(btnContract);
+		_self.arButtons.push(btnContract);
 		var btnCashout = addButton("btnCashout", posX, posY - 3*offsetY);
 		btnCashout.overSc = true;
 		face_mc.addChild(btnCashout);
-		_arButtons.push(btnCashout);
+		_self.arButtons.push(btnCashout);
 		var btnFacebook = addButton("btnFacebook", 1870, 48);
 		btnFacebook.overSc = true;
 		face_mc.addChild(btnFacebook);
-		_arButtons.push(btnFacebook);
+		_self.arButtons.push(btnFacebook);
 		var btnTwitter = addButton("btnTwitter", 1870, 123);
 		btnTwitter.overSc = true;
 		face_mc.addChild(btnTwitter);
-		_arButtons.push(btnTwitter);
+		_self.arButtons.push(btnTwitter);
 	}
 	
 	_self.createTreasure = function() {		
@@ -250,7 +244,7 @@ var ScrGame = function(){
 			box.y = arPosY[i];
 			box.id = (i+1);
 			game_mc.addChild(box);
-			_arButtons.push(box);
+			_self.arButtons.push(box);
 			_arBoxes.push(box);
 		}
 	};
@@ -464,13 +458,16 @@ var ScrGame = function(){
 		
 		if(options_debug){
 			_balanceSession = deposit;
-			_self.initLogic(_balanceSession);
+			App.logic.setBalance(_balanceSession);
+			_self.refreshBalance();
+			_objGame = _self.getGame();
 			_self.createTreasure();
 			_self.showWndBet();
 			return false;
 		}
 		
 		_self.showWndWarning(getText("connecting"));
+		
 		App.connect({bankroller : 'auto', paymentchannel:{deposit:deposit}}, function(connected){
 			 if (connected){
 				 _wndWarning.visible = false;
@@ -478,7 +475,7 @@ var ScrGame = function(){
 					 if(App.logic.balance() == result.balance){
 						 _balanceSession = result.balance;
 						 _self.refreshBalance();
-						 _objGame = App.logic.getGame();
+						 _objGame = _self.getGame();
 						 _self.createTreasure();
 						_self.showWndBet();
 					 } else {
@@ -502,7 +499,7 @@ var ScrGame = function(){
 			// bankrollbalance: 0,
 			// nonce: App.logic.nonce(),
 			// seed: Casino.getChannelGameRandom(,
-			// PlayergameData: App.logic.getGame()
+			// PlayergameData: _self.getGame()
 		// };
 		
 		// return {state:state, 
@@ -626,7 +623,14 @@ var ScrGame = function(){
 			return
 		}
 		
-		App.call('clickBox', [ 'confirm('+rndHash+')', box.id], function(result){
+		// bytes32 id,
+        // uint playerDeposit, 
+        // uint bankrollDeposit, 
+        // uint nonce, 
+        // uint[] gameData,
+        // bytes sig)
+		
+		App.call('clickBox', [ 'confirm('+rndHash+')', box.id, _betGame], function(result){
 			 if(App.logic.balance() == result.balance){
 				_self.showResult(result, box);
 			 } else {
@@ -683,7 +687,7 @@ var ScrGame = function(){
 		}
 	}
 	
-	_self.clickCell = function(item_mc) {
+	_self.clickObj = function(item_mc) {
 		if(item_mc._disabled){
 			return;
 		}
@@ -696,6 +700,7 @@ var ScrGame = function(){
 			item_mc.scale.x = 1*item_mc.sc;
 			item_mc.scale.y = 1*item_mc.sc;
 		}
+		
 		if(item_mc.name == "ItemBox"){
 			_self.clickBox(item_mc);
 		} else if(item_mc.name == "btnStart"){
@@ -729,8 +734,8 @@ var ScrGame = function(){
 		var mouseX = evt.data.global.x;
 		var mouseY = evt.data.global.y;
 		
-		for (var i = 0; i < _arButtons.length; i++) {
-			var item_mc = _arButtons[i];
+		for (var i = 0; i < _self.arButtons.length; i++) {
+			var item_mc = _self.arButtons[i];
 			if(hit_test_rec(item_mc, item_mc.w, item_mc.h, mouseX, mouseY)){
 				if(item_mc._selected == false && !item_mc._disabled && item_mc.visible){
 					item_mc._selected = true;
@@ -765,27 +770,6 @@ var ScrGame = function(){
 				}
 			}
 		}
-	};
-
-	_self.touchHandler = function(evt){
-		var phase = evt.type;
-		
-		if(phase=="mousedown" || phase=="mousemove" || phase == "touchmove" || phase == "touchstart"){
-			this.checkButtons(evt);
-		} else if (phase == "mouseup" || phase == "touchend") {
-			for (var i = 0; i < _arButtons.length; i++) {
-				var item_mc = _arButtons[i];
-				if(item_mc._selected){
-					this.clickCell(item_mc);
-					return;
-				}
-			}
-		}
-	};
-	
-	// RESPONSE
-	_self.responseServer = function(objGame){
-		_objGame = objGame;
 	};
 	
 	// UPDATE
@@ -884,6 +868,20 @@ var ScrGame = function(){
 	// REMOVE
 	_self.removeAllListener = function() {
 		clearClips();
+		
+		if(_wndDeposit){
+			_wndDeposit.removeAllListener();
+		}
+		if(_wndBet){
+			_wndBet.removeAllListener();
+		}
+		if(_wndInfo){
+			_wndInfo.removeAllListener();
+		}
+		if(_wndWin){
+			_wndWin.removeAllListener();
+		}
+		
 		this.off("mouseup", this.touchHandler);
 		this.off("mousedown", this.touchHandler);
 		this.off("mousemove", this.touchHandler);
@@ -897,5 +895,4 @@ var ScrGame = function(){
 	return _self;
 };
 
-ScrGame.prototype = Object.create(PIXI.Container.prototype);
-ScrGame.prototype.constructor = ScrGame;
+ScrGame.prototype = new InterfaceObject();

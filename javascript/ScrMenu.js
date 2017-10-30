@@ -10,12 +10,13 @@ var ScrMenu = function(){
 	PIXI.Container.call( this );
 	
 	var _self = this;
-	var _arButtons = [];
 	var _btnStart;
 	var _wndWarning;
 	
 	// INIT
 	_self.init = function(){
+		_self.initData();
+		
 		var bg = addObj("bgMenu", _W/2, _H/2);
 		scaleBack = _W/bg.w;
 		bg.scale.x = scaleBack;
@@ -38,14 +39,6 @@ var ScrMenu = function(){
 		_self.addChild(pirateTitle);
 		
 		_self.createGui();
-		
-		this.interactive = true;
-		this.on("mouseup", this.touchHandler);
-		this.on("mousedown", this.touchHandler);
-		this.on("mousemove", this.touchHandler);
-		this.on("touchstart", this.touchHandler);
-		this.on("touchmove", this.touchHandler);
-		this.on("touchend", this.touchHandler);
 	}
 	
 	_self.createGui = function() {
@@ -61,7 +54,7 @@ var ScrMenu = function(){
 		_btnStart.name = "btnStart"
 		_btnStart.overSc = true;
 		_self.addChild(_btnStart);
-		_arButtons.push(_btnStart);
+		_self.arButtons.push(_btnStart);
 		var tfStart = addText(getText("start"), 50, "#FFFFFF", undefined, "center", 700);
 		tfStart.x = 0;
 		tfStart.y = -tfStart.height/2;
@@ -70,15 +63,15 @@ var ScrMenu = function(){
 		var btnDao = addButton("btnDao", 1836, 960);
 		btnDao.overSc = true;
 		_self.addChild(btnDao);
-		_arButtons.push(btnDao);
+		_self.arButtons.push(btnDao);
 		var btnFacebook = addButton("btnFacebook", 1870, 48);
 		btnFacebook.overSc = true;
 		_self.addChild(btnFacebook);
-		_arButtons.push(btnFacebook);
+		_self.arButtons.push(btnFacebook);
 		var btnTwitter = addButton("btnTwitter", 1870, 123);
 		btnTwitter.overSc = true;
 		_self.addChild(btnTwitter);
-		_arButtons.push(btnTwitter);
+		_self.arButtons.push(btnTwitter);
 	};
 	
 	_self.showWndWarning = function(str) {
@@ -146,7 +139,7 @@ var ScrMenu = function(){
 		}
 	}
 	
-	_self.clickCell = function(item_mc) {
+	_self.clickObj = function(item_mc) {
 		if(item_mc._disabled){
 			return;
 		}
@@ -167,53 +160,6 @@ var ScrMenu = function(){
 			_self.clickFB();
 		} else if(item_mc.name == "btnTwitter"){
 			_self.clickTwitter();
-		}
-	};
-	
-	_self.checkButtons = function(evt){
-		var mouseX = evt.data.global.x;
-		var mouseY = evt.data.global.y;
-		
-		for (var i = 0; i < _arButtons.length; i++) {
-			var item_mc = _arButtons[i];
-			if(hit_test_rec(item_mc, item_mc.w, item_mc.h, mouseX, mouseY)){
-				if(item_mc._selected == false){
-					item_mc._selected = true;
-					if(item_mc.over){
-						item_mc.over.visible = true;
-					} else if(item_mc.overSc){
-						item_mc.scale.x = 1.1*item_mc.sc;
-						item_mc.scale.y = 1.1*item_mc.sc;
-					}
-				}
-			} else {
-				if(item_mc._selected){
-					item_mc._selected = false;
-					if(item_mc.over){
-						item_mc.over.visible = false;
-					} else if(item_mc.overSc){
-						item_mc.scale.x = 1*item_mc.sc;
-						item_mc.scale.y = 1*item_mc.sc;
-					}
-				}
-			}
-		}
-	};
-
-	_self.touchHandler = function(evt){
-		var phase = evt.type;
-		
-		if(phase=="mousemove" || phase == "touchmove" || phase == "touchstart"){
-			this.checkButtons(evt);
-		} else if (phase == "mousedown" || phase == "touchend") {
-			for (var i = 0; i < _arButtons.length; i++) {
-				var item_mc = _arButtons[i];
-				if(item_mc._selected){
-					this.clickCell(item_mc);
-					i--;
-					return;
-				}
-			}
 		}
 	};
 	
@@ -246,5 +192,4 @@ var ScrMenu = function(){
 	return _self;
 };
 
-ScrMenu.prototype = Object.create(PIXI.Container.prototype);
-ScrMenu.prototype.constructor = ScrMenu;
+ScrMenu.prototype = new InterfaceObject();

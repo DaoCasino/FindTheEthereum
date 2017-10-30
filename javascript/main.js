@@ -713,4 +713,31 @@ function hideGame() {
 visibly.onVisible(visGame);
 visibly.onHidden(hideGame);
 
+function Refresh() {
+    var bankroll = 3;
+    var bal = 0;
+	var deposit = 1
+    var p = bal - deposit;
+    var user_bet = 0;
+    
+	var _bet = ((deposit * 2 + p)) / ((65536 - 1310) / chance);
+	
+	var _b = ((bankroll - bal)/100000000 * chance)/(65536 - 1310);
+	maxuser_bet = Math.min(_bet, bal, _b, 10);
+	
+	if (user_bet > maxuser_bet) {
+		user_bet = Casino.Utils.toFixed(maxuser_bet, 4);
+	}
+	if (user_bet < 0.001) {
+		user_bet = 0.001;
+	}
+	console.log(_bet, bal, _b)
+	$("#profit-on-win").val((Casino.Utils.toFixed(user_bet * (65536 - 1310) / chance - user_bet, 8).toFixed(8)));
+	$("#payout").val("x" + Casino.Utils.toFixed((65536 - 1310) / chance, 5));
+	$("#slider-dice-one").slider("option", "max", maxuser_bet * 1000);
+	$("#amount-one").val(user_bet);
+	$("#slider-dice-one").slider("value", user_bet * 1000);
+    
+}
+
 document.addEventListener('DOMContentLoaded', loadLib);

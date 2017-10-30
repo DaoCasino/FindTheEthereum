@@ -23,6 +23,8 @@ var WndDeposit = function(prnt){
 	
 	// INIT
 	_self.init = function(){
+		_self.initData();
+		
 		var w = 600;
 		var h = 400;
 		var rect = new PIXI.Graphics();
@@ -79,14 +81,6 @@ var WndDeposit = function(prnt){
 		_tfBet = addText("0.00 BET", 40, "#FFFFFF", undefined, "center", 350, 4)
 		_tfBet.y = -5- _tfBet.height/2;
 		_self.addChild(_tfBet);
-	
-		_self.interactive = true;
-		_self.on('mousedown', _self.touchHandler);
-		_self.on('mousemove', _self.touchHandler);
-		_self.on('mouseup', _self.touchHandler);
-		_self.on('touchstart', _self.touchHandler);
-		_self.on('touchmove', _self.touchHandler);
-		_self.on('touchend', _self.touchHandler);
 	}
 	
 	_self.show = function(str, callback, maxBet) {
@@ -223,20 +217,9 @@ var WndDeposit = function(prnt){
 		}
 	}
 	
-	_self.removeAllListener = function() {
-		this.interactive = false;
-		this.off('mousedown', this.touchHandler);
-		this.off('mousemove', this.touchHandler);
-		this.off('mouseup', this.touchHandler);
-		this.off('touchstart', this.touchHandler);
-		this.off('touchmove', this.touchHandler);
-		this.off('touchend', this.touchHandler);
-	}
-	
 	_self.init();
 	
 	return _self;
 };
 
-WndDeposit.prototype = Object.create(PIXI.Container.prototype);
-WndDeposit.prototype.constructor = WndDeposit;
+WndDeposit.prototype = new InterfaceObject();
