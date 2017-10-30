@@ -3,9 +3,11 @@
 
 	address="Address"
 	balance="Balance"
+	connecting="Сonnecting"
 	congratulations="Congratulations!"
 	continue="Сontinue"
 	continue_game="Place the prize and continue the game."
+	loading="Loading"
 	lose="LOSE"
 	new_game="New game"
 	no="No"

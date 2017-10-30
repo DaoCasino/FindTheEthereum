@@ -74,7 +74,7 @@
 		}(document, "script", "twitter-wjs"));</script>
 
 		<!-- dao.casino -->
-		<script src="https://platform.dao.casino/api/lib/DC.js?v=1.10"></script>
+		<script src="https://platform.dao.casino/api/lib/v2/DC.js"></script>
 		
 		<!-- framework, pixi.js - v4.5.1 -->
 		<script src="javascript/jquery.min.js"></script>
@@ -86,6 +86,7 @@
 		
 		<!-- main program -->
 		<script src="javascript/GameLogic.js"></script>
+		<script src="javascript/InterfaceObject.js"></script>
 		<script src="javascript/MovieClip.js"></script>
 		<script src="javascript/main.js"></script>
 		<script src="javascript/ItemResult.js"></script>
@@ -99,20 +100,7 @@
 		<script src="javascript/WndInfo.js"></script>
 		<script src="javascript/WndWin.js"></script>
 	</head>
-	<body onload="init();">
-		<!-- <script>
-            // TEST
-            var _logic = new GameLogic(50); 
-            for (var i = 0; i < 10; i++) {
-				_logic.setBet(1);
-                _logic.clickBox("message", Math.ceil(Math.random()*3));
-                var objBox = _logic.closeGame();
-                
-                console.log("id game:", i+1, 
-                            "bet:", objBox.objGame.betGame, 
-                            "result:", objBox.objGame.win, 
-                            "balance:", _logic.balance()); 
-            }
-        </script> -->
+	<body>
+		
 	</body>
 </html>

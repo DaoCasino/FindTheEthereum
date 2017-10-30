@@ -10,7 +10,7 @@ var ScrGame = function(){
 	PIXI.Container.call( this );
 	
 	var _self = this;
-	var _logic, _objGame, _objTutor;
+	var _objGame, _objTutor;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial;
 	var _tfBalance, _tfBet, _tfWinStr;
 	var _fRequestFullScreen, _fCancelFullScreen;
@@ -27,12 +27,14 @@ var ScrGame = function(){
 	_betGame, _balanceBet, _balanceSession, _balanceGame,
 	_timeCloseWnd;
 	// arrays
-	var _arButtons, _arBoxes;
+	var _arBoxes;
 	// strings
-	var _openkey;
+	var _openkey = "0x";
 	
 	// INIT
 	_self.init = function(){
+		_self.initData();
+		
 		var bg = addObj("bgGame", _W/2, _H/2);
 		scaleBack = _W/bg.w;
 		bg.scale.x = scaleBack;
@@ -52,16 +54,7 @@ var ScrGame = function(){
 		_self.createStrings();
 		_self.createGui();
 		_self.createBtn();
-		_self.showWndDeposit();
-		_self.showTutorial(1);
-		
-		this.interactive = true;
-		this.on("mouseup", this.touchHandler);
-		this.on("mousedown", this.touchHandler);
-		this.on("mousemove", this.touchHandler);
-		this.on("touchstart", this.touchHandler);
-		this.on("touchmove", this.touchHandler);
-		this.on("touchend", this.touchHandler);
+		_self.refreshData();
 	};
 	
 	// CREATE
@@ -92,20 +85,19 @@ var ScrGame = function(){
 		_betGame = 1;
 		_balanceBet = 0;
 		_balanceSession = 0;
-		_timeCloseWnd = 0;
+		_timeCloseWnd = 0;		
 	}
 	
 	_self.createArrays = function(){
-		_arButtons = [];
+		_self.arButtons = [];
 		_arBoxes = [];
 	}
 	
 	_self.createStrings = function(){
-		if(options_dc){
-			_openkey = Casino.Account.get().openkey;
-		}
 		if(options_debug){
 			_openkey = "0x";
+		} else {
+			_openkey = DCLib.Account.get().openkey;
 		}
 	}
 	
@@ -126,7 +118,7 @@ var ScrGame = function(){
 		face_mc.addChild(icoBet);
 		var icoWS = addObj("icoWS", 52, posY+offsetY*2);
 		face_mc.addChild(icoWS);
-		var tfAddress= addText("0x", sizeTf, "#ffffff", "#000000", "left", 600, 4);
+		var tfAddress= addText(_openkey, sizeTf, "#ffffff", "#000000", "left", 600, 4);
 		tfAddress.x = icoKey.x + icoKey.w/2 + 10;
 		tfAddress.y = icoKey.y - tfAddress.height/2;
 		face_mc.addChild(tfAddress);
@@ -180,7 +172,7 @@ var ScrGame = function(){
 		_btnStart.name = "btnStart";
 		_btnStart.visible = false;
 		face_mc.addChild(_btnStart);
-		_arButtons.push(_btnStart);
+		_self.arButtons.push(_btnStart);
 		var tfStart = addText(getText("new_game"), 34, "#FFFFFF", undefined, "center", 240);
 		tfStart.x = 0;
 		tfStart.y = -tfStart.height/2;
@@ -195,7 +187,7 @@ var ScrGame = function(){
 		tfBtnSave.y = -tfBtnSave.height/2;
 		_pirateSave.addChild(tfBtnSave);
 		face_mc.addChild(_pirateSave);
-		_arButtons.push(_pirateSave);
+		_self.arButtons.push(_pirateSave);
 		
 		_pirateContinue = addButton("btnText", _W/2 + 250, 450);
 		_pirateContinue.name = "pirateContinue";
@@ -206,7 +198,7 @@ var ScrGame = function(){
 		tfBtnContinue.y = -tfBtnContinue.height/2;
 		_pirateContinue.addChild(tfBtnContinue);
 		face_mc.addChild(_pirateContinue);
-		_arButtons.push(_pirateContinue);
+		_self.arButtons.push(_pirateContinue);
 		
 		var posX = 1840;
 		var posY = 960;
@@ -214,27 +206,27 @@ var ScrGame = function(){
 		var btnDao = addButton("btnDao", posX-4, posY - 0*offsetY);
 		btnDao.overSc = true;
 		face_mc.addChild(btnDao);
-		_arButtons.push(btnDao);
+		_self.arButtons.push(btnDao);
 		var btnFullscreen = addButton("btnFullscreen", posX, posY - 1*offsetY);
 		btnFullscreen.overSc = true;
 		face_mc.addChild(btnFullscreen);
-		_arButtons.push(btnFullscreen);
+		_self.arButtons.push(btnFullscreen);
 		var btnContract = addButton("btnContract", posX, posY - 2*offsetY);
 		btnContract.overSc = true;
 		face_mc.addChild(btnContract);
-		_arButtons.push(btnContract);
+		_self.arButtons.push(btnContract);
 		var btnCashout = addButton("btnCashout", posX, posY - 3*offsetY);
 		btnCashout.overSc = true;
 		face_mc.addChild(btnCashout);
-		_arButtons.push(btnCashout);
+		_self.arButtons.push(btnCashout);
 		var btnFacebook = addButton("btnFacebook", 1870, 48);
 		btnFacebook.overSc = true;
 		face_mc.addChild(btnFacebook);
-		_arButtons.push(btnFacebook);
+		_self.arButtons.push(btnFacebook);
 		var btnTwitter = addButton("btnTwitter", 1870, 123);
 		btnTwitter.overSc = true;
 		face_mc.addChild(btnTwitter);
-		_arButtons.push(btnTwitter);
+		_self.arButtons.push(btnTwitter);
 	}
 	
 	_self.createTreasure = function() {		
@@ -252,7 +244,7 @@ var ScrGame = function(){
 			box.y = arPosY[i];
 			box.id = (i+1);
 			game_mc.addChild(box);
-			_arButtons.push(box);
+			_self.arButtons.push(box);
 			_arBoxes.push(box);
 		}
 	};
@@ -276,20 +268,33 @@ var ScrGame = function(){
 	}
 	
 	// REFRESH
-	_self.refreshBalance = function() {		
-		_tfBalance.setText((_balanceSession/_measure).toFixed(2) + " BET");
-	};
+	_self.refreshBalance = function() {	
+		var str =(_balanceSession/_measure).toFixed(2) + "/(" + (_balanceBet).toFixed(2) + ") BET"
+		_tfBalance.setText(str);
+	}
+	
+	_self.refreshData = function() {
+		_self.showWndWarning(getText("loading"));
+		
+		DCLib.Account.getBetBalance(DCLib.Account.get().openkey, function(value){
+			_wndWarning.visible = false;
+			_balanceBet = value;
+			_self.refreshBalance();
+			_self.showWndDeposit();
+			_self.showTutorial(1);
+		})
+	}
 	
 	// CLOSE
 	_self.closeWindow = function(wnd) {
 		_curWindow = wnd;
-		if(options_debug){
+		// if(options_debug){
 			_curWindow.visible = false;
 			_curWindow = undefined;
 			_bWindow = false;
-		} else {
-			_timeCloseWnd = 100;
-		}
+		// } else {
+			// _timeCloseWnd = 100;
+		// }
 	}
 	
 	// SHOW
@@ -297,12 +302,7 @@ var ScrGame = function(){
 		if(_bWindow){
 			return;
 		}
-		// if(_balancePlEth < 0.01){
-			// _self.showError(ERROR_BALANCE);
-			// infura.sendRequest("getBalance", openkey, _callback);
-			// _self.showChips(true);
-			// return;
-		// }
+		
 		if(_wndDeposit == undefined){
 			_wndDeposit = new WndDeposit(_self);
 			_wndDeposit.x = _W/2;
@@ -310,18 +310,15 @@ var ScrGame = function(){
 			wnd_mc.addChild(_wndDeposit);
 		}
 		
-		if(options_dc){
-			Casino.Account.getBetsBalance(_self.getBetsBalance);
-		}
+		DCLib.Account.getBetBalance(_openkey, _self.getBetsBalance);
+		
 		if(options_debug){
 			_balanceBet = 10;
 		}
 		_bWindow = true;
 		var str = getText("set_deposit").replace(new RegExp("SPL"), "\n");
 		_wndDeposit.show(str, function(value){
-					_balanceSession = value*_measure;
-					_self.refreshBalance();
-					_self.startChannelGame();
+					_self.startChannelGame(value*_measure);
 				}, _balanceBet)
 		_timeCloseWnd = 0;
 		_wndDeposit.visible = true;
@@ -346,8 +343,8 @@ var ScrGame = function(){
 		_bWindow = true;
 		var str = getText("set_bet").replace(new RegExp("SPL"), "\n");
 		_wndBet.show(str, function(value){
-					_self.setBet(value);
-				}, _balanceSession/_measure)
+			_self.setBet(value);
+		}, _balanceSession/_measure)
 		_timeCloseWnd = 0;
 		_wndBet.visible = true;
 		_curWindow = _wndBet;
@@ -452,51 +449,57 @@ var ScrGame = function(){
 	}
 
 	// CHANNEL
-	_self.startChannelGame = function(){
-		var str = getText("open_channel_start").replace(new RegExp("SPL"), "\n");
-		_self.showWndWarning(str);
-		
+	_self.startChannelGame = function(deposit){
 		if(_idTutor == 1){
 			_itemTutorial.visible = false;
 		}
 		
+		_bWindow = false;
+		
 		if(options_debug){
-			_wndWarning.visible = false;
-			_self.initLogic(_balanceSession);
+			_balanceSession = deposit;
+			App.logic.setBalance(_balanceSession);
+			_self.refreshBalance();
+			_objGame = _self.getGame();
 			_self.createTreasure();
 			_self.showWndBet();
 			return false;
 		}
 		
-		// TODO
+		_self.showWndWarning(getText("connecting"));
+		
+		App.connect({bankroller : 'auto', paymentchannel:{deposit:deposit}}, function(connected){
+			 if (connected){
+				 _wndWarning.visible = false;
+				 App.call('setBalance', [deposit], function(result){
+					 if(App.logic.balance() == result.balance){
+						 _balanceSession = result.balance;
+						 _self.refreshBalance();
+						 _objGame = _self.getGame();
+						 _self.createTreasure();
+						_self.showWndBet();
+					 } else {
+						 _self.showError(getText("Conflict setBalance"));
+					 }
+				})
+			 }
+		})
 	}
 	
 	_self.closeGameChannel = function(deposit){
-		if(_logic){
+		if(App.logic){
 			// TODO
 		}
-	}
-	
-	_self.initLogic = function(deposit){
-		// init logic
-		var params = { prnt:_self, 
-			balance:  deposit, 
-			address:  _openkey,
-			callback: _self.responseServer
-		};
-		
-		_logic = new GameLogic(params);
-		_objGame = _logic.getGame();	
 	}
 	
 	// DC
 	_self.getBlock = function() {
 		// var state = {
-			// playerbalance: _logic.balance(),
+			// playerbalance: App.logic.balance(),
 			// bankrollbalance: 0,
-			// nonce: _logic.nonce(),
+			// nonce: App.logic.nonce(),
 			// seed: Casino.getChannelGameRandom(,
-			// PlayergameData: _logic.getGame()
+			// PlayergameData: _self.getGame()
 		// };
 		
 		// return {state:state, 
@@ -510,10 +513,10 @@ var ScrGame = function(){
 	
 	// ACTION
 	_self.setBet = function(value) {
-		_betGame = value*_measure;
+		_betGame = Math.floor(value*_measure);
 		_balanceGame = _betGame;
 		_balanceSession -= _betGame;
-		_self.refreshBalance();
+		_self.refreshBalance()
 		_itemBet.visible = true;
 		_pirateSave.visible = false;
 		_pirateContinue.visible = false;
@@ -526,20 +529,18 @@ var ScrGame = function(){
 		if(options_debug){
 			_tfBet.setText((_betGame/_measure).toFixed(2));
 			_wndWS.setBet(_betGame/_measure);
-			_logic.setBet(_betGame);
+			App.logic.setBet(_betGame);
 			return
 		}
 		
-		if(options_dc){
-			Casino.callChannelGameFunc(
-				'setBet', [_betGame], 
-				function(res){
-					_tfBet.setText((res/_measure).toFixed(2));
-					_logic.setBet(res);
-				},  
-				function(log){ console.info(log) }
-			);
-		}
+		App.call('setBet', [_betGame], function(result){
+			 if(App.logic.balance() == result.balance){
+				 _tfBet.setText((_betGame/_measure).toFixed(2));
+				_wndWS.setBet(_betGame/_measure);
+			 } else {
+				 _self.showError(getText("Conflict setBet"));
+			 }
+		})
 	}
 	
 	_self.refreshBoxes = function() {
@@ -580,21 +581,24 @@ var ScrGame = function(){
 		var result = {};
 		
 		if(options_debug){
-			result = _logic.closeGame();
-		} else if(options_dc){
-			Casino.callChannelGameFunc(
-				'closeGame', [], 
-				function(res){
-					result = _logic.closeGame();
-				},  
-				function(log){ console.info(log) }
-			);
+			result = App.logic.closeGame();
+			_objGame = result.objGame;
+			_balanceSession = result.balance;
+			_self.refreshBalance();
+			_balanceGame = 0;
+		} else {
+			App.call('closeGame', [], function(result){
+				 if(App.logic.balance() == result.balance){
+					 _objGame = result.objGame;
+					_balanceSession = result.balance;
+					_self.refreshBalance();
+					_balanceGame = 0;
+				 } else {
+					 _self.showError(getText("Conflict closeGame"));
+				 }
+			})
 		}
 		
-		_objGame = result.objGame;
-		_balanceSession = result.balance;
-		_self.refreshBalance();
-		_balanceGame = 0;
 		_btnStart.visible = true;
 		_itemBet.visible = false;
 	}
@@ -610,23 +614,29 @@ var ScrGame = function(){
 		if(_idTutor == 3){
 			_itemTutorial.visible = false;
 		}
+		// var rndHash = DCLib.randomHash();
+		var rndHash = DCLib.Utils.makeSeed();
 		
 		if(options_debug){
-			result = _logic.clickBox(makeID(), box.id);
+			result = App.logic.clickBox(rndHash, box.id);
 			_self.showResult(result, box);
 			return
-		} 
-		
-		if(options_dc){
-			Casino.callChannelGameFunc(
-				"clickBox", [Casino.getChannelGameRandom(), box.id],
-				function(res){
-					result = _logic.clickBox(res.random_hash, box.id);
-					_self.showResult(result, box);
-				},
-				function(log){ console.info(log) }
-			);
 		}
+		
+		// bytes32 id,
+        // uint playerDeposit, 
+        // uint bankrollDeposit, 
+        // uint nonce, 
+        // uint[] gameData,
+        // bytes sig)
+		
+		App.call('clickBox', [ 'confirm('+rndHash+')', box.id, _betGame], function(result){
+			 if(App.logic.balance() == result.balance){
+				_self.showResult(result, box);
+			 } else {
+				 _self.showError(getText("Conflict clickBox"));
+			 }
+		})
 	}
 	
 	_self.fullscreen = function() {
@@ -677,7 +687,7 @@ var ScrGame = function(){
 		}
 	}
 	
-	_self.clickCell = function(item_mc) {
+	_self.clickObj = function(item_mc) {
 		if(item_mc._disabled){
 			return;
 		}
@@ -690,6 +700,7 @@ var ScrGame = function(){
 			item_mc.scale.x = 1*item_mc.sc;
 			item_mc.scale.y = 1*item_mc.sc;
 		}
+		
 		if(item_mc.name == "ItemBox"){
 			_self.clickBox(item_mc);
 		} else if(item_mc.name == "btnStart"){
@@ -723,8 +734,8 @@ var ScrGame = function(){
 		var mouseX = evt.data.global.x;
 		var mouseY = evt.data.global.y;
 		
-		for (var i = 0; i < _arButtons.length; i++) {
-			var item_mc = _arButtons[i];
+		for (var i = 0; i < _self.arButtons.length; i++) {
+			var item_mc = _self.arButtons[i];
 			if(hit_test_rec(item_mc, item_mc.w, item_mc.h, mouseX, mouseY)){
 				if(item_mc._selected == false && !item_mc._disabled && item_mc.visible){
 					item_mc._selected = true;
@@ -759,27 +770,6 @@ var ScrGame = function(){
 				}
 			}
 		}
-	};
-
-	_self.touchHandler = function(evt){
-		var phase = evt.type;
-		
-		if(phase=="mousedown" || phase=="mousemove" || phase == "touchmove" || phase == "touchstart"){
-			this.checkButtons(evt);
-		} else if (phase == "mouseup" || phase == "touchend") {
-			for (var i = 0; i < _arButtons.length; i++) {
-				var item_mc = _arButtons[i];
-				if(item_mc._selected){
-					this.clickCell(item_mc);
-					return;
-				}
-			}
-		}
-	};
-	
-	// RESPONSE
-	_self.responseServer = function(objGame){
-		_objGame = objGame;
 	};
 	
 	// UPDATE
@@ -871,13 +861,27 @@ var ScrGame = function(){
 	}
 
 	_self.getGame = function(){
-		if (!_logic || !_logic.getGame) { return false; }
-		return _logic.getGame()
+		if (!App.logic || !App.logic.getGame) { return false; }
+		return App.logic.getGame()
 	}
 	
 	// REMOVE
 	_self.removeAllListener = function() {
 		clearClips();
+		
+		if(_wndDeposit){
+			_wndDeposit.removeAllListener();
+		}
+		if(_wndBet){
+			_wndBet.removeAllListener();
+		}
+		if(_wndInfo){
+			_wndInfo.removeAllListener();
+		}
+		if(_wndWin){
+			_wndWin.removeAllListener();
+		}
+		
 		this.off("mouseup", this.touchHandler);
 		this.off("mousedown", this.touchHandler);
 		this.off("mousemove", this.touchHandler);
@@ -891,5 +895,4 @@ var ScrGame = function(){
 	return _self;
 };
 
-ScrGame.prototype = Object.create(PIXI.Container.prototype);
-ScrGame.prototype.constructor = ScrGame;
+ScrGame.prototype = new InterfaceObject();

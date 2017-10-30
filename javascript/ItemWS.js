@@ -56,7 +56,7 @@ function ItemWS() {
 	
 	_self.refreshWS = function(ws) {
 		_curWSGR.visible = true;
-		_curWSGR.y = _arPosY[ws-1] //- _curWSGR.height/2 - 5;
+		_curWSGR.y = _arPosY[ws-1] -5;
 	}
 	
 	_self.clear = function(ws) {

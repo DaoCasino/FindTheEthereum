@@ -6,28 +6,11 @@
 
 /*eslint no-undef: "none"*/
 
-var GameLogic = function(params){
+var GameLogic = function(){
 	var _self = this;
 	
-	var _prnt;
-	var _callback;
-	var _address   = "0x";
 	var _balance   = 0;
 	var _nonce = 0;
-	var _debug = true;
-	
-	if(params){
-		if(params.prnt){
-			_prnt = params.prnt;
-		}
-		if(params.address){
-			_address = params.address;
-		}
-		if(params.callback){
-			_callback = params.callback;
-		}
-		_balance = params.balance || 0;
-	}
 	
 	var _objGame = {
 		method       : "",
@@ -44,7 +27,14 @@ var GameLogic = function(params){
 		
 	var _arWinSt = [0, 2, 4, 10, 20, 50];
 	
-	_self.setBet = function(_bet){
+	_self.setBalance = function(balance){
+		_balance = balance;
+		return {
+			balance : balance
+		}
+	}
+	
+	_self.setBet = function(bet){
 		_nonce ++;
 		_objGame = {method:"setBet",
 					result:false, 
@@ -55,19 +45,21 @@ var GameLogic = function(params){
 					valuePlayer:0, 
 					countBox : 3,
 					profitGame : 0,
-					betGame:_bet};
+					betGame:bet};
 					
-		_balance -= _bet;
+		_balance -= bet;
 		
 		return {
-			bet : _bet
+			balance : _balance,
+			bet : bet
 		}
-	};
+	}
 	
-	_self.clickBox = function(_s, valPlayer){
+	_self.clickBox = function(random_hash, valPlayer){
 		_nonce ++;
 		_objGame.method = "clickBox";
-		_objGame.valueBankroller = createRnd(_s, _objGame.countBox);
+		// _objGame.valueBankroller = DCLib.randomNum(random_hash, 1, _objGame.countBox)
+		_objGame.valueBankroller = 1; // REMOVE!!!
 		_objGame.valuePlayer = valPlayer;
 		_objGame.win = false;
 		
@@ -87,14 +79,14 @@ var GameLogic = function(params){
 		if(_objGame.result){
 			_self.closeGame();
 		}
-
+		
 		return {
-			random_hash : _s,
+			random_hash : random_hash,
 			objGame 	: _objGame,
 			balance     : _balance,
 			timestamp   : new Date().getTime(),
 		}
-	};
+	}
 	
 	_self.closeGame = function(){
 		_nonce ++;
@@ -112,17 +104,6 @@ var GameLogic = function(params){
 		}
 	}
 	
-	function createRnd(seed, val){
-		var rand = Math.ceil(Math.random()*val);
-		if(!_debug){
-			var hash = Casino.ABI.soliditySHA3(["bytes32"],[ seed ]);		
-			rand = Casino.bigInt(hash.toString("hex"),16).divmod(val).remainder.value + 1;
-		}
-		
-		// console.log("GameLogic: rand=", rand);
-		return rand;
-	}
-	
 	_self.getGame = function(){
 		return _objGame;
 	};
@@ -136,4 +117,4 @@ var GameLogic = function(params){
 	};
 	
 	return _self;
-};
+}
