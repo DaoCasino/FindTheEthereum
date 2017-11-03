@@ -29,7 +29,7 @@ var ScrGame = function(){
 	// arrays
 	var _arBoxes;
 	// strings
-	var _openkey = "0x";
+	var _openkey, _addressBankroll, _idChannel;
 	
 	// INIT
 	_self.init = function(){
@@ -94,9 +94,11 @@ var ScrGame = function(){
 	}
 	
 	_self.createStrings = function(){
-		if(options_debug){
-			_openkey = "0x";
-		} else {
+		_openkey = "0x";
+		_addressBankroll = "0x";
+		_idChannel = DCLib.Utils.makeSeed();
+		
+		if(!options_debug){
 			_openkey = DCLib.Account.get().openkey;
 		}
 	}
@@ -268,7 +270,7 @@ var ScrGame = function(){
 	}
 	
 	// REFRESH
-	_self.refreshBalance = function() {	
+	_self.refreshBalance = function() {
 		var str =(_balanceSession/_measure).toFixed(2) + "/(" + (_balanceBet).toFixed(2) + ") BET"
 		_tfBalance.setText(str);
 	}
@@ -468,20 +470,20 @@ var ScrGame = function(){
 		
 		_self.showWndWarning(getText("connecting"));
 		
-		App.connect({bankroller : 'auto', paymentchannel:{deposit:deposit}}, function(connected){
-			 if (connected){
-				 _wndWarning.visible = false;
-				 App.call('setBalance', [deposit], function(result){
-					 if(App.logic.balance() == result.balance){
-						 _balanceSession = result.balance;
-						 _self.refreshBalance();
-						 _objGame = _self.getGame();
-						 _self.createTreasure();
-						_self.showWndBet();
-					 } else {
-						 _self.showError(getText("Conflict setBalance"));
-					 }
+		App.connect({bankroller : "auto", paymentchannel:{deposit:deposit}}, function(connected, info){
+			if (connected){
+				_addressBankroll = info.bankroller_address;
+				_wndWarning.visible = false;
+				_balanceSession = deposit;
+				
+				App.call('setGame', [_openkey, _addressBankroll, deposit], function(result){
+					_objGame = _self.getGame();
+					_self.refreshBalance();
+					_self.createTreasure();
+					_self.showWndBet();
 				})
+			 } else {
+				 _self.showError("disconnected");
 			 }
 		})
 	}
@@ -492,20 +494,7 @@ var ScrGame = function(){
 		}
 	}
 	
-	// DC
-	_self.getBlock = function() {
-		// var state = {
-			// playerbalance: App.logic.balance(),
-			// bankrollbalance: 0,
-			// nonce: App.logic.nonce(),
-			// seed: Casino.getChannelGameRandom(,
-			// PlayergameData: _self.getGame()
-		// };
-		
-		// return {state:state, 
-				// sig:Casino.ABI.soliditySHA3(["bytes32"],[state]};
-	}
-	
+	// DC	
 	_self.getBetsBalance = function(value) {
 		_balanceBet = Number(value);
 		_self.refreshBalance();
@@ -526,21 +515,8 @@ var ScrGame = function(){
 			_self.showTutorial(3);
 		}
 		
-		if(options_debug){
-			_tfBet.setText((_betGame/_measure).toFixed(2));
-			_wndWS.setBet(_betGame/_measure);
-			App.logic.setBet(_betGame);
-			return
-		}
-		
-		App.call('setBet', [_betGame], function(result){
-			 if(App.logic.balance() == result.balance){
-				 _tfBet.setText((_betGame/_measure).toFixed(2));
-				_wndWS.setBet(_betGame/_measure);
-			 } else {
-				 _self.showError(getText("Conflict setBet"));
-			 }
-		})
+		_tfBet.setText((_betGame/_measure).toFixed(2));
+		_wndWS.setBet(_betGame/_measure);
 	}
 	
 	_self.refreshBoxes = function() {
@@ -614,7 +590,8 @@ var ScrGame = function(){
 		if(_idTutor == 3){
 			_itemTutorial.visible = false;
 		}
-		// var rndHash = DCLib.randomHash();
+		
+		// var rndHash = DCLib.randomHash(); //confirm()
 		var rndHash = DCLib.Utils.makeSeed();
 		
 		if(options_debug){
@@ -622,21 +599,42 @@ var ScrGame = function(){
 			_self.showResult(result, box);
 			return
 		}
+			
+		var idChannel = _idChannel;
+		var nonce = App.logic.nonce();
+		var round = App.logic.getGame().countWinStr + 1;
+		var seed = DCLib.Utils.makeSeed();
+		var betGame = _betGame;
+		if(App.logic.getGame().countWinStr > 0){
+			betGame = 0;
+		}
 		
-		// bytes32 id,
-        // uint playerDeposit, 
-        // uint bankrollDeposit, 
-        // uint nonce, 
-        // uint[] gameData,
-        // bytes sig)
+		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]}
+		var hash = DCLib.web3.utils.soliditySha3(idChannel, nonce, round, seed, gameData);
+		console.log("hash:", hash);
+		var sign = DCLib.Account.sign(hash.substr(2));
+		console.log("sign:", sign);
 		
-		App.call('clickBox', [ 'confirm('+rndHash+')', box.id, _betGame], function(result){
-			 if(App.logic.balance() == result.balance){
-				_self.showResult(result, box);
-			 } else {
-				 _self.showError(getText("Conflict clickBox"));
-			 }
-		})
+		App.call('clickBox', 
+			[idChannel, nonce, round, seed, gameData, sign], 
+			function(result){
+				console.log("result:", result, App.logic.balance(), result.balance);
+				if(result.error){
+					_self.showError(result.error);
+					return;
+				}
+				if(!DCLib.checkSig(hash, result.signB.signature, _addressBankroll)){
+					_self.showError("invalid_signature");
+					return;
+				}
+				
+				if(App.logic.balance() == result.balance){
+					_self.showResult(result, box);
+				} else {
+					_self.showError(getText("Conflict clickBox"));
+				}
+			}
+		)
 	}
 	
 	_self.fullscreen = function() {
@@ -799,6 +797,7 @@ var ScrGame = function(){
 	_self.showResult = function(result, box){
 		_objGame = result.objGame;
 		_balanceSession = result.balance;
+		console.log("showResult:", _balanceSession);
 		_self.refreshBalance();
 		_balanceGame = _objGame.profitGame;
 		_tfWinStr.setText(_objGame.countWinStr);
