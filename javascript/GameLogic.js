@@ -56,8 +56,6 @@ var GameLogic = function(){
 		}
 		
 		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, nonce, round, seed, gameData);
-		
-		console.log("checkSig:", DCLib.checkSig(randomHash, sign.signature, _addressPlayer));
 		if(!DCLib.checkSig(randomHash, sign.signature, _addressPlayer)){
 			return {
 				error : "invalid_hash"

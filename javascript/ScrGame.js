@@ -278,9 +278,9 @@ var ScrGame = function(){
 	_self.refreshData = function() {
 		_self.showWndWarning(getText("loading"));
 		
-		DCLib.Account.getBetBalance(DCLib.Account.get().openkey, function(value){
+		DCLib.getBetBalance(_openkey, function(value){
 			_wndWarning.visible = false;
-			_balanceBet = value;
+			_balanceBet = Number(value);
 			_self.refreshBalance();
 			_self.showWndDeposit();
 			_self.showTutorial(1);
@@ -311,8 +311,7 @@ var ScrGame = function(){
 			_wndDeposit.y = _H/2;
 			wnd_mc.addChild(_wndDeposit);
 		}
-		
-		DCLib.Account.getBetBalance(_openkey, _self.getBetsBalance);
+		DCLib.getBetBalance(_openkey, _self.getBetsBalance);
 		
 		if(options_debug){
 			_balanceBet = 10;
@@ -609,21 +608,21 @@ var ScrGame = function(){
 			betGame = 0;
 		}
 		
-		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]}
+		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]};
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, nonce, round, seed, gameData);
-		console.log("hash:", hash);
-		var sign = DCLib.Account.sign(hash.substr(2));
-		console.log("sign:", sign);
+		var sign = DCLib.Account.sign(hash);
 		
 		App.call('clickBox', 
 			[idChannel, nonce, round, seed, gameData, sign], 
 			function(result){
-				console.log("result:", result, App.logic.balance(), result.balance);
 				if(result.error){
 					_self.showError(result.error);
 					return;
 				}
-				if(!DCLib.checkSig(hash, result.signB.signature, _addressBankroll)){
+				
+				var addressSign = DCLib.sigRecover(hash, result.signB.signature);
+				// if(!DCLib.checkSig(hash, result.signB.signature, _addressBankroll)){
+				if(addressSign.toLowerCase() != _addressBankroll.toLowerCase()){
 					_self.showError("invalid_signature");
 					return;
 				}
@@ -797,7 +796,6 @@ var ScrGame = function(){
 	_self.showResult = function(result, box){
 		_objGame = result.objGame;
 		_balanceSession = result.balance;
-		console.log("showResult:", _balanceSession);
 		_self.refreshBalance();
 		_balanceGame = _objGame.profitGame;
 		_tfWinStr.setText(_objGame.countWinStr);
