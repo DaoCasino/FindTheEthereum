@@ -627,11 +627,19 @@ var ScrGame = function(){
 		App.call('signBankroll', 
 			[idChannel, session, round, seed, gameData, signPlayer], 
 			function(result){
+				if(result.error){
+					_self.showError(result.error);
+					console.log(result.error);
+					return;
+				}
+				
 				App.call('clickBox', 
 					[idChannel, session, round, seed, gameData, result.signBankroll], 
 					function(result){
 						if(result.error){
 							_self.showError(result.error);
+							console.log("Dispute", result.error);
+							// TODO disput
 							return;
 						}
 						
