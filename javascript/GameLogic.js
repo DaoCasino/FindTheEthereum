@@ -41,10 +41,36 @@ var GameLogic = function(){
 		return true;
 	}
 	
-	_self.clickBox = function(idChannel, session, round, seed, gameData, signPlayer, signBankroll){
+	_self.signBankroll = function(idChannel, session, round, seed, gameData, signPlayer){
+		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
+		var addressSign = DCLib.sigRecover(randomHash, signPlayer.signature);
+		
+		if(addressSign.toLowerCase() != _addressPlayer.toLowerCase()){
+		// if(!DCLib.checkSig(randomHash, signPlayer.signature, _addressPlayer)){
+			return {
+				error: "invalid_signature_player"
+			}
+		}
+		
+		return {
+			randomHash: randomHash,
+			signBankroll: DCLib.Account.sign(randomHash)
+		}
+	}
+	
+	_self.clickBox = function(idChannel, session, round, seed, gameData, signBankroll){
 		var betGame = gameData.value[0];
 		var valPlayer = gameData.value[1];
 		var countWinStr = gameData.value[2];
+		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
+		var addressSign = DCLib.sigRecover(randomHash, signBankroll.signature);
+		
+		if(addressSign.toLowerCase() != _addressBankroll.toLowerCase()){
+		// if(!DCLib.checkSig(randomHash, signBankroll.signature, _addressBankroll)){
+			return {
+				error: "invalid_signature_bankroll"
+			}
+		}
 		
 		if(countWinStr >= _arWinSt.length || 
 		countWinStr < 0 ||
@@ -52,13 +78,6 @@ var GameLogic = function(){
 		valPlayer > MAX_VALUE){
 			return {
 				error : "invalid_data"
-			}
-		}
-		
-		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
-		if(!DCLib.checkSig(randomHash, signPlayer.signature, _addressPlayer)){
-			return {
-				error : "invalid_signature_player"
 			}
 		}
 		
@@ -96,7 +115,6 @@ var GameLogic = function(){
 		}
 		
 		return {
-			randomHash  : randomHash,
 			objGame 	: _objGame,
 			balance     : _balance,
 			signB 		: signBankroll,

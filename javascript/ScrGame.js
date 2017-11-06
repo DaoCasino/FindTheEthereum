@@ -563,6 +563,7 @@ var ScrGame = function(){
 			_balanceGame = 0;
 		} else {
 			App.call('closeGame', [], function(result){
+				console.log("closeGame:", App.logic.balance(), result.balance)
 				 if(App.logic.balance() == result.balance){
 					 _objGame = result.objGame;
 					_balanceSession = result.balance;
@@ -612,13 +613,22 @@ var ScrGame = function(){
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.sign(hash);
 		
-		App.request({action:'signBankroll', rawMsg:hash}, 
+		/*App.request({action:'signBankroll', rawMsg:hash}, 
 			function(data){
 				var signBankroll = data.response.sig;
-				// !!! игрок знает подписть банкроллера, может узнать выгодно ему это будет или нет
-				
+				// HACK BANROLL
+				var valBox = DCLib.numFromHash(signBankroll.signature, 1, _objGame.countBox);
+				if(valBox != box.id){
+					_gameOver = false;
+					_self.clickBox(box);
+					return;
+				}*/
+		
+		App.call('signBankroll', 
+			[idChannel, session, round, seed, gameData, signPlayer], 
+			function(result){
 				App.call('clickBox', 
-					[idChannel, session, round, seed, gameData, signPlayer, signBankroll], 
+					[idChannel, session, round, seed, gameData, result.signBankroll], 
 					function(result){
 						if(result.error){
 							_self.showError(result.error);
@@ -632,7 +642,10 @@ var ScrGame = function(){
 							return;
 						}
 						
-						if(App.logic.balance() == result.balance){
+						_objGame = result.objGame;
+						var valueBankroller = DCLib.numFromHash(result.signB.signature, 1, _objGame.countBox);
+						
+						if(valueBankroller == _objGame.valueBankroller){
 							_self.showResult(result, box);
 						} else {
 							_self.showError(getText("Conflict clickBox"));
@@ -642,6 +655,7 @@ var ScrGame = function(){
 			}
 		)
 	}
+	
 	
 	_self.fullscreen = function() {
 		 if(options_fullscreen) { 
