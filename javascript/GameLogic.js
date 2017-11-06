@@ -13,7 +13,7 @@ var GameLogic = function(){
 	const MAX_VALUE = 3;
 	
 	var _balance = 0;
-	var _nonce = 0;
+	var _session = 0;
 	var _openkey = DCLib.Account.get().openkey;
 	var _addressBankroll = "";
 	var _addressPlayer = "";
@@ -41,7 +41,7 @@ var GameLogic = function(){
 		return true;
 	}
 	
-	_self.clickBox = function(idChannel, nonce, round, seed, gameData, sign){
+	_self.clickBox = function(idChannel, session, round, seed, gameData, signPlayer, signBankroll){
 		var betGame = gameData.value[0];
 		var valPlayer = gameData.value[1];
 		var countWinStr = gameData.value[2];
@@ -55,10 +55,10 @@ var GameLogic = function(){
 			}
 		}
 		
-		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, nonce, round, seed, gameData);
-		if(!DCLib.checkSig(randomHash, sign.signature, _addressPlayer)){
+		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
+		if(!DCLib.checkSig(randomHash, signPlayer.signature, _addressPlayer)){
 			return {
-				error : "invalid_hash"
+				error : "invalid_signature_player"
 			}
 		}
 		
@@ -73,7 +73,7 @@ var GameLogic = function(){
 		}
 		
 		_objGame.method = "clickBox";
-		_objGame.valueBankroller = DCLib.numFromHash(randomHash, 1, _objGame.countBox);
+		_objGame.valueBankroller = DCLib.numFromHash(signBankroll.signature, 1, _objGame.countBox);
 		_objGame.valuePlayer = valPlayer;
 		_objGame.win = false;
 		
@@ -95,20 +95,18 @@ var GameLogic = function(){
 			_self.closeGame();
 		}
 		
-		var signB = signBankroll(randomHash);
-		
 		return {
 			randomHash  : randomHash,
 			objGame 	: _objGame,
 			balance     : _balance,
-			signB 		: signB,
+			signB 		: signBankroll,
 			timestamp   : new Date().getTime()
 		}
 	}
 	
 	_self.closeGame = function(){
 		var countWinStr = _objGame.countWinStr;
-		_nonce ++;
+		_session ++;
 		_objGame.method = "closeGame";
 		_objGame.result = true;
 		_objGame.play = false;
@@ -133,13 +131,9 @@ var GameLogic = function(){
 		return _balance
 	};
 	
-	_self.nonce = function(){
-		return _nonce
+	_self.session = function(){
+		return _session
 	};
 	
 	return _self;
-}
-
-function signBankroll(){
-	return undefined;
 }

@@ -600,7 +600,7 @@ var ScrGame = function(){
 		}
 			
 		var idChannel = _idChannel;
-		var nonce = App.logic.nonce();
+		var session = App.logic.session();
 		var round = App.logic.getGame().countWinStr + 1;
 		var seed = DCLib.Utils.makeSeed();
 		var betGame = _betGame;
@@ -609,29 +609,36 @@ var ScrGame = function(){
 		}
 		
 		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]};
-		var hash = DCLib.web3.utils.soliditySha3(idChannel, nonce, round, seed, gameData);
-		var sign = DCLib.Account.sign(hash);
+		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
+		var signPlayer = DCLib.Account.sign(hash);
 		
-		App.call('clickBox', 
-			[idChannel, nonce, round, seed, gameData, sign], 
-			function(result){
-				if(result.error){
-					_self.showError(result.error);
-					return;
-				}
+		App.request({action:'signBankroll', rawMsg:hash}, 
+			function(data){
+				var signBankroll = data.response.sig;
+				// !!! игрок знает подписть банкроллера, может узнать выгодно ему это будет или нет
 				
-				var addressSign = DCLib.sigRecover(hash, result.signB.signature);
-				// if(!DCLib.checkSig(hash, result.signB.signature, _addressBankroll)){
-				if(addressSign.toLowerCase() != _addressBankroll.toLowerCase()){
-					_self.showError("invalid_signature");
-					return;
-				}
-				
-				if(App.logic.balance() == result.balance){
-					_self.showResult(result, box);
-				} else {
-					_self.showError(getText("Conflict clickBox"));
-				}
+				App.call('clickBox', 
+					[idChannel, session, round, seed, gameData, signPlayer, signBankroll], 
+					function(result){
+						if(result.error){
+							_self.showError(result.error);
+							return;
+						}
+						
+						var addressSign = DCLib.sigRecover(hash, result.signB.signature);
+						// if(!DCLib.checkSig(hash, result.signB.signature, _addressBankroll)){
+						if(addressSign.toLowerCase() != _addressBankroll.toLowerCase()){
+							_self.showError("invalid_signature_bankroll");
+							return;
+						}
+						
+						if(App.logic.balance() == result.balance){
+							_self.showResult(result, box);
+						} else {
+							_self.showError(getText("Conflict clickBox"));
+						}
+					}
+				)
 			}
 		)
 	}
