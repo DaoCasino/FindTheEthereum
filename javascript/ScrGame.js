@@ -94,13 +94,9 @@ var ScrGame = function(){
 	}
 	
 	_self.createStrings = function(){
-		_openkey = "0x";
+		_openkey = DCLib.Account.get().openkey;
 		_addressBankroll = "0x";
 		_idChannel = DCLib.Utils.makeSeed();
-		
-		if(!options_debug){
-			_openkey = DCLib.Account.get().openkey;
-		}
 	}
 	
 	_self.createGui = function() {
@@ -277,7 +273,6 @@ var ScrGame = function(){
 	
 	_self.refreshData = function() {
 		_self.showWndWarning(getText("loading"));
-		
 		DCLib.getBetBalance(_openkey, function(value){
 			_wndWarning.visible = false;
 			_balanceBet = Number(value);
@@ -313,9 +308,6 @@ var ScrGame = function(){
 		}
 		DCLib.getBetBalance(_openkey, _self.getBetsBalance);
 		
-		if(options_debug){
-			_balanceBet = 10;
-		}
 		_bWindow = true;
 		var str = getText("set_deposit").replace(new RegExp("SPL"), "\n");
 		_wndDeposit.show(str, function(value){
@@ -432,7 +424,7 @@ var ScrGame = function(){
 	}
 	
 	_self.showError = function(value, callback) {
-		var str = "ERROR! \n\n " + value //+ " \n\n " + getText("contact_support");
+		var str = "ERROR! \n\n " + getText(value) //+ " \n\n " + getText("contact_support");
 		
 		if(_wndWarning){
 			_wndWarning.visible = false;
@@ -457,25 +449,22 @@ var ScrGame = function(){
 		
 		_bWindow = false;
 		
+		var objConnect = {bankroller : "auto", paymentchannel:{deposit:deposit}};
+		
 		if(options_debug){
-			_balanceSession = deposit;
-			App.logic.setBalance(_balanceSession);
-			_self.refreshBalance();
-			_objGame = _self.getGame();
-			_self.createTreasure();
-			_self.showWndBet();
-			return false;
+			objConnect = {bankroller : "auto"};
 		}
 		
 		_self.showWndWarning(getText("connecting"));
 		
-		App.connect({bankroller : "auto", paymentchannel:{deposit:deposit}}, function(connected, info){
+		App.connect(objConnect, function(connected, info){
 			if (connected){
 				_addressBankroll = info.bankroller_address;
+				// addressContract = info.contract_address
 				_wndWarning.visible = false;
 				_balanceSession = deposit;
 				
-				App.call('setGame', [_openkey, _addressBankroll, deposit], function(result){
+				App.call('initGame', [_openkey, _addressBankroll, deposit], function(result){
 					_objGame = _self.getGame();
 					_self.refreshBalance();
 					_self.createTreasure();
@@ -563,7 +552,6 @@ var ScrGame = function(){
 			_balanceGame = 0;
 		} else {
 			App.call('closeGame', [], function(result){
-				console.log("closeGame:", App.logic.balance(), result.balance)
 				 if(App.logic.balance() == result.balance){
 					 _objGame = result.objGame;
 					_balanceSession = result.balance;
@@ -579,6 +567,49 @@ var ScrGame = function(){
 		_itemBet.visible = false;
 	}
 	
+	_self.sendDispute = function() {
+		if(options_debug){
+			return;
+		}
+		
+		_self.showWndWarning(getText("dispute_resolve"));
+		console.log("sendDispute");
+		
+		var idChannel = _idChannel; // TODO set id channel
+		var session = App.logic.session();
+		var round = App.logic.getGame().countWinStr + 1;
+		var seed = DCLib.Utils.makeSeed();
+		var betGame = _betGame;
+		if(App.logic.getGame().countWinStr > 0){
+			betGame = 0;
+		}
+		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]};
+		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
+		var signPlayer = DCLib.Account.sign(hash);
+		
+		// TODO call function on the smart contract
+		var options = {};
+		options.nonce = 1; // todo
+		options.to = addressContract;
+		options.gasPrice = "0x"+numToHex(40000000000); // 40 Gwei
+		options.gasLimit = 0x927c0; //web3.toHex('21000');
+		
+		/*var urlInfura = "https://ropsten.infura.io/JCnK5ifEPH9qcQkX0Ahl";
+		$.ajax({
+			url: urlInfura,
+			type: "POST",
+			async: false,
+			dataType: 'json',
+			data: JSON.stringify({"jsonrpc":'2.0',
+									"method":"eth_getTransactionCount",
+									"params":[params, "latest"],
+									"id":1}),
+			success: function (d) {
+				
+			}
+		})*/
+	}
+	
 	// CLICK
 	_self.clickBox = function(box) {
 		if(_gameOver){
@@ -591,16 +622,7 @@ var ScrGame = function(){
 			_itemTutorial.visible = false;
 		}
 		
-		// var rndHash = DCLib.randomHash(); //confirm()
-		var rndHash = DCLib.Utils.makeSeed();
-		
-		if(options_debug){
-			result = App.logic.clickBox(rndHash, box.id);
-			_self.showResult(result, box);
-			return
-		}
-			
-		var idChannel = _idChannel;
+		var idChannel = _idChannel; // TODO set id channel
 		var session = App.logic.session();
 		var round = App.logic.getGame().countWinStr + 1;
 		var seed = DCLib.Utils.makeSeed();
@@ -612,6 +634,7 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]};
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.sign(hash);
+		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
 		
 		/*App.request({action:'signBankroll', rawMsg:hash}, 
 			function(data){
@@ -637,16 +660,18 @@ var ScrGame = function(){
 					[idChannel, session, round, seed, gameData, result.signBankroll], 
 					function(result){
 						if(result.error){
-							_self.showError(result.error);
-							console.log("Dispute", result.error);
-							// TODO disput
+							if(result.error == "invalid_signature_bankroll"){
+								_self.showError(strError, _self.sendDispute);
+							} else {
+								_self.showError(result.error);
+							}
 							return;
 						}
 						
 						var addressSign = DCLib.sigRecover(hash, result.signB.signature);
 						// if(!DCLib.checkSig(hash, result.signB.signature, _addressBankroll)){
 						if(addressSign.toLowerCase() != _addressBankroll.toLowerCase()){
-							_self.showError("invalid_signature_bankroll");
+							_self.showError(strError, _self.sendDispute);
 							return;
 						}
 						
@@ -663,7 +688,6 @@ var ScrGame = function(){
 			}
 		)
 	}
-	
 	
 	_self.fullscreen = function() {
 		 if(options_fullscreen) { 
@@ -719,7 +743,7 @@ var ScrGame = function(){
 		}
 		
 		item_mc._selected = false;
-		if(item_mc.over){
+		if(item_mc.over && item_mc.name != "ItemBox"){
 			item_mc.over.visible = false;
 		}
 		if(item_mc.overSc){

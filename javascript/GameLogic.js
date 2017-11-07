@@ -1,10 +1,10 @@
-/**
- * Created by DAO.casino
- * Treasure Of DAO - Logic
+ /**
+ * Created by DAO.casino.
  * v 1.0.0
+ *
+ * @constructor
+ * @this {GameLogic}
  */
-
-/*eslint no-undef: "none"*/
 
 var GameLogic = function(){
 	var _self = this;
@@ -14,7 +14,6 @@ var GameLogic = function(){
 	
 	var _balance = 0;
 	var _session = 0;
-	var _openkey = DCLib.Account.get().openkey;
 	var _addressBankroll = "";
 	var _addressPlayer = "";
 	
@@ -33,7 +32,15 @@ var GameLogic = function(){
 		
 	var _arWinSt = [0, 2, 4, 10, 20, 50];
 	
-	_self.setGame = function(addressPlayer, addressBankroll, balance){
+	/**
+	 * Set the game parameters.
+	 *
+	 * @param  {string} addressPlayer Player address.
+	 * @param  {string} addressBankroll Bankroll address.
+	 * @param  {number} balance Player tokens balance.
+	 * @return {boolean} true.
+	 */
+	_self.initGame = function(addressPlayer, addressBankroll, balance){
 		_addressPlayer = addressPlayer;
 		_addressBankroll = addressBankroll;
 		_balance = balance;
@@ -41,6 +48,19 @@ var GameLogic = function(){
 		return true;
 	}
 	
+	/**
+	 * Data signing by bankroll.
+	 *
+	 * @param  {string} idChannel Unique channel id.
+	 * @param  {number} session Game session number.
+	 * @param  {number} round Round in the gaming session.
+	 * @param  {string} seed Unique player seed.
+	 * @param  {Object} gameData The object contains data from the player.
+	 * @param  {string} gameData.type Data type in an array.
+	 * @param  {number[]} gameData.value Array of player values.
+	 * @param  {string} signPlayer Player's signature of previous parameters.
+	 * @return {Object} signBankroll Returns the signature of the bankroll.
+	 */
 	_self.signBankroll = function(idChannel, session, round, seed, gameData, signPlayer){
 		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var addressSign = DCLib.sigRecover(randomHash, signPlayer.signature);
@@ -58,6 +78,19 @@ var GameLogic = function(){
 		}
 	}
 	
+	/**
+	 * Box selection. The result of the game is calculated. Parameters change.
+	 *
+	 * @param  {string} idChannel Unique channel id.
+	 * @param  {number} session Game session number.
+	 * @param  {number} round Round in the gaming session.
+	 * @param  {string} seed Unique player seed.
+	 * @param  {Object} gameData The object contains data from the player.
+	 * @param  {string} gameData.type Data type in an array.
+	 * @param  {number[]} gameData.value Array of player values.
+	 * @param  {string} signBankroll Bankroll's signature of previous parameters.
+	 * @return {Object} objGame Returns the changed game object.
+	 */
 	_self.clickBox = function(idChannel, session, round, seed, gameData, signBankroll){
 		var betGame = gameData.value[0];
 		var valPlayer = gameData.value[1];
@@ -122,6 +155,11 @@ var GameLogic = function(){
 		}
 	}
 	
+	/**
+	 * Closes the game session.
+	 *
+	 * @return {Object} objGame Returns the changed game object.
+	 */
 	_self.closeGame = function(){
 		var countWinStr = _objGame.countWinStr;
 		_session ++;
@@ -141,17 +179,32 @@ var GameLogic = function(){
 		}
 	}
 	
+	/**
+	 * Returns a game object.
+	 *
+	 * @return {Object} objGame Returns a game object.
+	 */
 	_self.getGame = function(){
 		return _objGame;
-	};
+	}
 	
+	/**
+	 * Returns the player's balance.
+	 *
+	 * @return {number} Returns the player's balance.
+	 */
 	_self.balance = function(){
 		return _balance
-	};
+	}
 	
+	/**
+	 * Returns the session number of the game.
+	 *
+	 * @return {number} Returns the session number of the game.
+	 */
 	_self.session = function(){
 		return _session
-	};
+	}
 	
 	return _self;
 }

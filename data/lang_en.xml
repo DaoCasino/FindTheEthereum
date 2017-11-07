@@ -7,6 +7,7 @@
 	congratulations="Congratulations!"
 	continue="Сontinue"
 	continue_game="Place the prize and continue the game."
+	dispute_resolve="The dispute will be settled on a smart contract."
 	loading="Loading"
 	lose="LOSE"
 	new_game="New game"
@@ -24,6 +25,8 @@
 	your_bet="YOUR BET"
 	
 	error_balance_bet="You do not have enough BET."
+	invalid_data="You sent invalid data."
+	invalid_signature_bankroll="Bankroll did not sign the current event. We sent the dispute to smart contract ADR."
 	
 	tutor_1="Hello! Choose your deposit and click OK."
 	tutor_2="Now select a bet for one game."
