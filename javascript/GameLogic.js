@@ -193,7 +193,7 @@ var GameLogic = function(){
 	 *
 	 * @return {number} Returns the player's balance.
 	 */
-	_self.balance = function(){
+	_self.getBalance = function(){
 		return _balance
 	}
 	

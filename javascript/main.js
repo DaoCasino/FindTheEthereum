@@ -693,6 +693,9 @@ function makeID(){
 	
 	return str;
 }
+function copyToClipboard(value) {
+	window.prompt("Copy to clipboard: Ctrl+C", value);
+}
 
 function visGame() {
 	//play

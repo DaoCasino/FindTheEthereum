@@ -12,7 +12,7 @@ var ScrGame = function(){
 	var _self = this;
 	var _objGame, _objTutor;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial;
-	var _tfBalance, _tfBet, _tfWinStr;
+	var _tfBalance, _tfBet, _tfWinStr, __tfAddress;
 	var _fRequestFullScreen, _fCancelFullScreen;
 	// layers
 	var back_mc, game_mc, face_mc, wnd_mc, warning_mc, tutor_mc;
@@ -21,7 +21,7 @@ var ScrGame = function(){
 	// windows
 	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin;
 	// boolean
-	var _gameOver, _bWindow;
+	var _gameOver, _bWindow, _bCloseChannel;
 	// numbers
 	var _measure, _idTutor,
 	_betGame, _balanceBet, _balanceSession, _balanceGame,
@@ -75,8 +75,9 @@ var ScrGame = function(){
 	}
 	
 	_self.createBooleans = function(){
-		_gameOver = false;
+		_gameOver = true;
 		_bWindow = false;
+		_bCloseChannel = false;
 	}
 	
 	_self.createNumbers = function(){
@@ -116,16 +117,16 @@ var ScrGame = function(){
 		face_mc.addChild(icoBet);
 		var icoWS = addObj("icoWS", 52, posY+offsetY*2);
 		face_mc.addChild(icoWS);
-		var tfAddress= addText(_openkey, sizeTf, "#ffffff", "#000000", "left", 600, 4);
-		tfAddress.x = icoKey.x + icoKey.w/2 + 10;
-		tfAddress.y = icoKey.y - tfAddress.height/2;
-		face_mc.addChild(tfAddress);
+		_tfAddress = addText(_openkey, sizeTf, "#ffffff", "#000000", "left", 600, 4);
+		_tfAddress.x = icoKey.x + icoKey.w/2 + 10;
+		_tfAddress.y = icoKey.y - _tfAddress.height/2;
+		face_mc.addChild(_tfAddress);
 		_tfBalance = addText("0  BET", sizeTf, "#ffffff", "#000000", "left", 400, 4);
-		_tfBalance.x = tfAddress.x;
+		_tfBalance.x = _tfAddress.x;
 		_tfBalance.y = icoBet.y - _tfBalance.height/2;
 		face_mc.addChild(_tfBalance);
 		_tfWinStr= addText("0", sizeTf, "#ffffff", "#000000", "left", 400, 4);
-		_tfWinStr.x = tfAddress.x;
+		_tfWinStr.x = _tfAddress.x;
 		_tfWinStr.y =  icoWS.y - _tfWinStr.height/2;
 		face_mc.addChild(_tfWinStr);
 		var tfVersion = addText(version, 24, "#ffffff", "#000000", "right", 400, 4);
@@ -197,6 +198,31 @@ var ScrGame = function(){
 		_pirateContinue.addChild(tfBtnContinue);
 		face_mc.addChild(_pirateContinue);
 		_self.arButtons.push(_pirateContinue);
+		
+		// frame player address
+		var wAdr = _tfAddress.width+10;
+		var hAdr = 50;
+		var btnFrame = new PIXI.Container();
+		var objImg = new PIXI.Graphics();
+		objImg.beginFill(0xFFCC00).drawRect(-wAdr/2, -hAdr/2, wAdr, hAdr).endFill();
+		objImg.alpha = 0;
+		btnFrame.addChild(objImg);
+		btnFrame.over = new PIXI.Graphics();
+		btnFrame.over.lineStyle(3, 0xFFCC00, 1);
+		btnFrame.over.drawRect(-wAdr/2, -hAdr/2, wAdr, hAdr);
+		btnFrame.over.visible = false;
+		btnFrame.addChild(btnFrame.over);
+		btnFrame.name = "btnAddress";
+		btnFrame.w = objImg.width;
+		btnFrame.h = objImg.height;
+		btnFrame.x = _tfAddress.x + btnFrame.w/2 - 2;
+		btnFrame.y = _tfAddress.y + btnFrame.h/2 - 7;
+		btnFrame.interactive = true;
+		btnFrame.buttonMode = true;
+		btnFrame._selected = false;
+		btnFrame._disabled = false;
+		face_mc.addChild(btnFrame);
+		_self.arButtons.push(btnFrame);
 		
 		var posX = 1840;
 		var posY = 960;
@@ -476,9 +502,17 @@ var ScrGame = function(){
 		})
 	}
 	
-	_self.closeGameChannel = function(deposit){
+	_self.closeGameChannel = function(){
+		if(_bCloseChannel || options_debug || !_gameOver){
+			return false;
+		}
+		
+		_bCloseChannel = true;
+		
 		if(App.logic){
+			_self.showWndWarning(getText("disconnecting"));
 			// TODO
+			// App.disconnect();
 		}
 	}
 	
@@ -498,6 +532,7 @@ var ScrGame = function(){
 		_pirateSave.visible = false;
 		_pirateContinue.visible = false;
 		_bgDark.visible = false;
+		_gameOver = false;
 		
 		if(_idTutor == 2){
 			_self.showTutorial(3);
@@ -552,7 +587,7 @@ var ScrGame = function(){
 			_balanceGame = 0;
 		} else {
 			App.call('closeGame', [], function(result){
-				 if(App.logic.balance() == result.balance){
+				 if(App.logic.getBalance() == result.balance){
 					 _objGame = result.objGame;
 					_balanceSession = result.balance;
 					_self.refreshBalance();
@@ -588,30 +623,14 @@ var ScrGame = function(){
 		var signPlayer = DCLib.Account.sign(hash);
 		
 		// TODO call function on the smart contract
-		var options = {};
-		options.nonce = 1; // todo
-		options.to = addressContract;
-		options.gasPrice = "0x"+numToHex(40000000000); // 40 Gwei
-		options.gasLimit = 0x927c0; //web3.toHex('21000');
-		
-		/*var urlInfura = "https://ropsten.infura.io/JCnK5ifEPH9qcQkX0Ahl";
-		$.ajax({
-			url: urlInfura,
-			type: "POST",
-			async: false,
-			dataType: 'json',
-			data: JSON.stringify({"jsonrpc":'2.0',
-									"method":"eth_getTransactionCount",
-									"params":[params, "latest"],
-									"id":1}),
-			success: function (d) {
-				
-			}
-		})*/
+		// 1. updateChannel
+		// 2. updateGame
+		// 3. openDispute
 	}
 	
 	// CLICK
 	_self.clickBox = function(box) {
+		console.log("clickBox:", _gameOver);
 		if(_gameOver){
 			return;
 		}
@@ -705,7 +724,7 @@ var ScrGame = function(){
 	}
 	
 	_self.clickCashout = function() {
-		
+		_self.closeGameChannel();
 	}
 	
 	_self.clickTwitter = function() {
@@ -765,6 +784,8 @@ var ScrGame = function(){
 			_self.clickContract();
 		} else if(item_mc.name == "btnCashout"){
 			_self.clickCashout();
+		} else if(item_mc.name == "btnAddress"){
+			copyToClipboard(_openkey);
 		} else if(item_mc.name == "btnDao"){
 			_self.removeAllListener();
 			// var url = "https://platform.dao.casino/";
