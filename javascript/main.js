@@ -20,7 +20,7 @@ var fontMain = "Archivo Black";
 	fontMain = "Roboto Bold";
 
 // options
-var options_debug = false;
+var options_debug = true;
 var options_pause = false;
 var options_fullscreen = false;
 
@@ -104,6 +104,7 @@ function loadManifest(){
 	preloader.add("bgWndWarning", "images/bg/bgWndWarning.png");
 	preloader.add("bgWndWS", "images/bg/bgWndWS.png");
 	preloader.add("bgWndWS1", "images/bg/bgWndWS1.png");
+	preloader.add("bgWndBet", "images/bg/bgWndBet.png");
 		
 	preloader.add("images/texture/BoxesTexture.json");
 	preloader.add("images/texture/ItemsTexture.json");

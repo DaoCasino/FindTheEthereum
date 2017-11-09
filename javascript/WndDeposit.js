@@ -6,7 +6,7 @@
 
 /*eslint no-undef: "none"*/
 
-var WndDeposit = function(prnt){
+var WndDeposit = function(prnt, style){
 	PIXI.Container.call( this );
 	
 	var _self = this;
@@ -21,6 +21,11 @@ var WndDeposit = function(prnt){
 	var _tfDesc, _tfBet;
 	var _pressHead = false;
 	
+	if(style == undefined){
+		style = {bg:"bgWndDeposit",
+			colorDesc:"#ED9829"};
+	}
+	
 	// INIT
 	_self.init = function(){
 		_self.initData();
@@ -31,7 +36,7 @@ var WndDeposit = function(prnt){
 		rect.beginFill(0x000000).drawRect(-_W/2, -_H/2, _W, _H).endFill();
 		rect.alpha = 0.5;
 		_self.addChild(rect);
-		var bg = addObj("bgWndDeposit");
+		var bg = addObj(style.bg);
 		_self.addChild(bg);
 		var posLineY = 50;
 		var thinLine = addObj("lineScrollM", 0, posLineY);
@@ -75,7 +80,7 @@ var WndDeposit = function(prnt){
 		_self.addChild(_headScroll);
 		_arButtons.push(_headScroll);
 		
-		_tfDesc = addText("", 26, "#ED9829", undefined, "center", 500, 3)
+		_tfDesc = addText("", 26, style.colorDesc, undefined, "center", 500, 3)
 		_tfDesc.y = -125;
 		_self.addChild(_tfDesc);
 		_tfBet = addText("0.00 BET", 40, "#FFFFFF", undefined, "center", 350, 4)

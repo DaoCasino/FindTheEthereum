@@ -349,7 +349,9 @@ var ScrGame = function(){
 			return;
 		}
 		if(_wndBet == undefined){
-			_wndBet = new WndDeposit(_self);
+			var style = {bg:"bgWndBet",
+				colorDesc:"#FFCC00"};
+			_wndBet = new WndDeposit(_self, style);
 			_wndBet.x = _W/2;
 			_wndBet.y = _H/2;
 			wnd_mc.addChild(_wndBet);
