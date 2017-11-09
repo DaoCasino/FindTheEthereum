@@ -64,9 +64,10 @@ var GameLogic = function(){
 	_self.signBankroll = function(idChannel, session, round, seed, gameData, signPlayer){
 		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var addressSign = DCLib.sigRecover(randomHash, signPlayer.signature);
-		
-		if(addressSign.toLowerCase() != _addressPlayer.toLowerCase()){
-		// if(!DCLib.checkSig(randomHash, signPlayer.signature, _addressPlayer)){
+		// var addressSign = DCLib.web3.eth.accounts.recover(randomHash, signPlayer);
+		console.log("signBankroll addressSign:", addressSign);
+		// if(addressSign.toLowerCase() != _addressPlayer.toLowerCase()){
+		if(!DCLib.checkSig(randomHash, signPlayer.signature, _addressPlayer)){
 			return {
 				error: "invalid_signature_player"
 			}
@@ -75,6 +76,7 @@ var GameLogic = function(){
 		return {
 			randomHash: randomHash,
 			signBankroll: DCLib.Account.sign(randomHash)
+			// signBankroll: DCLib.Account.signHash(randomHash)
 		}
 	}
 	
@@ -97,9 +99,11 @@ var GameLogic = function(){
 		var countWinStr = gameData.value[2];
 		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var addressSign = DCLib.sigRecover(randomHash, signBankroll.signature);
+		// var addressSign = DCLib.web3.eth.accounts.recover(randomHash, signBankroll);
+		console.log("clickBox addressSign:", addressSign);
 		
-		if(addressSign.toLowerCase() != _addressBankroll.toLowerCase()){
-		// if(!DCLib.checkSig(randomHash, signBankroll.signature, _addressBankroll)){
+		// if(addressSign.toLowerCase() != _addressBankroll.toLowerCase()){
+		if(!DCLib.checkSig(randomHash, signBankroll.signature, _addressBankroll)){
 			return {
 				error: "invalid_signature_bankroll"
 			}
@@ -125,7 +129,7 @@ var GameLogic = function(){
 		}
 		
 		_objGame.method = "clickBox";
-		_objGame.valueBankroller = DCLib.numFromHash(signBankroll.signature, 1, _objGame.countBox);
+		_objGame.valueBankroller = DCLib.numFromHash(signBankroll, 1, _objGame.countBox);
 		_objGame.valuePlayer = valPlayer;
 		_objGame.win = false;
 		

@@ -1,5 +1,3 @@
-/*eslint no-undef: "none"*/
-
 var _W = 1920;
 var _H = 1080;
 var version = "v. 1.0.0";
@@ -20,7 +18,7 @@ var fontMain = "Archivo Black";
 	fontMain = "Roboto Bold";
 
 // options
-var options_debug = true;
+var options_debug = false;
 var options_pause = false;
 var options_fullscreen = false;
 

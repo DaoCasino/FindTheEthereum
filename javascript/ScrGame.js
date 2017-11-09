@@ -6,6 +6,14 @@
 
 /*eslint no-undef: "none"*/
 
+// var hash = "0x146eb29e721c774c602023c40af0e9f174eebfffc61228270ec78f25ecdca575";
+// var sign = DCLib.Account.sign(hash);
+// DCLib.sigRecover(hash, sign.signature);
+
+// var hash = DCLib.web3.utils.soliditySha3(1);
+// var sig = DCLib.Account.signHash(hash)
+// DCLib.web3.eth.accounts.recover(hash, sig)
+
 var ScrGame = function(){
 	PIXI.Container.call( this );
 	
@@ -293,7 +301,9 @@ var ScrGame = function(){
 	
 	// REFRESH
 	_self.refreshBalance = function() {
-		var str =(_balanceSession/_measure).toFixed(2) + "/(" + (_balanceBet).toFixed(2) + ") BET"
+		_balanceSession = Number(_balanceSession.toFixed(2));
+		_betGame = Number(_betGame.toFixed(2));
+		var str =_balanceSession + "/(" + _balanceBet + ") BET"
 		_tfBalance.setText(str);
 	}
 	
@@ -337,7 +347,7 @@ var ScrGame = function(){
 		_bWindow = true;
 		var str = getText("set_deposit").replace(new RegExp("SPL"), "\n");
 		_wndDeposit.show(str, function(value){
-					_self.startChannelGame(value*_measure);
+					_self.startChannelGame(value);
 				}, _balanceBet)
 		_timeCloseWnd = 0;
 		_wndDeposit.visible = true;
@@ -365,7 +375,7 @@ var ScrGame = function(){
 		var str = getText("set_bet").replace(new RegExp("SPL"), "\n");
 		_wndBet.show(str, function(value){
 			_self.setBet(value);
-		}, _balanceSession/_measure)
+		}, _balanceSession)
 		_timeCloseWnd = 0;
 		_wndBet.visible = true;
 		_curWindow = _wndBet;
@@ -383,8 +393,8 @@ var ScrGame = function(){
 		}
 		var str = getText("win") + "!";
 		if(_objGame){
-			// str = "+" + (_objGame.profitGame-_betGame)/_measure;
-			str = "+" + (_objGame.profitGame)/_measure;
+			// str = "+" + (_objGame.profitGame-_betGame);
+			str = "+" + (_objGame.profitGame);
 		}
 		
 		_itemTutorial.visible = false;
@@ -471,22 +481,23 @@ var ScrGame = function(){
 
 	// CHANNEL
 	_self.startChannelGame = function(deposit){
+		deposit = Number(deposit);
 		if(_idTutor == 1){
 			_itemTutorial.visible = false;
 		}
 		
 		_bWindow = false;
 		
-		var objConnect = {bankroller : "auto", paymentchannel:{deposit:deposit}};
+		var objConnect = {bankroller : "auto", paychannel:{deposit:deposit}};
 		
 		if(options_debug){
 			objConnect = {bankroller : "auto"};
 		}
-		
 		_self.showWndWarning(getText("connecting"));
 		
 		App.connect(objConnect, function(connected, info){
 			if (connected){
+				console.log("info:", info);
 				_addressBankroll = info.bankroller_address;
 				// addressContract = info.contract_address
 				_wndWarning.visible = false;
@@ -526,7 +537,8 @@ var ScrGame = function(){
 	
 	// ACTION
 	_self.setBet = function(value) {
-		_betGame = Math.floor(value*_measure);
+		_betGame = Number(value);
+		_betGame = Number(_betGame.toFixed(2));
 		_balanceGame = _betGame;
 		_balanceSession -= _betGame;
 		_self.refreshBalance()
@@ -540,8 +552,8 @@ var ScrGame = function(){
 			_self.showTutorial(3);
 		}
 		
-		_tfBet.setText((_betGame/_measure).toFixed(2));
-		_wndWS.setBet(_betGame/_measure);
+		_tfBet.setText(_betGame);
+		_wndWS.setBet(_betGame);
 	}
 	
 	_self.refreshBoxes = function() {
@@ -552,7 +564,7 @@ var ScrGame = function(){
 	}
 	
 	_self.newGame = function() {
-		if(_balanceSession < 0.01*_measure){
+		if(_balanceSession < 0.01){
 			_self.showError(getText("error_balance_bet"));
 		} else {
 			if(_idTutor == 4){
@@ -632,7 +644,6 @@ var ScrGame = function(){
 	
 	// CLICK
 	_self.clickBox = function(box) {
-		console.log("clickBox:", _gameOver);
 		if(_gameOver){
 			return;
 		}
@@ -655,6 +666,7 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]};
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.sign(hash);
+		// var signPlayer = DCLib.Account.signHash(hash);
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
 		
 		/*App.request({action:'signBankroll', rawMsg:hash}, 
@@ -690,14 +702,14 @@ var ScrGame = function(){
 						}
 						
 						var addressSign = DCLib.sigRecover(hash, result.signB.signature);
-						// if(!DCLib.checkSig(hash, result.signB.signature, _addressBankroll)){
-						if(addressSign.toLowerCase() != _addressBankroll.toLowerCase()){
+						// var addressSign = DCLib.web3.eth.accounts.recover(hash, result.signB);
+						if(!DCLib.checkSig(hash, result.signB.signature, _addressBankroll)){
 							_self.showError(strError, _self.sendDispute);
 							return;
 						}
 						
 						_objGame = result.objGame;
-						var valueBankroller = DCLib.numFromHash(result.signB.signature, 1, _objGame.countBox);
+						var valueBankroller = DCLib.numFromHash(result.signB, 1, _objGame.countBox);
 						
 						if(valueBankroller == _objGame.valueBankroller){
 							_self.showResult(result, box);
@@ -890,7 +902,7 @@ var ScrGame = function(){
 			box.openBox(false);
 			_wndWS.clear();
 		}
-		_tfBet.setText((_balanceGame/_measure).toFixed(2));
+		_tfBet.setText(_balanceGame.toFixed(2));
 		
 		var it = new ItemResult(_objGame.win, box.x, box.y-200)
 		face_mc.addChild(it)
