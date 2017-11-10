@@ -12,7 +12,6 @@ var GameLogic = function(){
 	const MIN_VALUE = 1;
 	const MAX_VALUE = 3;
 	
-	var _balance = 0;
 	var _session = 0;
 	var _addressBankroll = "";
 	var _addressPlayer = "";
@@ -24,9 +23,9 @@ var GameLogic = function(){
 		win          : false,
 		countWinStr  : 0,
 		valueBankroller : 0,
-		valuePlayer : 0,
-		countBox : 3,
-		profitGame   : 0,
+		valuePlayer  : 0,
+		countBox     : 3,
+		bufferProfit : 0,
 		betGame      : 0
 	};
 		
@@ -40,10 +39,9 @@ var GameLogic = function(){
 	 * @param  {number} balance Player tokens balance.
 	 * @return {boolean} true.
 	 */
-	_self.initGame = function(addressPlayer, addressBankroll, balance){
+	_self.initGame = function(addressPlayer, addressBankroll){
 		_addressPlayer = addressPlayer;
 		_addressBankroll = addressBankroll;
-		_balance = balance;
 		
 		return true;
 	}
@@ -120,10 +118,12 @@ var GameLogic = function(){
 		
 		// new game
 		if(betGame > 0){
-			_balance -= betGame;
+			// _balance -= betGame;
+			_self.payChannel.addTX(-betGame);
+			_self.payChannel.printLog()
 			_objGame.betGame = betGame;
 			_objGame.countWinStr = 0;
-			_objGame.profitGame = 0;
+			_objGame.bufferProfit = 0;
 			_objGame.result = false;
 			_objGame.play = false;
 		}
@@ -144,7 +144,7 @@ var GameLogic = function(){
 			_objGame.result = true;
 		}
 		
-		_objGame.profitGame = _objGame.betGame * _arWinSt[_objGame.countWinStr];
+		_objGame.bufferProfit = _objGame.betGame * _arWinSt[_objGame.countWinStr];
 		
 		// game over
 		if(_objGame.result){
@@ -153,7 +153,7 @@ var GameLogic = function(){
 		
 		return {
 			objGame 	: _objGame,
-			balance     : _balance,
+			balance     : _self.payChannel.getBalance(),
 			signB 		: signBankroll,
 			timestamp   : new Date().getTime()
 		}
@@ -170,15 +170,23 @@ var GameLogic = function(){
 		_objGame.method = "closeGame";
 		_objGame.result = true;
 		_objGame.play = false;
-		if(countWinStr > 0){
-			_balance += _objGame.profitGame;
-		}
+		// if(countWinStr > 0){
+			// _balance += _objGame.bufferProfit;
+		// }
 		_objGame.countWinStr = 0;
+		// add result to paychannel
+		_self.payChannel.addTX(_objGame.bufferProfit);
+		_self.payChannel.printLog();
+		
+		console.log("bufferProfit:", _objGame.bufferProfit, 
+			"getProfit:", _self.payChannel.getProfit(),
+			"getBalance:", _self.payChannel.getBalance(),
+			"getDeposit:", _self.payChannel.getDeposit());
 		
 		return {
 			objGame 	: _objGame,
 			countWinStr : countWinStr,
-			balance     : _balance,
+			balance     : _self.payChannel.getBalance(),
 			timestamp   : new Date().getTime(),
 		}
 	}
@@ -198,7 +206,7 @@ var GameLogic = function(){
 	 * @return {number} Returns the player's balance.
 	 */
 	_self.getBalance = function(){
-		return _balance
+		return _self.payChannel.getBalance()
 	}
 	
 	/**

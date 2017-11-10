@@ -31,8 +31,8 @@ var ScrGame = function(){
 	// boolean
 	var _gameOver, _bWindow, _bCloseChannel;
 	// numbers
-	var _measure, _idTutor,
-	_betGame, _balanceBet, _balanceSession, _balanceGame,
+	var _idTutor,
+	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
 	_timeCloseWnd;
 	// arrays
 	var _arBoxes;
@@ -89,10 +89,10 @@ var ScrGame = function(){
 	}
 	
 	_self.createNumbers = function(){
-		_measure = 100000000;
 		_idTutor = 0;
 		_betGame = 1;
 		_balanceBet = 0;
+		_balanceEth = 0;
 		_balanceSession = 0;
 		_timeCloseWnd = 0;		
 	}
@@ -105,7 +105,6 @@ var ScrGame = function(){
 	_self.createStrings = function(){
 		_openkey = DCLib.Account.get().openkey;
 		_addressBankroll = "0x";
-		_idChannel = DCLib.Utils.makeSeed();
 	}
 	
 	_self.createGui = function() {
@@ -309,12 +308,19 @@ var ScrGame = function(){
 	
 	_self.refreshData = function() {
 		_self.showWndWarning(getText("loading"));
-		DCLib.getBetBalance(_openkey, function(value){
-			_wndWarning.visible = false;
-			_balanceBet = Number(value);
-			_self.refreshBalance();
-			_self.showWndDeposit();
-			_self.showTutorial(1);
+		DCLib.getEthBalance(_openkey, function(valueEth){
+			_balanceEth = Number(valueEth);
+			DCLib.getBetBalance(_openkey, function(valueBet){
+				_wndWarning.visible = false;
+				_balanceBet = Number(valueBet);
+				_self.refreshBalance();
+				if(_balanceEth == 0){
+					_self.showError("error_balance_eth");
+				} else {
+					_self.showWndDeposit();
+					_self.showTutorial(1);
+				}
+			})
 		})
 	}
 	
@@ -393,8 +399,7 @@ var ScrGame = function(){
 		}
 		var str = getText("win") + "!";
 		if(_objGame){
-			// str = "+" + (_objGame.profitGame-_betGame);
-			str = "+" + (_objGame.profitGame);
+			str = "+" + (_objGame.bufferProfit);
 		}
 		
 		_itemTutorial.visible = false;
@@ -488,22 +493,27 @@ var ScrGame = function(){
 		
 		_bWindow = false;
 		
+		console.log("startChannelGame deposit:", deposit);
 		var objConnect = {bankroller : "auto", paychannel:{deposit:deposit}};
-		
 		if(options_debug){
 			objConnect = {bankroller : "auto"};
+			_idChannel = DCLib.Utils.makeSeed();
 		}
 		_self.showWndWarning(getText("connecting"));
 		
 		App.connect(objConnect, function(connected, info){
 			if (connected){
-				console.log("info:", info);
 				_addressBankroll = info.bankroller_address;
-				// addressContract = info.contract_address
+				var transactionHash = "";
+				if(info.channel){
+					_idChannel = info.channel.channel_id;
+					addressContract = info.channel.contract_address;
+					transactionHash = info.channel.receipt.transactionHash;
+				}
 				_wndWarning.visible = false;
 				_balanceSession = deposit;
 				
-				App.call('initGame', [_openkey, _addressBankroll, deposit], function(result){
+				App.call('initGame', [_openkey, _addressBankroll], function(result){
 					_objGame = _self.getGame();
 					_self.refreshBalance();
 					_self.createTreasure();
@@ -524,8 +534,11 @@ var ScrGame = function(){
 		
 		if(App.logic){
 			_self.showWndWarning(getText("disconnecting"));
-			// TODO
-			// App.disconnect();
+			_btnStart.visible = false;
+			
+			App.disconnect({}, function(res){
+				console.log('disconnect result', res)
+			})
 		}
 	}
 	
@@ -624,7 +637,7 @@ var ScrGame = function(){
 		_self.showWndWarning(getText("dispute_resolve"));
 		console.log("sendDispute");
 		
-		var idChannel = _idChannel; // TODO set id channel
+		var idChannel = _idChannel;
 		var session = App.logic.session();
 		var round = App.logic.getGame().countWinStr + 1;
 		var seed = DCLib.Utils.makeSeed();
@@ -654,7 +667,7 @@ var ScrGame = function(){
 			_itemTutorial.visible = false;
 		}
 		
-		var idChannel = _idChannel; // TODO set id channel
+		var idChannel = _idChannel;
 		var session = App.logic.session();
 		var round = App.logic.getGame().countWinStr + 1;
 		var seed = DCLib.Utils.makeSeed();
@@ -799,7 +812,8 @@ var ScrGame = function(){
 		} else if(item_mc.name == "btnCashout"){
 			_self.clickCashout();
 		} else if(item_mc.name == "btnAddress"){
-			copyToClipboard(_openkey);
+			var url = urlEtherscan + "address/" + _openkey;
+			window.open(url, "_blank");
 		} else if(item_mc.name == "btnDao"){
 			_self.removeAllListener();
 			// var url = "https://platform.dao.casino/";
@@ -885,7 +899,7 @@ var ScrGame = function(){
 		_objGame = result.objGame;
 		_balanceSession = result.balance;
 		_self.refreshBalance();
-		_balanceGame = _objGame.profitGame;
+		_balanceGame = _objGame.bufferProfit;
 		_tfWinStr.setText(_objGame.countWinStr);
 		
 		box.setSelected(true);

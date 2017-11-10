@@ -25,6 +25,7 @@
 	your_bet="YOUR BET"
 	
 	error_balance_bet="You do not have enough BET."
+	error_balance_eth="You do not have enough ETH."
 	invalid_data="You sent invalid data."
 	invalid_signature_bankroll="Bankroll did not sign the current event. We sent the dispute to smart contract ADR."
 	
