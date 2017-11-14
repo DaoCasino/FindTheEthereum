@@ -4,9 +4,12 @@
  *
  * @constructor
  * @this {GameLogic}
+ *  
+ * Define our DApp logic constructor, 
+ * for use it in frontend and bankroller side
  */
 
-var GameLogic = function(){
+DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	var _self = this;
 	
 	const MIN_VALUE = 1;
@@ -61,11 +64,9 @@ var GameLogic = function(){
 	 */
 	_self.signBankroll = function(idChannel, session, round, seed, gameData, signPlayer){
 		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
-		var addressSign = DCLib.sigRecover(randomHash, signPlayer.signature);
-		// var addressSign = DCLib.web3.eth.accounts.recover(randomHash, signPlayer);
-		console.log("signBankroll addressSign:", addressSign);
-		// if(addressSign.toLowerCase() != _addressPlayer.toLowerCase()){
-		if(!DCLib.checkSig(randomHash, signPlayer.signature, _addressPlayer)){
+		var signBankroll = DCLib.Account.signHash(randomHash);
+		
+		if(!DCLib.checkHashSig(randomHash, signPlayer, _addressPlayer)){
 			return {
 				error: "invalid_signature_player"
 			}
@@ -73,8 +74,7 @@ var GameLogic = function(){
 		
 		return {
 			randomHash: randomHash,
-			signBankroll: DCLib.Account.sign(randomHash)
-			// signBankroll: DCLib.Account.signHash(randomHash)
+			signBankroll: signBankroll
 		}
 	}
 	
@@ -96,12 +96,8 @@ var GameLogic = function(){
 		var valPlayer = gameData.value[1];
 		var countWinStr = gameData.value[2];
 		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
-		var addressSign = DCLib.sigRecover(randomHash, signBankroll.signature);
-		// var addressSign = DCLib.web3.eth.accounts.recover(randomHash, signBankroll);
-		console.log("clickBox addressSign:", addressSign);
 		
-		// if(addressSign.toLowerCase() != _addressBankroll.toLowerCase()){
-		if(!DCLib.checkSig(randomHash, signBankroll.signature, _addressBankroll)){
+		if(!DCLib.checkHashSig(randomHash, signBankroll, _addressBankroll)){
 			return {
 				error: "invalid_signature_bankroll"
 			}
@@ -118,9 +114,7 @@ var GameLogic = function(){
 		
 		// new game
 		if(betGame > 0){
-			// _balance -= betGame;
 			_self.payChannel.addTX(-betGame);
-			_self.payChannel.printLog()
 			_objGame.betGame = betGame;
 			_objGame.countWinStr = 0;
 			_objGame.bufferProfit = 0;
@@ -154,7 +148,7 @@ var GameLogic = function(){
 		return {
 			objGame 	: _objGame,
 			balance     : _self.payChannel.getBalance(),
-			signB 		: signBankroll,
+			signBankroll 		: signBankroll,
 			timestamp   : new Date().getTime()
 		}
 	}
@@ -170,13 +164,10 @@ var GameLogic = function(){
 		_objGame.method = "closeGame";
 		_objGame.result = true;
 		_objGame.play = false;
-		// if(countWinStr > 0){
-			// _balance += _objGame.bufferProfit;
-		// }
+		
 		_objGame.countWinStr = 0;
 		// add result to paychannel
 		_self.payChannel.addTX(_objGame.bufferProfit);
-		_self.payChannel.printLog();
 		
 		console.log("bufferProfit:", _objGame.bufferProfit, 
 			"getProfit:", _self.payChannel.getProfit(),
@@ -219,4 +210,4 @@ var GameLogic = function(){
 	}
 	
 	return _self;
-}
+})

@@ -1,8 +1,9 @@
 {
 	"name" : "Find The Ethereum",
 	"code" : "DC_FindTheEthereum",
-
-	"run" : {
-		"client" : "bankroll.js"
-	}
+	
+	"index" : "./index.html",
+	"logic" : "./javascript/GameLogic.js",
+	
+	"run"   : "./bankroll.js"
 }

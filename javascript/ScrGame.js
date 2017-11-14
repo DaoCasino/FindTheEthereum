@@ -308,9 +308,9 @@ var ScrGame = function(){
 	
 	_self.refreshData = function() {
 		_self.showWndWarning(getText("loading"));
-		DCLib.getEthBalance(_openkey, function(valueEth){
+		DCLib.Eth.getEthBalance(_openkey, function(valueEth){
 			_balanceEth = Number(valueEth);
-			DCLib.getBetBalance(_openkey, function(valueBet){
+			DCLib.Eth.getBetBalance(_openkey, function(valueBet){
 				_wndWarning.visible = false;
 				_balanceBet = Number(valueBet);
 				_self.refreshBalance();
@@ -348,7 +348,7 @@ var ScrGame = function(){
 			_wndDeposit.y = _H/2;
 			wnd_mc.addChild(_wndDeposit);
 		}
-		DCLib.getBetBalance(_openkey, _self.getBetsBalance);
+		DCLib.Eth.getBetBalance(_openkey, _self.getBetsBalance);
 		
 		_bWindow = true;
 		var str = getText("set_deposit").replace(new RegExp("SPL"), "\n");
@@ -493,7 +493,6 @@ var ScrGame = function(){
 		
 		_bWindow = false;
 		
-		console.log("startChannelGame deposit:", deposit);
 		var objConnect = {bankroller : "auto", paychannel:{deposit:deposit}};
 		if(options_debug){
 			objConnect = {bankroller : "auto"};
@@ -508,7 +507,9 @@ var ScrGame = function(){
 				if(info.channel){
 					_idChannel = info.channel.channel_id;
 					addressContract = info.channel.contract_address;
-					transactionHash = info.channel.receipt.transactionHash;
+					if(info.channel.receipt){
+						transactionHash = info.channel.receipt.transactionHash;
+					}
 				}
 				_wndWarning.visible = false;
 				_balanceSession = deposit;
@@ -537,6 +538,8 @@ var ScrGame = function(){
 			_btnStart.visible = false;
 			
 			App.disconnect({}, function(res){
+				_wndWarning.visible = false;
+				_self.createWndInfo(getText("close_channel"));
 				console.log('disconnect result', res)
 			})
 		}
@@ -678,20 +681,8 @@ var ScrGame = function(){
 		
 		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]};
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
-		var signPlayer = DCLib.Account.sign(hash);
-		// var signPlayer = DCLib.Account.signHash(hash);
+		var signPlayer = DCLib.Account.signHash(hash);
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
-		
-		/*App.request({action:'signBankroll', rawMsg:hash}, 
-			function(data){
-				var signBankroll = data.response.sig;
-				// HACK BANROLL
-				var valBox = DCLib.numFromHash(signBankroll.signature, 1, _objGame.countBox);
-				if(valBox != box.id){
-					_gameOver = false;
-					_self.clickBox(box);
-					return;
-				}*/
 		
 		App.call('signBankroll', 
 			[idChannel, session, round, seed, gameData, signPlayer], 
@@ -714,15 +705,13 @@ var ScrGame = function(){
 							return;
 						}
 						
-						var addressSign = DCLib.sigRecover(hash, result.signB.signature);
-						// var addressSign = DCLib.web3.eth.accounts.recover(hash, result.signB);
-						if(!DCLib.checkSig(hash, result.signB.signature, _addressBankroll)){
+						if(!DCLib.checkHashSig(hash, result.signBankroll, _addressBankroll)){
 							_self.showError(strError, _self.sendDispute);
 							return;
 						}
 						
 						_objGame = result.objGame;
-						var valueBankroller = DCLib.numFromHash(result.signB, 1, _objGame.countBox);
+						var valueBankroller = DCLib.numFromHash(result.signBankroll, 1, _objGame.countBox);
 						
 						if(valueBankroller == _objGame.valueBankroller){
 							_self.showResult(result, box);

@@ -3,10 +3,12 @@
 
 	address="Address"
 	balance="Balance"
+	close_channel="Tokens are successfully distributed."
 	connecting="Сonnecting"
 	congratulations="Congratulations!"
 	continue="Сontinue"
 	continue_game="Place the prize and continue the game."
+	disconnecting="Disconnecting."
 	dispute_resolve="The dispute will be settled on a smart contract."
 	loading="Loading"
 	lose="LOSE"

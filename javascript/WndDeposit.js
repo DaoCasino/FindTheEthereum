@@ -92,6 +92,7 @@ var WndDeposit = function(prnt, style){
 		_callback = callback;
 		_tfDesc.setText(str);
 		_maxBet = maxBet;
+		_curBet = (_maxBet/10).toFixed(2);
 		var posX = _stX + (_curBet/_maxBet)*_endX*2;
 		_headScroll.x = posX;
 		var sc = (posX + _endX)/(_endX*2);
@@ -100,10 +101,14 @@ var WndDeposit = function(prnt, style){
 		
 		if(_curBet > _maxBet){
 			_curBet = _maxBet.toFixed(2);
-			_tfBet.setText(String(_curBet) + " BET");
 			_headScroll.x = _endX;
 			_fatLine.x = 0;
 			_fatLine.scale.x = 1;
+		}
+		
+		_tfBet.setText(String(_curBet) + " BET");
+		if(posX > _stX && _curBet >= 0.01){
+			_btnOk.setDisabled(false);
 		}
 	}
 	

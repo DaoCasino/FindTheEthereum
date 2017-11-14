@@ -57,13 +57,12 @@ function init() {
 	loadManifest();
 }
 
-function loadLib() {
+function loadLib() {	
 	// Wait when DClib loaded
 	DCLib.on('ready', function(){
 		// Create our DApp
 		window.App = new DCLib.DApp({
-			code  : gameCode, // unique DApp code
-			logic : GameLogic, // inject logic constructor in your DApp
+			code  : gameCode // unique DApp code
 		})
 		
 		init();
