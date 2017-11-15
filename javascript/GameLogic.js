@@ -166,13 +166,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		_objGame.play = false;
 		
 		_objGame.countWinStr = 0;
-		// add result to paychannel
 		_self.payChannel.addTX(_objGame.bufferProfit);
-		
-		console.log("bufferProfit:", _objGame.bufferProfit, 
-			"getProfit:", _self.payChannel.getProfit(),
-			"getBalance:", _self.payChannel.getBalance(),
-			"getDeposit:", _self.payChannel.getDeposit());
 		
 		return {
 			objGame 	: _objGame,

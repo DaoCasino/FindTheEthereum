@@ -19,11 +19,11 @@ var ScrGame = function(){
 	
 	var _self = this;
 	var _objGame, _objTutor;
-	var _curWindow, _itemBet, _bgDark, _itemTutorial;
+	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
 	var _tfBalance, _tfBet, _tfWinStr, __tfAddress;
 	var _fRequestFullScreen, _fCancelFullScreen;
 	// layers
-	var back_mc, game_mc, face_mc, wnd_mc, warning_mc, tutor_mc;
+	var back_mc, game_mc, face_mc, wnd_mc, warning_mc, tutor_mc, tooltip_mc;
 	// buttons
 	var _btnStart, _btnClose, _btnStart, _pirateContinue, _pirateSave;
 	// windows
@@ -33,7 +33,7 @@ var ScrGame = function(){
 	// numbers
 	var _idTutor,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
-	_timeCloseWnd;
+	_timeCloseWnd, _deposit;
 	// arrays
 	var _arBoxes;
 	// strings
@@ -73,6 +73,7 @@ var ScrGame = function(){
 		warning_mc = new PIXI.Container();
 		wnd_mc = new PIXI.Container();
 		tutor_mc = new PIXI.Container();
+		tooltip_mc = new PIXI.Container();
 		
 		_self.addChild(game_mc);
 		_self.addChild(back_mc);
@@ -80,6 +81,7 @@ var ScrGame = function(){
 		_self.addChild(warning_mc);
 		_self.addChild(wnd_mc);
 		_self.addChild(tutor_mc);
+		_self.addChild(tooltip_mc);
 	}
 	
 	_self.createBooleans = function(){
@@ -235,18 +237,22 @@ var ScrGame = function(){
 		var posY = 960;
 		var offsetY = 135;
 		var btnDao = addButton("btnDao", posX-4, posY - 0*offsetY);
+		btnDao.tooltip = "home";
 		btnDao.overSc = true;
 		face_mc.addChild(btnDao);
 		_self.arButtons.push(btnDao);
 		var btnFullscreen = addButton("btnFullscreen", posX, posY - 1*offsetY);
+		btnFullscreen.tooltip = "fullscreen";
 		btnFullscreen.overSc = true;
 		face_mc.addChild(btnFullscreen);
 		_self.arButtons.push(btnFullscreen);
 		var btnContract = addButton("btnContract", posX, posY - 2*offsetY);
+		btnContract.tooltip = "show_contract";
 		btnContract.overSc = true;
 		face_mc.addChild(btnContract);
 		_self.arButtons.push(btnContract);
 		var btnCashout = addButton("btnCashout", posX, posY - 3*offsetY);
+		btnCashout.tooltip = "cashout";
 		btnCashout.overSc = true;
 		face_mc.addChild(btnCashout);
 		_self.arButtons.push(btnCashout);
@@ -258,6 +264,13 @@ var ScrGame = function(){
 		btnTwitter.overSc = true;
 		face_mc.addChild(btnTwitter);
 		_self.arButtons.push(btnTwitter);
+		
+		// Tooltip
+		_tooltip = new ItemTooltip();
+		_tooltip.x = _W/2;
+		_tooltip.y = _H/2;
+		_tooltip.visible = false;
+		tooltip_mc.addChild(_tooltip);
 	}
 	
 	_self.createTreasure = function() {		
@@ -308,19 +321,18 @@ var ScrGame = function(){
 	
 	_self.refreshData = function() {
 		_self.showWndWarning(getText("loading"));
-		DCLib.Eth.getEthBalance(_openkey, function(valueEth){
-			_balanceEth = Number(valueEth);
-			DCLib.Eth.getBetBalance(_openkey, function(valueBet){
-				_wndWarning.visible = false;
-				_balanceBet = Number(valueBet);
-				_self.refreshBalance();
-				if(_balanceEth == 0){
-					_self.showError("error_balance_eth");
-				} else {
-					_self.showWndDeposit();
-					_self.showTutorial(1);
-				}
-			})
+		
+		DCLib.Eth.getBalances(_openkey, function(res) {
+			_wndWarning.visible = false;
+			_balanceEth = Number(res.eth);
+			_balanceBet = Number(res.bets);
+			_self.refreshBalance();
+			if(_balanceEth == 0){
+				_self.showError("error_balance_eth");
+			} else {
+				_self.showWndDeposit();
+				_self.showTutorial(1);
+			}
 		})
 	}
 	
@@ -513,6 +525,7 @@ var ScrGame = function(){
 				}
 				_wndWarning.visible = false;
 				_balanceSession = deposit;
+				_deposit = deposit;
 				
 				App.call('initGame', [_openkey, _addressBankroll], function(result){
 					_objGame = _self.getGame();
@@ -609,24 +622,19 @@ var ScrGame = function(){
 		_bgDark.visible = false;
 		var result = {};
 		
-		if(options_debug){
-			result = App.logic.closeGame();
-			_objGame = result.objGame;
-			_balanceSession = result.balance;
-			_self.refreshBalance();
-			_balanceGame = 0;
-		} else {
-			App.call('closeGame', [], function(result){
-				 if(App.logic.getBalance() == result.balance){
-					 _objGame = result.objGame;
-					_balanceSession = result.balance;
-					_self.refreshBalance();
-					_balanceGame = 0;
-				 } else {
-					 _self.showError(getText("Conflict closeGame"));
-				 }
-			})
-		}
+		App.call('closeGame', [], function(result){
+			 if(App.logic.getBalance() == result.balance){
+				 _objGame = result.objGame;
+				_balanceSession = result.balance;
+				if(options_debug){
+					_balanceSession = _deposit + App.logic.payChannel.getProfit()
+				}
+				_self.refreshBalance();
+				_balanceGame = 0;
+			 } else {
+				 _self.showError(getText("Conflict closeGame"));
+			 }
+		})
 		
 		_btnStart.visible = true;
 		_itemBet.visible = false;
@@ -665,6 +673,7 @@ var ScrGame = function(){
 		}
 		_gameOver = true;
 		var result = {};
+		box.setSelected(true);
 		
 		if(_idTutor == 3){
 			_itemTutorial.visible = false;
@@ -822,6 +831,10 @@ var ScrGame = function(){
 		var mouseX = evt.data.global.x;
 		var mouseY = evt.data.global.y;
 		
+		if(_tooltip){
+			_tooltip.visible = false;
+		}
+		
 		for (var i = 0; i < _self.arButtons.length; i++) {
 			var item_mc = _self.arButtons[i];
 			if(hit_test_rec(item_mc, item_mc.w, item_mc.h, mouseX, mouseY)){
@@ -841,6 +854,21 @@ var ScrGame = function(){
 						_itemTutorial.show(getText("save_prize"));
 					} else if(item_mc.name == "pirateContinue" && _itemTutorial){
 						_itemTutorial.show(getText("continue_game"));
+					}
+				}
+				
+				if(item_mc._selected && item_mc.visible){
+					if(_tooltip && item_mc.tooltip){
+						_tooltip.show(getText(item_mc.tooltip));
+						_tooltip.x = item_mc.x;
+						_tooltip.y = item_mc.y - item_mc.h/2;
+						_tooltip.visible = true;
+						if(_tooltip.x + _tooltip.w/2 > _W){
+							_tooltip.x = _W - _tooltip.w/2;
+						}
+						if(_tooltip.y - _tooltip.h/2 < 0){
+							_tooltip.y = _tooltip.h/2;
+						}
 					}
 				}
 			} else {
@@ -887,11 +915,12 @@ var ScrGame = function(){
 	_self.showResult = function(result, box){
 		_objGame = result.objGame;
 		_balanceSession = result.balance;
+		if(options_debug){
+			_balanceSession = _deposit + App.logic.payChannel.getProfit()
+		}
 		_self.refreshBalance();
 		_balanceGame = _objGame.bufferProfit;
 		_tfWinStr.setText(_objGame.countWinStr);
-		
-		box.setSelected(true);
 		
 		for (var i = 0; i < _arBoxes.length; i++) {
 			var item_mc = _arBoxes[i];
