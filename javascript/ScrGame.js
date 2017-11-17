@@ -27,7 +27,7 @@ var ScrGame = function(){
 	// buttons
 	var _btnStart, _btnClose, _btnStart, _pirateContinue, _pirateSave;
 	// windows
-	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin;
+	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin, _wndHistory;
 	// boolean
 	var _gameOver, _bWindow, _bCloseChannel;
 	// numbers
@@ -251,7 +251,12 @@ var ScrGame = function(){
 		btnContract.overSc = true;
 		face_mc.addChild(btnContract);
 		_self.arButtons.push(btnContract);
-		var btnCashout = addButton("btnCashout", posX, posY - 3*offsetY);
+		var btnHistory = addButton("btnHistory", posX, posY - 3*offsetY);
+		btnHistory.tooltip = "show_history";
+		btnHistory.overSc = true;
+		face_mc.addChild(btnHistory);
+		_self.arButtons.push(btnHistory);
+		var btnCashout = addButton("btnCashout", posX, posY - 4*offsetY);
 		btnCashout.tooltip = "cashout";
 		btnCashout.overSc = true;
 		face_mc.addChild(btnCashout);
@@ -294,9 +299,6 @@ var ScrGame = function(){
 	};
 	
 	_self.createWndInfo = function(str, callback, addStr) {
-		if(_bWindow){
-			return false;
-		}
 		if(_wndInfo == undefined){
 			_wndInfo = new WndInfo(this);
 			_wndInfo.x = _W/2;
@@ -420,6 +422,24 @@ var ScrGame = function(){
 		_timeCloseWnd = 0;
 		_wndWin.visible = true;
 		_curWindow = _wndWin;
+	}
+	
+	_self.showWndHistory = function() {
+		if(_bWindow){
+			return;
+		}
+		if(_wndHistory == undefined){
+			_wndHistory = new WndHistory(_self, _deposit);
+			_wndHistory.x = _W/2;
+			_wndHistory.y = _H/2;
+			wnd_mc.addChild(_wndHistory);
+		}
+		
+		_bWindow = true;
+		_wndHistory.show(App.logic.getHistory())
+		_timeCloseWnd = 0;
+		_wndHistory.visible = true;
+		_curWindow = _wndHistory;
 	}
 	
 	_self.showTutorial = function(id) {		
@@ -627,7 +647,7 @@ var ScrGame = function(){
 				 _objGame = result.objGame;
 				_balanceSession = result.balance;
 				if(options_debug){
-					_balanceSession = _deposit + App.logic.payChannel.getProfit()
+					_balanceSession = _deposit + App.logic.payChannel.getProfit();
 				}
 				_self.refreshBalance();
 				_balanceGame = 0;
@@ -786,6 +806,10 @@ var ScrGame = function(){
 			return;
 		}
 		
+		if(_tooltip){
+			_tooltip.visible = false;
+		}
+		
 		item_mc._selected = false;
 		if(item_mc.over && item_mc.name != "ItemBox"){
 			item_mc.over.visible = false;
@@ -803,6 +827,8 @@ var ScrGame = function(){
 			_self.continueGame();
 		} else if(item_mc.name == "pirateSave"){
 			_self.showWndWin();
+		} else if(item_mc.name == "btnHistory"){
+			_self.showWndHistory();
 		} else if(item_mc.name == "btnFullscreen"){
 			_self.fullscreen();
 		} else if(item_mc.name == "btnContract"){
@@ -860,8 +886,8 @@ var ScrGame = function(){
 				if(item_mc._selected && item_mc.visible){
 					if(_tooltip && item_mc.tooltip){
 						_tooltip.show(getText(item_mc.tooltip));
-						_tooltip.x = item_mc.x;
-						_tooltip.y = item_mc.y - item_mc.h/2;
+						_tooltip.x = item_mc.x - (item_mc.w/2 + _tooltip.w/2);
+						_tooltip.y = item_mc.y;
 						_tooltip.visible = true;
 						if(_tooltip.x + _tooltip.w/2 > _W){
 							_tooltip.x = _W - _tooltip.w/2;

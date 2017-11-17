@@ -18,6 +18,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	var _session = 0;
 	var _addressBankroll = "";
 	var _addressPlayer = "";
+	var _history = [];
 	
 	var _objGame = {
 		method       : "",
@@ -113,13 +114,18 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		}
 		
 		// new game
+		var objHistory = {balance:0, profit:0, countWinStr:0};
 		if(betGame > 0){
+			_session ++;
 			_self.payChannel.addTX(-betGame);
 			_objGame.betGame = betGame;
 			_objGame.countWinStr = 0;
 			_objGame.bufferProfit = 0;
 			_objGame.result = false;
 			_objGame.play = false;
+			_history.push(objHistory);
+		} else {
+			objHistory = _history[_session-1];
 		}
 		
 		_objGame.method = "clickBox";
@@ -140,15 +146,29 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		
 		_objGame.bufferProfit = _objGame.betGame * _arWinSt[_objGame.countWinStr];
 		
+		for(var tag in _objGame){
+			if(tag == "countWinStr"){
+				if(_objGame[tag] > 0){
+					objHistory[tag] = _objGame[tag];
+				}
+			}else{
+				objHistory[tag] = _objGame[tag];
+			}
+		}
+		
 		// game over
 		if(_objGame.result){
 			_self.closeGame();
 		}
 		
+		objHistory.balance = _self.payChannel.getBalance();
+		objHistory.profit =_objGame.bufferProfit - _objGame.betGame;
+		
 		return {
 			objGame 	: _objGame,
 			balance     : _self.payChannel.getBalance(),
-			signBankroll 		: signBankroll,
+			signBankroll: signBankroll,
+			history		: _history,
 			timestamp   : new Date().getTime()
 		}
 	}
@@ -160,7 +180,6 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	 */
 	_self.closeGame = function(){
 		var countWinStr = _objGame.countWinStr;
-		_session ++;
 		_objGame.method = "closeGame";
 		_objGame.result = true;
 		_objGame.play = false;
@@ -168,9 +187,15 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		_objGame.countWinStr = 0;
 		_self.payChannel.addTX(_objGame.bufferProfit);
 		
+		var objHistory = _history[_session-1];
+		objHistory.balance = _self.payChannel.getBalance();
+		objHistory.profit =_objGame.bufferProfit - _objGame.betGame;
+		_history[_session-1] = objHistory;
+		
 		return {
 			objGame 	: _objGame,
 			countWinStr : countWinStr,
+			history		: _history,
 			balance     : _self.payChannel.getBalance(),
 			timestamp   : new Date().getTime(),
 		}
@@ -192,6 +217,15 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	 */
 	_self.getBalance = function(){
 		return _self.payChannel.getBalance()
+	}
+	
+	/**
+	 * Returns an array of game history.
+	 *
+	 * @return {array} Returns an array of game history.
+	 */
+	_self.getHistory = function(){
+		return _history
 	}
 	
 	/**
