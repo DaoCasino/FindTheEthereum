@@ -18,7 +18,7 @@ var fontMain = "Archivo Black";
 	fontMain = "Roboto Bold";
 
 // options
-var options_debug = true;
+var options_debug = false;
 var options_pause = false;
 var options_fullscreen = false;
 

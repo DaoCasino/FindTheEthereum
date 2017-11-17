@@ -573,7 +573,13 @@ var ScrGame = function(){
 			App.disconnect({}, function(res){
 				_wndWarning.visible = false;
 				_self.createWndInfo(getText("close_channel"));
-				console.log('disconnect result', res)
+				
+				DCLib.Eth.getBalances(_openkey, function(res) {
+					_balanceEth = Number(res.eth);
+					_balanceBet = Number(res.bets);
+					_balanceSession = 0;
+					_self.refreshBalance();
+				})
 			})
 		}
 	}
