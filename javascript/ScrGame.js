@@ -533,6 +533,7 @@ var ScrGame = function(){
 		_self.showWndWarning(getText("connecting"));
 		
 		App.connect(objConnect, function(connected, info){
+			console.log('Game connect:', connected, info);
 			if (connected){
 				_addressBankroll = info.bankroller_address;
 				var transactionHash = "";
@@ -544,15 +545,23 @@ var ScrGame = function(){
 					}
 				}
 				_wndWarning.visible = false;
-				_balanceSession = deposit;
-				_deposit = deposit;
-				
-				App.call('initGame', [_openkey, _addressBankroll], function(result){
-					_objGame = _self.getGame();
-					_self.refreshBalance();
-					_self.createTreasure();
-					_self.showWndBet();
-				})
+				if(addressContract){
+					_balanceSession = deposit;
+					_deposit = deposit;
+					
+					DCLib.Eth.getBalances(_openkey, function(resBal) {
+						_balanceEth = Number(resBal.eth);
+						_balanceBet = Number(resBal.bets);
+						_self.refreshBalance();
+						App.call('initGame', [_openkey, _addressBankroll], function(result){
+							_objGame = _self.getGame();
+							_self.createTreasure();
+							_self.showWndBet();
+						})
+					})					
+				} else {
+					_self.showError("disconnected");
+				}
 			 } else {
 				 _self.showError("disconnected");
 			 }
@@ -565,6 +574,7 @@ var ScrGame = function(){
 		}
 		
 		_bCloseChannel = true;
+		_itemTutorial.visible = false;
 		
 		if(App.logic){
 			_self.showWndWarning(getText("disconnecting"));
@@ -572,14 +582,18 @@ var ScrGame = function(){
 			
 			App.disconnect({}, function(res){
 				_wndWarning.visible = false;
-				_self.createWndInfo(getText("close_channel"));
-				
-				DCLib.Eth.getBalances(_openkey, function(res) {
-					_balanceEth = Number(res.eth);
-					_balanceBet = Number(res.bets);
-					_balanceSession = 0;
-					_self.refreshBalance();
-				})
+				_balanceSession = 0;
+				console.log('Game disconnect:', res);
+				if(res.channel.receipt){
+					DCLib.Eth.getBalances(_openkey, function(resBal) {
+						_balanceEth = Number(resBal.eth);
+						_balanceBet = Number(resBal.bets);
+						_self.refreshBalance();
+					})
+					_self.createWndInfo(getText("close_channel"));
+				} else {
+					_self.showError("disconnected");
+				}
 			})
 		}
 	}

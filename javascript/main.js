@@ -1,11 +1,11 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 1.0.0";
+var version = "v. 1.0.1";
 var dataAnima = [];
 var dataMovie = [];
 var arClips = [];
 var language;
-var addressContract = "0x";
+var addressContract;
 var urlEtherscan = "https://ropsten.etherscan.io/";
 var gameCode = "DC_FindTheEthereum";
 
