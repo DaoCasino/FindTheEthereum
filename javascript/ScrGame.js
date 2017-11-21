@@ -31,13 +31,13 @@ var ScrGame = function(){
 	// boolean
 	var _gameOver, _bWindow, _bCloseChannel;
 	// numbers
-	var _idTutor,
+	var _idTutor, _idBox,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
-	_timeCloseWnd, _deposit;
+	_timeCloseWnd, _depositPlayer, _depositBankroll;
 	// arrays
 	var _arBoxes;
 	// strings
-	var _openkey, _addressBankroll, _idChannel;
+	var _openkey, _addressBankroll, _idChannel, _signStateChannel;
 	
 	// INIT
 	_self.init = function(){
@@ -96,7 +96,8 @@ var ScrGame = function(){
 		_balanceBet = 0;
 		_balanceEth = 0;
 		_balanceSession = 0;
-		_timeCloseWnd = 0;		
+		_timeCloseWnd = 0;
+		_depositBankroll = 0;
 	}
 	
 	_self.createArrays = function(){
@@ -365,7 +366,7 @@ var ScrGame = function(){
 		DCLib.Eth.getBetBalance(_openkey, _self.getBetsBalance);
 		
 		_bWindow = true;
-		var str = getText("set_deposit").replace(new RegExp("SPL"), "\n");
+		var str = getText("set_depositPlayer").replace(new RegExp("SPL"), "\n");
 		_wndDeposit.show(str, function(value){
 					_self.startChannelGame(value);
 				}, _balanceBet)
@@ -429,7 +430,7 @@ var ScrGame = function(){
 			return;
 		}
 		if(_wndHistory == undefined){
-			_wndHistory = new WndHistory(_self, _deposit);
+			_wndHistory = new WndHistory(_self, _depositPlayer);
 			_wndHistory.x = _W/2;
 			_wndHistory.y = _H/2;
 			wnd_mc.addChild(_wndHistory);
@@ -540,20 +541,25 @@ var ScrGame = function(){
 				if(info.channel){
 					_idChannel = info.channel.channel_id;
 					addressContract = info.channel.contract_address;
+					_depositBankroll = DCLib.Utils.bet2dec(info.channel.bankroller_deposit);
 					if(info.channel.receipt){
 						transactionHash = info.channel.receipt.transactionHash;
 					}
 				}
 				_wndWarning.visible = false;
-				if(addressContract){
+				if(addressContract  || options_debug){
 					_balanceSession = deposit;
-					_deposit = deposit;
+					_depositPlayer = deposit;
+					if(addressContract){
+						_myContract = new DCLib.web3.eth.Contract(abiContract, addressContract);
+					}
 					
 					DCLib.Eth.getBalances(_openkey, function(resBal) {
 						_balanceEth = Number(resBal.eth);
 						_balanceBet = Number(resBal.bets);
 						_self.refreshBalance();
-						App.call('initGame', [_openkey, _addressBankroll], function(result){
+						
+						App.call('initGame', [_idChannel, _openkey, _addressBankroll, _depositBankroll], function(result){
 							_objGame = _self.getGame();
 							_self.createTreasure();
 							_self.showWndBet();
@@ -656,28 +662,43 @@ var ScrGame = function(){
 	}
 	
 	_self.closeGame = function() {
-		_gameOver = true;
-		_pirateSave.visible = false;
-		_pirateContinue.visible = false;
-		_bgDark.visible = false;
-		var result = {};
-		
 		App.call('closeGame', [], function(result){
 			 if(App.logic.getBalance() == result.balance){
 				 _objGame = result.objGame;
 				_balanceSession = result.balance;
 				if(options_debug){
-					_balanceSession = _deposit + App.logic.payChannel.getProfit();
+					_balanceSession = _depositPlayer + App.logic.payChannel.getProfit();
 				}
 				_self.refreshBalance();
 				_balanceGame = 0;
+				_self.closeGameUI();
 			 } else {
 				 _self.showError(getText("Conflict closeGame"));
 			 }
 		})
-		
+	}
+	
+	_self.closeGameUI = function() {
+		_gameOver = true;
+		_pirateSave.visible = false;
+		_pirateContinue.visible = false;
+		_bgDark.visible = false;
 		_btnStart.visible = true;
 		_itemBet.visible = false;
+		
+		_self.updateChannel();
+	}
+	
+	_self.updateChannel = function() {
+		var balancePlayer =  DCLib.Utils.bet4dec(App.logic.payChannel.getBalance());
+		var balanceBankroll =  DCLib.Utils.bet4dec(_depositBankroll - App.logic.payChannel.getProfit());
+		var session = App.logic.session();
+		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, session);
+		console.log("hashGame:", _idChannel, balancePlayer, balanceBankroll, session, hash);
+		
+		App.call('updateChannel', [hash], function(result){
+			_signStateChannel = result.signBankroll;
+		})
 	}
 	
 	_self.sendDispute = function() {
@@ -696,15 +717,54 @@ var ScrGame = function(){
 		if(App.logic.getGame().countWinStr > 0){
 			betGame = 0;
 		}
-		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]};
-		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
-		var signPlayer = DCLib.Account.sign(hash);
+		// var gameData = {type:'uint', value:[betGame, _idBox, App.logic.getGame().countWinStr]};
+		// var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
+		// var signPlayer = DCLib.Account.sign(hash);
 		
 		// TODO call function on the smart contract
 		// 1. updateChannel
 		// 2. updateGame
 		// 3. openDispute
+		
+		// infura.sendRequest("updateChannel", _openkey, _self.response);
+		
 	}
+	/*
+	_self.response = function(command, value, error) {
+		if(value == undefined || error){
+			if((command == "sendRaw" || command == "gameTxHash")){
+				if(error){
+					// OUT OF GAS - error client (wrong arguments from the client)
+					// invalid JUMP - throw contract
+					console.log("response:", error);
+					_self.showError(error.message);
+				} else {
+					_self.showError("ERROR_CONTRACT");
+				}
+			}
+			return false;
+		}
+		
+		if(command == "updateChannel" ||
+			command == "updateGame" ||
+			command == "openDispute"){
+			_self.responseTransaction(command, value);
+		}
+	}
+	
+	_self.responseTransaction = function(name, value) {
+		var args = [];
+		
+		if(name == "updateChannel"){
+			// bytes32 id, uint playerDeposit, uint bankrollDeposit, uint session, bytes sig
+			var id = _idChannel;
+			var playerDeposit = 0;
+			var bankrollDeposit = 0;
+			var session = 0;
+			var sig = 0;
+			args = [id, playerDeposit, bankrollDeposit, session, sig];
+		}
+	}*/
 	
 	// CLICK
 	_self.clickBox = function(box) {
@@ -712,6 +772,7 @@ var ScrGame = function(){
 			return;
 		}
 		_gameOver = true;
+		_idBox = box.id;
 		var result = {};
 		box.setSelected(true);
 		
@@ -728,7 +789,7 @@ var ScrGame = function(){
 			betGame = 0;
 		}
 		
-		var gameData = {type:'uint', value:[betGame, box.id, App.logic.getGame().countWinStr]};
+		var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, box.id]};
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.signHash(hash);
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
@@ -962,7 +1023,7 @@ var ScrGame = function(){
 		_objGame = result.objGame;
 		_balanceSession = result.balance;
 		if(options_debug){
-			_balanceSession = _deposit + App.logic.payChannel.getProfit()
+			_balanceSession = _depositPlayer + App.logic.payChannel.getProfit()
 		}
 		_self.refreshBalance();
 		_balanceGame = _objGame.bufferProfit;
@@ -1017,7 +1078,7 @@ var ScrGame = function(){
 		} else {
 			// Game Over
 			if(_objGame.result){
-				_self.closeGame();
+				_self.closeGameUI();
 			}
 			_self.showTutorial(4);
 		}

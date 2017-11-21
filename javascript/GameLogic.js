@@ -16,6 +16,8 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	const MAX_VALUE = 3;
 	
 	var _session = 0;
+	var _depositBankroll = 0;
+	var _idChannel = "";
 	var _addressBankroll = "";
 	var _addressPlayer = "";
 	var _history = [];
@@ -38,14 +40,17 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	/**
 	 * Set the game parameters.
 	 *
+	 * @param  {string} idChannel channel ID.
 	 * @param  {string} addressPlayer Player address.
 	 * @param  {string} addressBankroll Bankroll address.
 	 * @param  {number} balance Player tokens balance.
 	 * @return {boolean} true.
 	 */
-	_self.initGame = function(addressPlayer, addressBankroll){
+	_self.initGame = function(idChannel, addressPlayer, addressBankroll, depositBankroll){
+		_idChannel = idChannel;
 		_addressPlayer = addressPlayer;
 		_addressBankroll = addressBankroll;
+		_depositBankroll = depositBankroll;
 		
 		return true;
 	}
@@ -68,15 +73,13 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		var signBankroll = DCLib.Account.signHash(randomHash);
 		
 		if(!DCLib.checkHashSig(randomHash, signPlayer, _addressPlayer)){
-			return {
-				error: "invalid_signature_player"
-			}
+			return {error: "invalid_signature_player"};
 		}
 		
 		return {
 			randomHash: randomHash,
 			signBankroll: signBankroll
-		}
+		};
 	}
 	
 	/**
@@ -94,23 +97,19 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	 */
 	_self.clickBox = function(idChannel, session, round, seed, gameData, signBankroll){
 		var betGame = gameData.value[0];
-		var valPlayer = gameData.value[1];
-		var countWinStr = gameData.value[2];
+		var countWinStr = gameData.value[1];
+		var valPlayer = gameData.value[2];
 		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		
 		if(!DCLib.checkHashSig(randomHash, signBankroll, _addressBankroll)){
-			return {
-				error: "invalid_signature_bankroll"
-			}
+			return {error: "invalid_signature_bankroll"};
 		}
 		
 		if(countWinStr >= _arWinSt.length || 
 		countWinStr < 0 ||
 		valPlayer < MIN_VALUE ||
 		valPlayer > MAX_VALUE){
-			return {
-				error : "invalid_data"
-			}
+			return {error : "invalid_data"};
 		}
 		
 		// new game
@@ -170,7 +169,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 			signBankroll: signBankroll,
 			history		: _history,
 			timestamp   : new Date().getTime()
-		}
+		};
 	}
 	
 	/**
@@ -197,8 +196,24 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 			countWinStr : countWinStr,
 			history		: _history,
 			balance     : _self.payChannel.getBalance(),
-			timestamp   : new Date().getTime(),
+			timestamp   : new Date().getTime()
+		};
+	}
+	
+	_self.updateChannel = function(hashPlayer){
+		var balancePlayer = DCLib.Utils.bet4dec(_self.payChannel.getBalance());
+		var balanceBankroll =  DCLib.Utils.bet4dec(_depositBankroll - _self.payChannel.getProfit());
+		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, _session);
+		var signBankroll = DCLib.Account.signHash(hash);
+		
+		if(hashPlayer != hash){
+			return {error: "invalid_parameters"};
 		}
+		
+		return {
+			hash: hash,
+			signBankroll: signBankroll
+		};
 	}
 	
 	/**
