@@ -201,8 +201,8 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	}
 	
 	_self.updateChannel = function(hashPlayer){
-		var balancePlayer = DCLib.Utils.bet4dec(_self.payChannel.getBalance());
-		var balanceBankroll =  DCLib.Utils.bet4dec(_depositBankroll - _self.payChannel.getProfit());
+		var balancePlayer = DCLib.Utils.bet2dec(_self.payChannel.getBalance());
+		var balanceBankroll =  DCLib.Utils.bet2dec(_depositBankroll - _self.payChannel.getProfit());
 		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, _session);
 		var signBankroll = DCLib.Account.signHash(hash);
 		

@@ -4,7 +4,7 @@ function Infura(openkey) {
 	var _self = this;
 	var _urlInfura = "https://ropsten.infura.io/JCnK5ifEPH9qcQkX0Ahl";
 	
-	/*_self.sendRequest = function(name, params, callback){
+	_self.sendRequest = function(name, params, callback){
 		if(openkey){
 			var method = name;
 			var arParams = [params, "latest"]; // latest, pending
@@ -44,7 +44,7 @@ function Infura(openkey) {
 				}
 			})
 		}
-	}*/
+	}
 	
 	return _self;
 }
