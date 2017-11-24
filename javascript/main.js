@@ -5,7 +5,7 @@ var dataAnima = [];
 var dataMovie = [];
 var arClips = [];
 var language;
-var addressContract;
+var addressContract; // 0x27859b54e9818e6f3f38ca3a5772749aa72fc5b2
 var urlEtherscan = "https://ropsten.etherscan.io/";
 
 var currentScreen, scrContainer;
@@ -66,7 +66,7 @@ function loadLib() {
 		window.App = new DCLib.DApp({
 			code : 'DC_FindTheEthereum',
 			contract: {
-				contract_address: '0x82ddbd542c69377647ba8aa854e5fdb88906d81e',
+				contract_address: '0xd3e6544e3c980cd265c349c1750e450cb30e0988',
 				contract_abi: abiContract
 			}
 		})

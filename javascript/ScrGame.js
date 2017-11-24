@@ -712,19 +712,14 @@ var ScrGame = function(){
 		_bgDark.visible = false;
 		_btnStart.visible = true;
 		_itemBet.visible = false;
-		
-		_self.updateChannel();
+
+		App.updateState({session: 1}, result => {
+			_signStateChannel = result.signed_bankroller;
+		})
 	}
 	
 	_self.updateChannel = function() {
-		var balancePlayer =  DCLib.Utils.bet2dec(App.logic.payChannel.getBalance());
-		var balanceBankroll =  DCLib.Utils.bet2dec(_depositBankroll - App.logic.payChannel.getProfit());
-		var session = App.logic.session();
-		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, session);
-		
-		App.call('updateChannel', [hash], function(result){
-			_signStateChannel = result.signBankroll;
-		})
+		App.updateChannel({session: App.logic.session(), signed_args: _signStateChannel})
 	}
 	
 	_self.sendDispute = function() {
