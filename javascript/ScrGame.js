@@ -591,7 +591,29 @@ var ScrGame = function(){
 			_self.showWndWarning(getText("disconnecting"));
 			_btnStart.visible = false;
 			
-			App.disconnect({}, function(res){
+			// var Obj = {
+			// 	channel_id: _idChannel,
+			// 	player_balance: DCLib.Utils.bet2dec(App.logic.payChannel.getBalance()),
+			// 	bankroller_balance: DCLib.Utils.bet2dec(App.logic.payChannel.getBankrollBalance()),
+			// 	session: App.logic.session(),
+			// 	bool: true,
+			// }
+
+			// var signed_args = DCLib.Account.signHash( 
+			// 	DCLib.Utils.sha3(
+			// 		Obj.channel_id,
+			// 		Obj.player_balance,
+			// 		Obj.bankroller_balance,
+			// 		Obj.session,
+			// 		Obj.bool
+			// 	))
+
+			// Obj['signed_args'] = signed_args
+
+
+			var session = App.logic.session()
+
+			App.disconnect({session:session}, function(res){
 				_wndWarning.visible = false;
 				_balanceSession = 0;
 				console.log('Game disconnect:', res);
@@ -734,7 +756,7 @@ var ScrGame = function(){
 	}
 	
 	// RESPONSE
-	_self.responseTransaction = function(name, value) {
+	/*_self.responseTransaction = function(name, value) {
 		var args = [];
 		var balancePlayer =  DCLib.Utils.bet2dec(App.logic.payChannel.getBalance());
 		var balanceBankroll =  DCLib.Utils.bet2dec(_depositBankroll - App.logic.payChannel.getProfit());
@@ -772,7 +794,7 @@ var ScrGame = function(){
 				break;
 		}
 	}
-	
+	*/
 	// CLICK
 	_self.clickBox = function(box) {
 		if(_gameOver){
