@@ -93,7 +93,7 @@ var WndDeposit = function(prnt, style){
 		_tfDesc.setText(str);
 		_maxBet = maxBet;
 		if(_curBet == 0){
-			_curBet = (_maxBet/10).toFixed(2);
+			_curBet = Number((_maxBet/10).toFixed(2)) || 0.01;
 		}
 		var posX = _stX + (_curBet/_maxBet)*_endX*2;
 		_headScroll.x = posX;

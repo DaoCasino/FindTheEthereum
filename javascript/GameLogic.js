@@ -100,7 +100,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		var countWinStr = gameData.value[1];
 		var valPlayer = gameData.value[2];
 		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
-		
+
 		if(!DCLib.checkHashSig(randomHash, signBankroll, _addressBankroll)){
 			return {error: "invalid_signature_bankroll"};
 		}
@@ -162,7 +162,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		
 		objHistory.balance = _self.payChannel.getBalance();
 		objHistory.profit =_objGame.bufferProfit - _objGame.betGame;
-		
+		console.log("clickBox:", objHistory.balance, objHistory.profit);
 		return {
 			objGame 	: _objGame,
 			balance     : _self.payChannel.getBalance(),
@@ -197,25 +197,6 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 			history		: _history,
 			balance     : _self.payChannel.getBalance(),
 			timestamp   : new Date().getTime()
-		};
-	}
-		
-	_self.updateChannel = function(hashPlayer){
-		var balancePlayer = DCLib.Utils.bet2dec(_self.payChannel.getBalance());
-		var balanceBankroll =  DCLib.Utils.bet2dec(_self.payChannel.getBankrollBalance());
-
-		console.log('Update channel', balancePlayer, balanceBankroll)
-
-		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, _session);
-		var signBankroll = DCLib.Account.signHash(hash);
-		
-		if(hashPlayer != hash){
-			return {error: "invalid_parameters"};
-		}
-		
-		return {
-			hash: hash,
-			signBankroll: signBankroll
 		};
 	}
 	

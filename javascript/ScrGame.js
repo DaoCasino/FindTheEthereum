@@ -25,7 +25,7 @@ var ScrGame = function(){
 	// layers
 	var back_mc, game_mc, face_mc, wnd_mc, warning_mc, tutor_mc, tooltip_mc;
 	// buttons
-	var _btnStart, _btnClose, _btnStart, _pirateContinue, _pirateSave;
+	var _btnStart, _btnClose, _btnStart, _pirateContinue, _pirateSave, _btnCashout, _btnSave;
 	// windows
 	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin, _wndHistory;
 	// boolean
@@ -33,11 +33,11 @@ var ScrGame = function(){
 	// numbers
 	var _idTutor, _idBox,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
-	_timeCloseWnd, _depositPlayer, _depositBankroll;
+	_timeCloseWnd, _depositPlayer, _depositBankroll, _signSession;
 	// arrays
 	var _arBoxes;
 	// strings
-	var _openkey, _addressBankroll, _idChannel, _signStateChannel;
+	var _openkey, _addressBankroll, _idChannel, _signStateChannel, _signPlayer, _signBankroll;
 	
 	// INIT
 	_self.init = function(){
@@ -98,6 +98,7 @@ var ScrGame = function(){
 		_balanceSession = 0;
 		_timeCloseWnd = 0;
 		_depositBankroll = 0;
+		_signSession = 0;
 	}
 	
 	_self.createArrays = function(){
@@ -252,16 +253,21 @@ var ScrGame = function(){
 		btnContract.overSc = true;
 		face_mc.addChild(btnContract);
 		_self.arButtons.push(btnContract);
+		// _btnSave = addButton("btnSave", posX, posY - 3*offsetY);
+		// _btnSave.tooltip = "save_data";
+		// _btnSave.overSc = true;
+		// face_mc.addChild(_btnSave);
+		// _self.arButtons.push(_btnSave);
 		var btnHistory = addButton("btnHistory", posX, posY - 3*offsetY);
 		btnHistory.tooltip = "show_history";
 		btnHistory.overSc = true;
 		face_mc.addChild(btnHistory);
 		_self.arButtons.push(btnHistory);
-		var btnCashout = addButton("btnCashout", posX, posY - 4*offsetY);
-		btnCashout.tooltip = "cashout";
-		btnCashout.overSc = true;
-		face_mc.addChild(btnCashout);
-		_self.arButtons.push(btnCashout);
+		_btnCashout = addButton("btnCashout", posX, posY - 4*offsetY);
+		_btnCashout.tooltip = "cashout";
+		_btnCashout.overSc = true;
+		face_mc.addChild(_btnCashout);
+		_self.arButtons.push(_btnCashout);
 		var btnFacebook = addButton("btnFacebook", 1870, 48);
 		btnFacebook.overSc = true;
 		face_mc.addChild(btnFacebook);
@@ -270,6 +276,9 @@ var ScrGame = function(){
 		btnTwitter.overSc = true;
 		face_mc.addChild(btnTwitter);
 		_self.arButtons.push(btnTwitter);
+		
+		// _btnSave.setAplhaDisabled(true);
+		_btnCashout.setAplhaDisabled(true);
 		
 		// Tooltip
 		_tooltip = new ItemTooltip();
@@ -366,8 +375,9 @@ var ScrGame = function(){
 		DCLib.Eth.getBetBalance(_openkey, _self.getBetsBalance);
 		
 		_bWindow = true;
-		var str = getText("set_depositPlayer").replace(new RegExp("SPL"), "\n");
+		var str = getText("set_deposit").replace(new RegExp("SPL"), "\n");
 		_wndDeposit.show(str, function(value){
+			console.log('VALUE', value)
 					_self.startChannelGame(value);
 				}, _balanceBet)
 		_timeCloseWnd = 0;
@@ -525,7 +535,7 @@ var ScrGame = function(){
 		}
 		
 		_bWindow = false;
-		
+		console.log('DEPOSIT', deposit)
 		var betGame = 0;
 		var countWinStr = 0;
 		var valPlayer = 0;
@@ -586,31 +596,11 @@ var ScrGame = function(){
 		
 		_bCloseChannel = true;
 		_itemTutorial.visible = false;
+		_btnCashout.setAplhaDisabled(true);
 		
 		if(App.logic){
 			_self.showWndWarning(getText("disconnecting"));
 			_btnStart.visible = false;
-			
-			// var Obj = {
-			// 	channel_id: _idChannel,
-			// 	player_balance: DCLib.Utils.bet2dec(App.logic.payChannel.getBalance()),
-			// 	bankroller_balance: DCLib.Utils.bet2dec(App.logic.payChannel.getBankrollBalance()),
-			// 	session: App.logic.session(),
-			// 	bool: true,
-			// }
-
-			// var signed_args = DCLib.Account.signHash( 
-			// 	DCLib.Utils.sha3(
-			// 		Obj.channel_id,
-			// 		Obj.player_balance,
-			// 		Obj.bankroller_balance,
-			// 		Obj.session,
-			// 		Obj.bool
-			// 	))
-
-			// Obj['signed_args'] = signed_args
-
-
 			var session = App.logic.session()
 
 			App.disconnect({session:session}, function(res){
@@ -675,6 +665,7 @@ var ScrGame = function(){
 			_self.refreshBoxes();
 			_gameOver = false;
 			_btnStart.visible = false;
+			_btnCashout.setAplhaDisabled(true);
 			_self.showWndBet();
 		}
 	}
@@ -712,14 +703,29 @@ var ScrGame = function(){
 		_bgDark.visible = false;
 		_btnStart.visible = true;
 		_itemBet.visible = false;
-
-		App.updateState({session: 1}, result => {
-			_signStateChannel = result.signed_bankroller;
-		})
+		_bCloseChannel = false;
+		_btnCashout.setAplhaDisabled(false);
+		if (!options_debug) { 
+			App.updateState({session: 1}, result => {
+				_signStateChannel = result.signed_bankroller;
+			})
+		}
 	}
 	
 	_self.updateChannel = function() {
-		App.updateChannel({session: App.logic.session(), signed_args: _signStateChannel})
+		if (options_debug) return
+		// App.updateChannel({
+		// 	session: App.logic.session(), 
+		// 	signed_args: _signStateChannel}, result => {
+		// 	App.updateGame({
+		// 		session      : _signSession,
+		// 		round        : App.logic.getGame().countWinStr + 1,
+		// 		seed         : DCLib.Utils.makeSeed(),
+		// 		game_data    : {type:'uint', value:[_betGame, App.logic.getGame().countWinStr, _idBox]},
+		// 		sig_player   : _signPlayer,
+		// 		sig_bankroll : _signBankroll
+		// 	})
+		// })
 	}
 	
 	_self.sendDispute = function() {
@@ -750,46 +756,6 @@ var ScrGame = function(){
 		// infura.sendRequest("updateChannel", _openkey, _self.response);
 	}
 	
-	// RESPONSE
-	/*_self.responseTransaction = function(name, value) {
-		var args = [];
-		var balancePlayer =  DCLib.Utils.bet2dec(App.logic.payChannel.getBalance());
-		var balanceBankroll =  DCLib.Utils.bet2dec(_depositBankroll - App.logic.payChannel.getProfit());
-		var session = App.logic.session();
-		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, session);
-		
-		if(name == "updateChannel"){
-			args = [_idChannel, balancePlayer, balanceBankroll, session, _signStateChannel];
-		}
-	}
-	
-	_self.response = function(command, value, error) {
-		if(value == undefined || error){
-			if((command == "sendRaw")){
-				if(error){
-					// OUT OF GAS - error client (wrong arguments from the client)
-					// invalid JUMP - throw contract
-					console.log("response:", error);
-					_self.showError(error.message);
-				} else {
-					_self.showError("ERROR_CONTRACT");
-				}
-			}
-			return false;
-		}
-		
-		switch(command){
-			case "updateChannel":
-			case "updateGame":
-			case "openDispute":
-				_self.responseTransaction(command, value);
-				break;
-			case "sendRaw":
-				
-				break;
-		}
-	}
-	*/
 	// CLICK
 	_self.clickBox = function(box) {
 		if(_gameOver){
@@ -816,8 +782,9 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, box.id]};
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.signHash(hash);
+
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
-		
+		_signPlayer = signPlayer
 		App.call('signBankroll', 
 			[idChannel, session, round, seed, gameData, signPlayer], 
 			function(result){
@@ -826,7 +793,9 @@ var ScrGame = function(){
 					console.log(result.error);
 					return;
 				}
-				
+
+				_signBankroll = result.signBankroll
+
 				App.call('clickBox', 
 					[idChannel, session, round, seed, gameData, result.signBankroll], 
 					function(result){
@@ -838,7 +807,9 @@ var ScrGame = function(){
 							}
 							return;
 						}
-						
+
+						_sigSession   = App.logic.session()
+
 						if(!DCLib.checkHashSig(hash, result.signBankroll, _addressBankroll)){
 							_self.showError(strError, _self.sendDispute);
 							return;
@@ -940,6 +911,8 @@ var ScrGame = function(){
 			_self.clickContract();
 		} else if(item_mc.name == "btnCashout"){
 			_self.clickCashout();
+		} else if(item_mc.name == "btnSave"){
+			_self.updateChannel();
 		} else if(item_mc.name == "btnAddress"){
 			var url = urlEtherscan + "address/" + _openkey;
 			window.open(url, "_blank");
@@ -988,7 +961,7 @@ var ScrGame = function(){
 					}
 				}
 				
-				if(item_mc._selected && item_mc.visible){
+				if(item_mc.visible){
 					if(_tooltip && item_mc.tooltip){
 						_tooltip.show(getText(item_mc.tooltip));
 						_tooltip.x = item_mc.x - (item_mc.w/2 + _tooltip.w/2);

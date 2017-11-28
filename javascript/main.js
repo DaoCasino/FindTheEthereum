@@ -1,6 +1,6 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 1.0.1";
+var version = "v. 1.0.2";
 var dataAnima = [];
 var dataMovie = [];
 var arClips = [];
@@ -540,6 +540,15 @@ function addButton(name, _x, _y, _scGr, _scaleX, _scaleY) {
 			obj.img.filters = [colorFilter];
 		} else {
 			obj.img.filters = [];
+		}
+	};
+	
+	obj.setAplhaDisabled = function(value){
+		obj._disabled = value;
+		if(value){
+			obj.alpha = 0.5;
+		} else {
+			obj.alpha = 1;
 		}
 	};
 	

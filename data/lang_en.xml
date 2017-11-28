@@ -24,6 +24,7 @@
 	please_wait="Please wait."
 	profit="Profit"
 	save="Save"
+	save_data="Save data to the blockchain"
 	save_prize="Save the profit and finish the game."
 	set_bet="Select a bet SPL for the current game."
 	set_deposit="Select the amount of BET SPL you are ready to play."
