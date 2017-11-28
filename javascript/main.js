@@ -1,6 +1,6 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 1.0.2";
+var version = "v. 1.0.2 (1)";
 var dataAnima = [];
 var dataMovie = [];
 var arClips = [];

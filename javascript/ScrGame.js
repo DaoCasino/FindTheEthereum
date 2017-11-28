@@ -541,7 +541,7 @@ var ScrGame = function(){
 		var valPlayer = 0;
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
-		var objConnect = {bankroller : "auto", paychannel:{deposit:deposit}, gamedata:gameData};
+		var objConnect = {bankroller : "0x2498cd0327d089c6b94d385eedf47cea0d57031f", paychannel:{deposit:deposit}, gamedata:gameData};
 		if(options_debug){
 			objConnect = {bankroller : "auto"};
 			_idChannel = DCLib.Utils.makeSeed();
