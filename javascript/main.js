@@ -84,7 +84,7 @@ function loadLib() {
 	})
 }
 
-function updateOnlineStatus(event) {
+function updateOnlineStatus(e) {
 	var condition = navigator.onLine ? "online" : "offline";
 	if(condition == "offline"){
 		// TODO disconnect

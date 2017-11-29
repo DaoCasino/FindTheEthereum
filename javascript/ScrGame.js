@@ -558,7 +558,7 @@ var ScrGame = function(){
 		
 		// auto, 0x5e9816aa4dcb6b96d229128d3046e9768ef41cd7, 0x2498cd0327d089c6b94d385eedf47cea0d57031f
 		var objConnect = {
-			bankroller : "0x2498cd0327d089c6b94d385eedf47cea0d57031f", 
+			bankroller : "auto", 
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
@@ -737,6 +737,9 @@ var ScrGame = function(){
 		if (!options_debug) { 
 			App.updateState({session: 1}, result => {
 				_signStateChannel = result.signed_bankroller;
+				if(_balanceSession == 0){
+					_self.closeGameChannel();
+				}
 			})
 		}
 	}
