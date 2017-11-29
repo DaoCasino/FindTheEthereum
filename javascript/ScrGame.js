@@ -379,7 +379,6 @@ var ScrGame = function(){
 		_bWindow = true;
 		var str = getText("set_deposit").replace(new RegExp("SPL"), "\n");
 		_wndDeposit.show(str, function(value){
-			console.log('VALUE', value)
 					_self.startChannelGame(value);
 				}, _balanceBet)
 		_timeCloseWnd = 0;
@@ -537,13 +536,17 @@ var ScrGame = function(){
 		}
 		
 		_bWindow = false;
-		console.log('DEPOSIT', deposit)
 		var betGame = 0;
 		var countWinStr = 0;
 		var valPlayer = 0;
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
-		var objConnect = {bankroller : "0x2498cd0327d089c6b94d385eedf47cea0d57031f", paychannel:{deposit:deposit}, gamedata:gameData};
+		// auto, 0x5e9816aa4dcb6b96d229128d3046e9768ef41cd7, 0x2498cd0327d089c6b94d385eedf47cea0d57031f
+		var objConnect = {
+			bankroller : "0x2498cd0327d089c6b94d385eedf47cea0d57031f", 
+			paychannel:{deposit:deposit}, 
+			gamedata:gameData
+		};
 		if(options_debug){
 			objConnect = {bankroller : "auto"};
 			_idChannel = DCLib.Utils.makeSeed();
@@ -570,7 +573,7 @@ var ScrGame = function(){
 					if(addressContract){
 						_contract = new DCLib.web3.eth.Contract(abiContract, addressContract);
 					}
-					
+					console.log("addressContract:", addressContract)
 					DCLib.Eth.getBalances(_openkey, function(resBal) {
 						_balanceEth = Number(resBal.eth);
 						_balanceBet = Number(resBal.bets);
@@ -581,6 +584,9 @@ var ScrGame = function(){
 							for (var i = 0; i < _self.arButtons.length; i++) {
 								var item_mc = _self.arButtons[i];
 								item_mc._selected = false;
+							}
+							if(_tooltip){
+								_tooltip.visible = false;
 							}
 							_objGame = _self.getGame();
 							_self.closeWindow();
@@ -871,14 +877,15 @@ var ScrGame = function(){
 	_self.clickFB = function() {
 		if (typeof(FB) != 'undefined' && FB != null ) {
 			var urlGame = 'http://platform.dao.casino/';
-			var urlImg = "http://platform.dao.casino/games/blackjack/game/images/share/bgMenu.jpg";
+			// var urlImg = "http://platform.dao.casino/games/FindTheEthereum/images/bg/shareFB.jpg";
+			var urlImg = "/images/bg/shareFB.jpg";
 			
 			FB.ui({
 			  method: 'feed',
 			  picture: urlImg,
 			  link: urlGame,
 			  caption: 'PLAY',
-			  description: 'Play Treasure Island for BET',
+			  description: 'Play "Find The Ethereum" for BET',
 			}, function(response){});
 		} else {
 			console.log("FB is not defined");
@@ -928,7 +935,7 @@ var ScrGame = function(){
 			_self.removeAllListener();
 			// var url = "https://platform.dao.casino/";
 			var url = "/";
-			window.open(url, "_self");
+			window.open(url, "_blank");
 		} else if(item_mc.name == "btnFacebook"){
 			_self.clickFB();
 		} else if(item_mc.name == "btnTwitter"){
@@ -953,10 +960,14 @@ var ScrGame = function(){
 				if(item_mc._selected == false && !item_mc._disabled && item_mc.visible){
 					item_mc._selected = true;
 					if(item_mc.over){
-						item_mc.over.visible = true;
 						if(item_mc.name == "ItemBox"){
+							if(_gameOver){
+								item_mc._selected = false;
+								break;
+							}
 							item_mc.main.visible = false;
 						}
+						item_mc.over.visible = true;
 					} else if(item_mc.overSc){
 						item_mc.scale.x = 1.1*item_mc.sc;
 						item_mc.scale.y = 1.1*item_mc.sc;

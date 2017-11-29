@@ -125,14 +125,15 @@ var ScrMenu = function(){
 	_self.clickFB = function() {
 		if (typeof(FB) != 'undefined' && FB != null ) {
 			var urlGame = 'http://platform.dao.casino/';
-			var urlImg = "http://platform.dao.casino/games/blackjack/game/images/share/bgMenu.jpg";
+			// var urlImg = "http://platform.dao.casino/games/FindTheEthereum/images/bg/shareFB.jpg";
+			var urlImg = "/images/bg/shareFB.jpg";
 			
 			FB.ui({
 			  method: 'feed',
 			  picture: urlImg,
 			  link: urlGame,
 			  caption: 'PLAY',
-			  description: 'Play Treasure Island for BET',
+			  description: 'Play "Find The Ethereum" for BET',
 			}, function(response){});
 		} else {
 			console.log("FB is not defined");

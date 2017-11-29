@@ -38,23 +38,6 @@
 		<!--CSS style import-->
 		<link rel="stylesheet" href="css/style.css">
 		
-		<!-- Facebook Pixel Code -->
-		<script>
-			!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-			n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-			n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-			t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-			document,'script','https://connect.facebook.net/en_US/fbevents.js');
-			fbq('init', '1030004810417034'); // Insert your pixel ID here.
-			fbq('track', 'PageView');
-		</script>
-		<noscript>
-			<img height="1" width="1" style="display:none"
-			src="https://www.facebook.com/tr?id=1030004810417034&ev=PageView&noscript=1"
-			/>
-		</noscript>
-		<!-- DO NOT MODIFY -->
-		<!-- End Facebook Pixel Code -->
 		<script>window.twttr = (function(d, s, id) {
 		  var js, fjs = d.getElementsByTagName(s)[0],
 			t = window.twttr || {};
@@ -105,6 +88,24 @@
 		<script src="javascript/WndWin.js"></script>
 	</head>
 	<body>
-		
+		<!-- Facebook Pixel Code -->
+		<script>
+		  window.fbAsyncInit = function() {
+			FB.init({
+			  appId            : '1517661781636462',
+			  autoLogAppEvents : true,
+			  xfbml            : true,
+			  version          : 'v2.11'
+			});
+		  };
+
+		  (function(d, s, id){
+			 var js, fjs = d.getElementsByTagName(s)[0];
+			 if (d.getElementById(id)) {return;}
+			 js = d.createElement(s); js.id = id;
+			 js.src = "https://connect.facebook.net/en_US/sdk.js";
+			 fjs.parentNode.insertBefore(js, fjs);
+		   }(document, 'script', 'facebook-jssdk'));
+		</script>
 	</body>
 </html>

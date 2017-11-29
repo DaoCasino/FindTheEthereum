@@ -1,6 +1,6 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 1.0.3";
+var version = "v. 1.0.4";
 var dataAnima = [];
 var dataMovie = [];
 var arClips = [];
@@ -39,6 +39,8 @@ function init() {
 	colorFilter.desaturate();
 	
 	window.addEventListener("resize", onResize, false);
+	window.addEventListener("online", updateOnlineStatus);
+	window.addEventListener("offline", updateOnlineStatus);
 	
 	startTime = getTimer();
 	onResize();
@@ -72,7 +74,21 @@ function loadLib() {
 		})
 		
 		init();
+		
+		var loaded = sessionStorage.getItem('loaded');
+		if(loaded) {
+			reloadedPage();
+		} else {
+			sessionStorage.setItem('loaded', true);
+		}
 	})
+}
+
+function updateOnlineStatus(event) {
+	var condition = navigator.onLine ? "online" : "offline";
+	if(condition == "offline"){
+		// TODO disconnect
+	}
 }
 
 function createScreenLoader(){
@@ -728,5 +744,14 @@ function hideGame() {
 
 visibly.onVisible(visGame);
 visibly.onHidden(hideGame);
+
+function reloadedPage(){
+	if(sessionStorage.getItem('loaded')){
+		if(App.logic && sprites_loaded){
+			// TODO disconnect
+		}
+	}
+}
+
 
 document.addEventListener('DOMContentLoaded', loadLib);
