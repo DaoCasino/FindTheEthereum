@@ -1,11 +1,10 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 1.0.2 (1)";
 var dataAnima = [];
 var dataMovie = [];
 var arClips = [];
 var language;
-var addressContract; // 0x27859b54e9818e6f3f38ca3a5772749aa72fc5b2
+var addressContract;
 var urlEtherscan = "https://ropsten.etherscan.io/";
 
 var currentScreen, scrContainer;

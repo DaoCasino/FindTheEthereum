@@ -25,7 +25,8 @@ var ScrGame = function(){
 	// layers
 	var back_mc, game_mc, face_mc, wnd_mc, warning_mc, tutor_mc, tooltip_mc;
 	// buttons
-	var _btnStart, _btnClose, _btnStart, _pirateContinue, _pirateSave, _btnCashout, _btnSave;
+	var _btnStart, _btnClose, _btnStart, _pirateContinue, _pirateSave, 
+	_btnCashout, _btnSave, _btnContract;
 	// windows
 	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin, _wndHistory;
 	// boolean
@@ -248,11 +249,11 @@ var ScrGame = function(){
 		btnFullscreen.overSc = true;
 		face_mc.addChild(btnFullscreen);
 		_self.arButtons.push(btnFullscreen);
-		var btnContract = addButton("btnContract", posX, posY - 2*offsetY);
-		btnContract.tooltip = "show_contract";
-		btnContract.overSc = true;
-		face_mc.addChild(btnContract);
-		_self.arButtons.push(btnContract);
+		_btnContract = addButton("btnContract", posX, posY - 2*offsetY);
+		_btnContract.tooltip = "show_contract";
+		_btnContract.overSc = true;
+		face_mc.addChild(_btnContract);
+		_self.arButtons.push(_btnContract);
 		// _btnSave = addButton("btnSave", posX, posY - 3*offsetY);
 		// _btnSave.tooltip = "save_data";
 		// _btnSave.overSc = true;
@@ -279,6 +280,7 @@ var ScrGame = function(){
 		
 		// _btnSave.setAplhaDisabled(true);
 		_btnCashout.setAplhaDisabled(true);
+		_btnContract.setAplhaDisabled(true);
 		
 		// Tooltip
 		_tooltip = new ItemTooltip();
@@ -350,14 +352,14 @@ var ScrGame = function(){
 	
 	// CLOSE
 	_self.closeWindow = function(wnd) {
-		_curWindow = wnd;
-		// if(options_debug){
+		if(wnd){
+			_curWindow = wnd;
+		}
+		if(_curWindow){
 			_curWindow.visible = false;
 			_curWindow = undefined;
 			_bWindow = false;
-		// } else {
-			// _timeCloseWnd = 100;
-		// }
+		}
 	}
 	
 	// SHOW
@@ -575,7 +577,13 @@ var ScrGame = function(){
 						_self.refreshBalance();
 						
 						App.call('initGame', [_idChannel, _openkey, _addressBankroll, _depositBankroll], function(result){
+							_btnContract.setAplhaDisabled(false);
+							for (var i = 0; i < _self.arButtons.length; i++) {
+								var item_mc = _self.arButtons[i];
+								item_mc._selected = false;
+							}
 							_objGame = _self.getGame();
+							_self.closeWindow();
 							_self.createTreasure();
 							_self.showWndBet();
 						})

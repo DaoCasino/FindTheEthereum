@@ -162,7 +162,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		
 		objHistory.balance = _self.payChannel.getBalance();
 		objHistory.profit =_objGame.bufferProfit - _objGame.betGame;
-		console.log("clickBox:", objHistory.balance, objHistory.profit);
+		
 		return {
 			objGame 	: _objGame,
 			balance     : _self.payChannel.getBalance(),

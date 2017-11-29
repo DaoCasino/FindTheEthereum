@@ -198,7 +198,7 @@ var WndHistory = function(prnt, deposit){
 		var mouseY = evt.data.global.y - _self.y;
 		_self.scrollHead(mouseY);
 	}
-
+	
 	_self.scrollHead = function(mouseY){
 		var posY = Math.max(mouseY, _stY);
 		posY = Math.min(posY, _endY);
@@ -206,7 +206,7 @@ var WndHistory = function(prnt, deposit){
 		
 		if(_tfNum.height > _hMask){
 			var difH = _tfNum.height - _hMask;
-			var sc = (posY + Math.abs(_stY))/410;
+			var sc = (posY + Math.abs(_stY))/340;
 			var textY = -130 - difH*sc;
 			_tfNum.y = textY;
 			_tfBet.y = textY;
