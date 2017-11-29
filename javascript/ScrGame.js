@@ -319,6 +319,9 @@ var ScrGame = function(){
 		}
 		
 		_bWindow = true;
+		if(_tooltip){
+			_tooltip.visible = false;
+		}
 		
 		_wndInfo.show(str, callback, addStr)
 		_wndInfo.visible = true;
@@ -375,6 +378,9 @@ var ScrGame = function(){
 			wnd_mc.addChild(_wndDeposit);
 		}
 		DCLib.Eth.getBetBalance(_openkey, _self.getBetsBalance);
+		if(_tooltip){
+			_tooltip.visible = false;
+		}
 		
 		_bWindow = true;
 		var str = getText("set_deposit").replace(new RegExp("SPL"), "\n");
@@ -402,6 +408,9 @@ var ScrGame = function(){
 		if(_idTutor == 1){
 			_self.showTutorial(2);
 		}
+		if(_tooltip){
+			_tooltip.visible = false;
+		}
 		
 		_bWindow = true;
 		var str = getText("set_bet").replace(new RegExp("SPL"), "\n");
@@ -427,6 +436,9 @@ var ScrGame = function(){
 		if(_objGame){
 			str = "+" + (_objGame.bufferProfit);
 		}
+		if(_tooltip){
+			_tooltip.visible = false;
+		}
 		
 		_itemTutorial.visible = false;
 		_bWindow = true;
@@ -445,6 +457,9 @@ var ScrGame = function(){
 			_wndHistory.x = _W/2;
 			_wndHistory.y = _H/2;
 			wnd_mc.addChild(_wndHistory);
+		}
+		if(_tooltip){
+			_tooltip.visible = false;
 		}
 		
 		_bWindow = true;
@@ -573,7 +588,7 @@ var ScrGame = function(){
 					if(addressContract){
 						_contract = new DCLib.web3.eth.Contract(abiContract, addressContract);
 					}
-					console.log("addressContract:", addressContract)
+					
 					DCLib.Eth.getBalances(_openkey, function(resBal) {
 						_balanceEth = Number(resBal.eth);
 						_balanceBet = Number(resBal.bets);
@@ -877,8 +892,7 @@ var ScrGame = function(){
 	_self.clickFB = function() {
 		if (typeof(FB) != 'undefined' && FB != null ) {
 			var urlGame = 'http://platform.dao.casino/';
-			// var urlImg = "http://platform.dao.casino/games/FindTheEthereum/images/bg/shareFB.jpg";
-			var urlImg = "/images/bg/shareFB.jpg";
+			var urlImg = "http://platform.dao.casino/games/FindTheEthereum/images/bg/shareFB.jpg";
 			
 			FB.ui({
 			  method: 'feed',
@@ -932,7 +946,6 @@ var ScrGame = function(){
 			var url = urlEtherscan + "address/" + _openkey;
 			window.open(url, "_blank");
 		} else if(item_mc.name == "btnDao"){
-			_self.removeAllListener();
 			// var url = "https://platform.dao.casino/";
 			var url = "/";
 			window.open(url, "_blank");

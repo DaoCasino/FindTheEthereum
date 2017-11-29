@@ -125,8 +125,7 @@ var ScrMenu = function(){
 	_self.clickFB = function() {
 		if (typeof(FB) != 'undefined' && FB != null ) {
 			var urlGame = 'http://platform.dao.casino/';
-			// var urlImg = "http://platform.dao.casino/games/FindTheEthereum/images/bg/shareFB.jpg";
-			var urlImg = "/images/bg/shareFB.jpg";
+			var urlImg = "http://platform.dao.casino/games/FindTheEthereum/images/bg/shareFB.jpg";
 			
 			FB.ui({
 			  method: 'feed',

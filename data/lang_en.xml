@@ -43,7 +43,7 @@
 	invalid_data="You sent invalid data."
 	invalid_signature_bankroll="Bankroll did not sign the current event. We sent the dispute to smart contract ADR."
 	
-	tutor_1="Hello! Choose your deposit and click OK."
+	tutor_1="Hello! Choose your deposit and click ACCEPT."
 	tutor_2="Now select a bet for one game."
 	tutor_3="Good! Find the ethereum!"
 	tutor_4="It is a pity that you lost, but you can play a new game."
