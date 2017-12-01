@@ -30,7 +30,7 @@ var ScrGame = function(){
 	// windows
 	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin, _wndHistory;
 	// boolean
-	var _gameOver, _bWindow, _bCloseChannel;
+	var _gameOver, _bWindow, _bCloseChannel, _bOpenChannel;
 	// numbers
 	var _idTutor, _idBox,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
@@ -38,7 +38,7 @@ var ScrGame = function(){
 	// arrays
 	var _arBoxes;
 	// strings
-	var _openkey, _addressBankroll, _idChannel, _signStateChannel, _signPlayer, _signBankroll;
+	var _openkey, _addressBankroll, _idChannel, _signStateChannel, _signPlayer, _signBankroll, _idRoom;
 	
 	// INIT
 	_self.init = function(){
@@ -61,10 +61,60 @@ var ScrGame = function(){
 		_self.createNumbers();
 		_self.createArrays();
 		_self.createStrings();
+		_self.loadGame();
 		_self.createGui();
 		_self.createBtn();
 		_self.refreshData();
 	};
+	
+	// SAVE/LOAD GAME
+	_self.saveGame = function(){
+		if(options_debug){
+			return;
+		}
+		
+		loginObj["addressContract"] = addressContract;
+		loginObj["balanceSession"] = _balanceSession;
+		loginObj["balanceGame"] = _balanceGame;
+		loginObj["depositPlayer"] = _depositPlayer;
+		loginObj["addressBankroll"] = _addressBankroll;
+		loginObj["idChannel"] = _idChannel;
+		loginObj["signStateChannel"] = _signStateChannel;
+		loginObj["signPlayer"] = _signPlayer;
+		loginObj["signBankroll"] = _signBankroll;
+		loginObj["objGame"] = _objGame;
+		loginObj["gameOver"] = _gameOver;
+		loginObj["openChannel"] = _bOpenChannel;
+		loginObj["room"] = _idRoom; 
+		loginObj["history"] = App.logic.getHistory();
+		loginObj["session"] = App.logic.session();
+		
+		saveData();
+	}
+	
+	_self.loadGame = function(){
+		loadData();
+		
+		if(loginObj["openChannel"]){
+			addressContract = loginObj["addressContract"];
+			_balanceSession = loginObj["balanceSession"];
+			_balanceGame = loginObj["balanceGame"];
+			_depositPlayer = loginObj["depositPlayer"];
+			_addressBankroll = loginObj["addressBankroll"];
+			_idChannel = loginObj["idChannel"];
+			_signStateChannel = loginObj["signStateChannel"];
+			_signPlayer = loginObj["signPlayer"];
+			_signBankroll = loginObj["signBankroll"];
+			_objGame = loginObj["objGame"];
+			_bOpenChannel = loginObj["openChannel"];
+			_idRoom = loginObj["room"]; 
+			_gameOver = loginObj["gameOver"];
+			console.log("loadData:", _objGame);
+			
+			App.logic.initGame(_openkey, _addressBankroll);
+			App.logic.loadGame(_objGame, loginObj["history"], loginObj["session"]);
+		}
+	}
 	
 	// CREATE
 	_self.createLayers = function(){
@@ -89,6 +139,7 @@ var ScrGame = function(){
 		_gameOver = true;
 		_bWindow = false;
 		_bCloseChannel = false;
+		_bOpenChannel = false;
 	}
 	
 	_self.createNumbers = function(){
@@ -110,6 +161,7 @@ var ScrGame = function(){
 	_self.createStrings = function(){
 		_openkey = DCLib.Account.get().openkey;
 		_addressBankroll = "0x";
+		_idRoom = '';
 	}
 	
 	_self.createGui = function() {
@@ -347,8 +399,31 @@ var ScrGame = function(){
 			if(_balanceEth == 0){
 				_self.showError("error_balance_eth");
 			} else {
-				_self.showWndDeposit();
-				_self.showTutorial(1);
+				// load game
+				if(_bOpenChannel){
+					console.log("LOAD GAME");
+					
+					var objConnect = {
+						bankroll_address : _addressBankroll, 
+						channel_id:_idChannel,
+						room: _idRoom,
+						player_address: _openkey
+					};
+					console.log("objConnect:", objConnect);
+					App.reconnect(objConnect, function(res){
+						console.log("!!!!!!!!!!!!!:", res);
+						_self.createTreasure();
+						if(_objGame.betGame == 0 && _balanceSession > 0){
+							_btnStart.visible = true;
+						}
+						_btnContract.setAplhaDisabled(false);
+					});
+				// new game
+				} else {
+					// console.log("NEW GAME");
+					_self.showWndDeposit();
+					_self.showTutorial(1);
+				}
 			}
 		})
 	}
@@ -572,6 +647,7 @@ var ScrGame = function(){
 			console.log('Game connect:', connected, info);
 			if (connected){
 				_addressBankroll = info.bankroller_address;
+				_idRoom = info.room_name;
 				var transactionHash = "";
 				if(info.channel){
 					_idChannel = info.channel.channel_id;
@@ -587,6 +663,7 @@ var ScrGame = function(){
 					_depositPlayer = deposit;
 					if(addressContract){
 						_contract = new DCLib.web3.eth.Contract(abiContract, addressContract);
+						_bOpenChannel = true;
 					}
 					
 					DCLib.Eth.getBalances(_openkey, function(resBal) {
@@ -594,7 +671,7 @@ var ScrGame = function(){
 						_balanceBet = Number(resBal.bets);
 						_self.refreshBalance();
 						
-						App.call('initGame', [_idChannel, _openkey, _addressBankroll, _depositBankroll], function(result){
+						App.call('initGame', [_openkey, _addressBankroll], function(result){
 							_btnContract.setAplhaDisabled(false);
 							for (var i = 0; i < _self.arButtons.length; i++) {
 								var item_mc = _self.arButtons[i];
@@ -607,6 +684,7 @@ var ScrGame = function(){
 							_self.closeWindow();
 							_self.createTreasure();
 							_self.showWndBet();
+							_self.saveGame();
 						})
 					})					
 				} else {
@@ -642,7 +720,9 @@ var ScrGame = function(){
 						_balanceBet = Number(resBal.bets);
 						_self.refreshBalance();
 					})
+					_bOpenChannel = false;
 					_self.createWndInfo(getText("close_channel"));
+					_self.saveGame();
 				} else {
 					_self.showError("disconnected");
 				}
@@ -730,17 +810,21 @@ var ScrGame = function(){
 		_pirateSave.visible = false;
 		_pirateContinue.visible = false;
 		_bgDark.visible = false;
-		_btnStart.visible = true;
 		_itemBet.visible = false;
 		_bCloseChannel = false;
 		_btnCashout.setAplhaDisabled(false);
-		if (!options_debug) { 
-			App.updateState({session: 1}, result => {
-				_signStateChannel = result.signed_bankroller;
-				if(_balanceSession == 0){
-					_self.closeGameChannel();
-				}
-			})
+		if (options_debug) {
+			_btnStart.visible = true;
+		} else {
+			// App.updateState({session: 1}, result => {
+				// _signStateChannel = result.signed_bankroller;
+				// if(_balanceSession == 0){
+					// _self.closeGameChannel();
+				// } else {
+					_btnStart.visible = true;
+				// }
+				// _self.saveGame();
+			// })
 		}
 	}
 	
@@ -784,8 +868,6 @@ var ScrGame = function(){
 		// 1. updateChannel
 		// 2. updateGame
 		// 3. openDispute
-		
-		// infura.sendRequest("updateChannel", _openkey, _self.response);
 	}
 	
 	// CLICK
@@ -816,7 +898,8 @@ var ScrGame = function(){
 		var signPlayer = DCLib.Account.signHash(hash);
 
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
-		_signPlayer = signPlayer
+		_signPlayer = signPlayer;
+		
 		App.call('signBankroll', 
 			[idChannel, session, round, seed, gameData, signPlayer], 
 			function(result){
@@ -840,7 +923,7 @@ var ScrGame = function(){
 							return;
 						}
 
-						_sigSession   = App.logic.session()
+						_sigSession = App.logic.session();
 
 						if(!DCLib.checkHashSig(hash, result.signBankroll, _addressBankroll)){
 							_self.showError(strError, _self.sendDispute);
@@ -885,7 +968,7 @@ var ScrGame = function(){
 		if(twttr){
 			var urlGame = 'http://platform.dao.casino/';
 			var url="https://twitter.com/intent/tweet";
-			var str='Play Treasure Island for BET '+ " " + urlGame;
+			var str='Play "Find The Ethereum" for BET '+ " " + urlGame;
 			var hashtags="blockchain,ethereum,daocasino";
 			var via="daocasino";
 			window.open(url+"?text="+str+";hashtags="+hashtags+";via="+via,"","width=500,height=300");
@@ -1060,6 +1143,7 @@ var ScrGame = function(){
 		_self.refreshBalance();
 		_balanceGame = _objGame.bufferProfit;
 		_tfWinStr.setText(_objGame.countWinStr);
+		_self.saveGame();
 		
 		for (var i = 0; i < _arBoxes.length; i++) {
 			var item_mc = _arBoxes[i];

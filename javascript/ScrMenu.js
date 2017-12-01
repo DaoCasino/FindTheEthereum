@@ -115,7 +115,7 @@ var ScrMenu = function(){
 		if(twttr){
 			var urlGame = 'http://platform.dao.casino/';
 			var url="https://twitter.com/intent/tweet";
-			var str='Play Treasure Island for BET '+ " " + urlGame;
+			var str='Play "Find The Ethereum" for BET '+ " " + urlGame;
 			var hashtags="blockchain,ethereum,daocasino";
 			var via="daocasino";
 			window.open(url+"?text="+str+";hashtags="+hashtags+";via="+via,"","width=500,height=300");

@@ -1,6 +1,7 @@
 var _W = 1920;
 var _H = 1080;
 var version = "v. 1.0.0";
+var loginObj = {};
 var dataAnima = [];
 var dataMovie = [];
 var arClips = [];
@@ -39,8 +40,8 @@ function init() {
 	colorFilter.desaturate();
 	
 	window.addEventListener("resize", onResize, false);
-	window.addEventListener("online", updateOnlineStatus);
-	window.addEventListener("offline", updateOnlineStatus);
+	// window.addEventListener("online", updateOnlineStatus);
+	// window.addEventListener("offline", updateOnlineStatus);
 	
 	startTime = getTimer();
 	onResize();
@@ -84,10 +85,44 @@ function loadLib() {
 	})
 }
 
+function saveData() {
+	if(isLocalStorageAvailable()){
+		var loginStr = JSON.stringify(loginObj);
+		localStorage.setItem('dc_fte', loginStr);
+		// console.log("Saving: ok!");
+	}
+}
+
+function loadData() {
+	if(isLocalStorageAvailable()){
+		if (localStorage.getItem('dc_fte')){
+			var loginStr = localStorage.getItem('dc_fte')
+			// loginObj = JSON.parse(loginStr);
+			// console.log("Loading: ok!");
+		} else {
+			// console.log("Loading: fail!");
+		}
+	}
+}
+
+function resetData() {
+	loginObj = {};
+	saveData();
+}
+
+function isLocalStorageAvailable() {
+    try {
+        return 'localStorage' in window && window['localStorage'] !== null;
+    } catch (e) {
+		console.log("localStorage_failed:",e);
+        return false;
+    }
+}
+
 function updateOnlineStatus(e) {
 	var condition = navigator.onLine ? "online" : "offline";
-	if(condition == "offline"){
-		// TODO disconnect
+	if(condition == "offline" && App.logic){
+		// App.disconnect({session:App.logic.session()});
 	}
 }
 
@@ -748,7 +783,7 @@ visibly.onHidden(hideGame);
 function reloadedPage(){
 	if(sessionStorage.getItem('loaded')){
 		if(App.logic && sprites_loaded){
-			// TODO disconnect
+			// App.disconnect({session:App.logic.session()});
 		}
 	}
 }

@@ -16,8 +16,6 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	const MAX_VALUE = 3;
 	
 	var _session = 0;
-	var _depositBankroll = 0;
-	var _idChannel = "";
 	var _addressBankroll = "";
 	var _addressPlayer = "";
 	var _history = [];
@@ -40,17 +38,13 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	/**
 	 * Set the game parameters.
 	 *
-	 * @param  {string} idChannel channel ID.
 	 * @param  {string} addressPlayer Player address.
 	 * @param  {string} addressBankroll Bankroll address.
-	 * @param  {number} balance Player tokens balance.
 	 * @return {boolean} true.
 	 */
-	_self.initGame = function(idChannel, addressPlayer, addressBankroll, depositBankroll){
-		_idChannel = idChannel;
+	_self.initGame = function(addressPlayer, addressBankroll){
 		_addressPlayer = addressPlayer;
 		_addressBankroll = addressBankroll;
-		_depositBankroll = depositBankroll;
 		
 		return true;
 	}
@@ -190,6 +184,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		objHistory.balance = _self.payChannel.getBalance();
 		objHistory.profit =_objGame.bufferProfit - _objGame.betGame;
 		_history[_session-1] = objHistory;
+		 _objGame.betGame = 0;
 		
 		return {
 			objGame 	: _objGame,
@@ -234,6 +229,16 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	 */
 	_self.session = function(){
 		return _session
+	}
+	
+	_self.loadGame = function(objGame, hist, session){
+		// only for player
+		if(_addressBankroll == "" || _addressBankroll == DCLib.Account.get().openkey){
+			return;
+		}
+		_objGame = objGame;
+		_history = hist;
+		_session = session;
 	}
 	
 	return _self;
