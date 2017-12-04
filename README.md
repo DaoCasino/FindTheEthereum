@@ -16,7 +16,7 @@ The game has a winstreak system. If the player guessed the box, he can continue 
 ## Table of Contents
 - [File structure](#-file-structure)
   - [dapp.manifest](#dappmanifest)
-  - [GameLogic.js](#GameLogicjs)
+  - [GameLogic.js](#gamelogicjs)
   - [bankroll.js](#bankrolljs)
   
 ## 📁 File structure
