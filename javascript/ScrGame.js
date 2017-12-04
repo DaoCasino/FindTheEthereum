@@ -17,7 +17,7 @@
 var ScrGame = function(){
 	PIXI.Container.call( this );
 	
-	const TIME_ONLINE = 60000;
+	const TIME_ONLINE = 2000;
 	
 	var _self = this;
 	var _objGame, _objTutor, _contract, _objCurSession, _objPrevSession;
@@ -189,8 +189,8 @@ var ScrGame = function(){
 	}
 	
 	_self.createGui = function() {
-		var sizeTf = 40;
-		var posY = 48;
+		var sizeTf  = 40;
+		var posY    = 48;
 		var offsetY = 84;
 		
 		_bgDark = new PIXI.Graphics();
@@ -689,7 +689,11 @@ var ScrGame = function(){
 						_contract = new DCLib.web3.eth.Contract(abiContract, addressContract);
 						_bOpenChannel = true;
 					}
-					
+
+					// App.Room.on('timeout', function(receipt) {
+					// 	console.log('listen bankroll',receipt)
+					// })
+
 					DCLib.Eth.getBalances(_openkey, function(resBal) {
 						_balanceEth = Number(resBal.eth);
 						_balanceBet = Number(resBal.bets);
@@ -751,6 +755,21 @@ var ScrGame = function(){
 					_self.showError("disconnected");
 				}
 			})
+		}
+	}
+	
+	_self.checkOnline = function(){
+		if(App){
+			if(App.Room && _addressBankroll){
+				App.request({action: 'check_channel'}, function(res) {
+					if (res.response.state_channel === false) {
+						_bOpenChannel = false
+						App.request({action: 'disconnect'})
+						_self.closeWindow()
+						_self.showError("disconnected");
+					}
+				})
+			}
 		}
 	}
 	
@@ -1166,7 +1185,7 @@ var ScrGame = function(){
 	};
 	
 	// UPDATE
-	_self.update = function(diffTime) {		
+	_self.update = function(diffTime) {	
 		if(_timeCloseWnd > 0 && _curWindow && _bWindow){
 			_timeCloseWnd -= diffTime;
 			if(_timeCloseWnd < 100){
@@ -1177,11 +1196,13 @@ var ScrGame = function(){
 			}
 		}
 		
-		if(!options_debug 0&& _addressBankroll){
+		if(!options_debug && _addressBankroll){
 			_timeOnline += diffTime;
 			if(_timeOnline > TIME_ONLINE){
 				_timeOnline = 0;
-				App.closeByTimeout();
+				if(App.checkPlayer && _bOpenChannel && !_bCloseChannel){
+					App.checkPlayer();
+				}
 			}
 		}
 		

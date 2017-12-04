@@ -747,7 +747,9 @@ function visGame() {
 	refreshTime();
 	
 	if(currentScreen){
-		// ScreenGame.resetTimer();
+		if(currentScreen.name == "ScrGame"){
+			currentScreen.checkOnline();
+		}
 	}
 }
 
