@@ -17,8 +17,10 @@
 var ScrGame = function(){
 	PIXI.Container.call( this );
 	
+	const TIME_ONLINE = 60000;
+	
 	var _self = this;
-	var _objGame, _objTutor, _contract;
+	var _objGame, _objTutor, _contract, _objCurSession, _objPrevSession;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
 	var _tfBalance, _tfBet, _tfWinStr, __tfAddress;
 	var _fRequestFullScreen, _fCancelFullScreen;
@@ -34,11 +36,11 @@ var ScrGame = function(){
 	// numbers
 	var _idTutor, _idBox,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
-	_timeCloseWnd, _depositPlayer, _depositBankroll, _signSession;
+	_timeCloseWnd, _depositPlayer, _depositBankroll, _signSession, _timeOnline;
 	// arrays
 	var _arBoxes;
 	// strings
-	var _openkey, _addressBankroll, _idChannel, _signStateChannel, _signPlayer, _signBankroll, _idRoom;
+	var _openkey, _addressBankroll, _idChannel, _signPlayer, _signBankroll, _idRoom;
 	
 	// INIT
 	_self.init = function(){
@@ -61,6 +63,7 @@ var ScrGame = function(){
 		_self.createNumbers();
 		_self.createArrays();
 		_self.createStrings();
+		_self.createObjects();
 		_self.loadGame();
 		_self.createGui();
 		_self.createBtn();
@@ -79,10 +82,11 @@ var ScrGame = function(){
 		loginObj["depositPlayer"] = _depositPlayer;
 		loginObj["addressBankroll"] = _addressBankroll;
 		loginObj["idChannel"] = _idChannel;
-		loginObj["signStateChannel"] = _signStateChannel;
 		loginObj["signPlayer"] = _signPlayer;
 		loginObj["signBankroll"] = _signBankroll;
 		loginObj["objGame"] = _objGame;
+		loginObj["objCurSession"] = _objCurSession;
+		loginObj["objPrevSession"] = _objPrevSession;
 		loginObj["gameOver"] = _gameOver;
 		loginObj["openChannel"] = _bOpenChannel;
 		loginObj["room"] = _idRoom; 
@@ -102,10 +106,11 @@ var ScrGame = function(){
 			_depositPlayer = loginObj["depositPlayer"];
 			_addressBankroll = loginObj["addressBankroll"];
 			_idChannel = loginObj["idChannel"];
-			_signStateChannel = loginObj["signStateChannel"];
 			_signPlayer = loginObj["signPlayer"];
 			_signBankroll = loginObj["signBankroll"];
 			_objGame = loginObj["objGame"];
+			_objCurSession = loginObj["objCurSession"];
+			_objPrevSession = loginObj["objPrevSession"];
 			_bOpenChannel = loginObj["openChannel"];
 			_idRoom = loginObj["room"]; 
 			_gameOver = loginObj["gameOver"];
@@ -149,6 +154,7 @@ var ScrGame = function(){
 		_balanceEth = 0;
 		_balanceSession = 0;
 		_timeCloseWnd = 0;
+		_timeOnline = 0;
 		_depositBankroll = 0;
 		_signSession = 0;
 	}
@@ -160,8 +166,26 @@ var ScrGame = function(){
 	
 	_self.createStrings = function(){
 		_openkey = DCLib.Account.get().openkey;
-		_addressBankroll = "0x";
 		_idRoom = '';
+	}
+	
+	_self.createObjects = function () {
+		_objCurSession = {
+			session: 0,
+			winstrict: 0,
+			player_balance: 0,
+			bankroll_balance: 0,
+			signPlayer: "",
+			signBankroll: ""
+		}
+		_objPrevSession = {
+			session: 0,
+			winstrict: 0,
+			player_balance: 0,
+			bankroll_balance: 0,
+			signPlayer: "",
+			signBankroll: ""
+		}
 	}
 	
 	_self.createGui = function() {
@@ -785,7 +809,8 @@ var ScrGame = function(){
 		_pirateContinue.visible = false;
 		_bgDark.visible = false;
 		_itemTutorial.visible = false;
-		_self.refreshBoxes();
+		// _self.refreshBoxes();
+		_self.updateState(_self.refreshBoxes);
 	}
 	
 	_self.closeGame = function() {
@@ -816,16 +841,46 @@ var ScrGame = function(){
 		if (options_debug) {
 			_btnStart.visible = true;
 		} else {
-			// App.updateState({session: 1}, result => {
-				// _signStateChannel = result.signed_bankroller;
-				// if(_balanceSession == 0){
-					// _self.closeGameChannel();
-				// } else {
+			_self.updateState(function(){
+				if(_balanceSession == 0){
+					_self.closeGameChannel();
+				} else {
 					_btnStart.visible = true;
-				// }
-				// _self.saveGame();
-			// })
+				}
+				_self.saveGame();
+			});
 		}
+	}
+	
+	_self.updateState = function(callback) {
+		var balancePlayer = DCLib.Utils.bet2dec(App.logic.payChannel.getBalance());
+		var balanceBankroll = DCLib.Utils.bet2dec(App.logic.payChannel.getBankrollBalance());
+		var session = App.logic.session();
+		console.log("updateState:", _idChannel, _openkey, balancePlayer, balanceBankroll, session);
+		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, session);
+		var signPlayer = DCLib.Account.signHash(hash);
+		
+		App.updateState({
+			channel_id: _idChannel,
+			player_address: _openkey,
+			player_balance: balancePlayer,
+			bankroller_balance: balanceBankroll,
+			session: session,
+			signed_args: signPlayer,
+			}, result => {
+				console.log("result:", result);
+				_objCurSession.session = session;
+				_objCurSession.winstrict = App.logic.getGame().countWinStr;
+				_objCurSession.player_balance = balancePlayer;
+				_objCurSession.bankroll_balance = balanceBankroll;
+				_objCurSession.signPlayer = signPlayer;
+				_objCurSession.signBankroll = result.signed_bankroller;
+				
+				if(typeof callback == "function"){
+					callback();
+				}
+			}
+		)
 	}
 	
 	_self.updateChannel = function() {
@@ -1119,6 +1174,14 @@ var ScrGame = function(){
 				_curWindow.visible = false;
 				_curWindow = undefined;
 				_bWindow = false;
+			}
+		}
+		
+		if(!options_debug 0&& _addressBankroll){
+			_timeOnline += diffTime;
+			if(_timeOnline > TIME_ONLINE){
+				_timeOnline = 0;
+				App.closeByTimeout();
 			}
 		}
 		

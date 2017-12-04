@@ -14,7 +14,6 @@ var LoadBack, LoadPercent;
 var startTime;
 var renderer, stage, preloader, colorFilter; // pixi;
 var sprites_loaded = false;
-var infura;
 var fontMain = "Archivo Black";
 	fontMain = "Roboto Bold";
 
@@ -40,14 +39,10 @@ function init() {
 	colorFilter.desaturate();
 	
 	window.addEventListener("resize", onResize, false);
-	// window.addEventListener("online", updateOnlineStatus);
-	// window.addEventListener("offline", updateOnlineStatus);
 	
 	startTime = getTimer();
 	onResize();
 	update();
-	
-	// infura = new Infura();
 	
 	language = new daoLang();
 	language.add_lang_xml('en');
@@ -75,13 +70,6 @@ function loadLib() {
 		})
 		
 		init();
-		
-		var loaded = sessionStorage.getItem('loaded');
-		if(loaded) {
-			reloadedPage();
-		} else {
-			sessionStorage.setItem('loaded', true);
-		}
 	})
 }
 
@@ -117,13 +105,6 @@ function isLocalStorageAvailable() {
 		console.log("localStorage_failed:",e);
         return false;
     }
-}
-
-function updateOnlineStatus(e) {
-	var condition = navigator.onLine ? "online" : "offline";
-	if(condition == "offline" && App.logic){
-		// App.disconnect({session:App.logic.session()});
-	}
 }
 
 function createScreenLoader(){
@@ -286,19 +267,18 @@ function update() {
 	requestAnimationFrame(update);
 	renderer.render(stage);
 	
-	if(options_pause){
-		return;
-	}
 	var diffTime = getTimer() - startTime;
 	if(diffTime > 29){
 		if (currentScreen) {
 			currentScreen.update(diffTime);
 		}
 		
-		for (var i = 0; i < arClips.length; i++) {
-			var clip = arClips[i];
-			if(clip){
-				clip.enter_frame();
+		if(!options_pause){
+			for (var i = 0; i < arClips.length; i++) {
+				var clip = arClips[i];
+				if(clip){
+					clip.enter_frame();
+				}
 			}
 		}
 		
@@ -779,14 +759,6 @@ function hideGame() {
 
 visibly.onVisible(visGame);
 visibly.onHidden(hideGame);
-
-function reloadedPage(){
-	if(sessionStorage.getItem('loaded')){
-		if(App.logic && sprites_loaded){
-			// App.disconnect({session:App.logic.session()});
-		}
-	}
-}
 
 
 document.addEventListener('DOMContentLoaded', loadLib);
