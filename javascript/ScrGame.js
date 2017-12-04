@@ -17,7 +17,7 @@
 var ScrGame = function(){
 	PIXI.Container.call( this );
 	
-	const TIME_ONLINE = 2000;
+	const TIME_ONLINE = 5000;
 	
 	var _self = this;
 	var _objGame, _objTutor, _contract, _objCurSession, _objPrevSession;
@@ -764,6 +764,7 @@ var ScrGame = function(){
 				App.request({action: 'check_channel'}, function(res) {
 					if (res.response.state_channel === false) {
 						_bOpenChannel = false
+						_bCloseChannel = true;
 						App.request({action: 'disconnect'})
 						_self.closeWindow()
 						_self.showError("disconnected");
@@ -872,6 +873,9 @@ var ScrGame = function(){
 	}
 	
 	_self.updateState = function(callback) {
+		if (options_debug) {
+			return;
+		}
 		var balancePlayer = DCLib.Utils.bet2dec(App.logic.payChannel.getBalance());
 		var balanceBankroll = DCLib.Utils.bet2dec(App.logic.payChannel.getBankrollBalance());
 		var session = App.logic.session();
