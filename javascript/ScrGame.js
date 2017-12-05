@@ -20,7 +20,7 @@ var ScrGame = function(){
 	const TIME_ONLINE = 5000;
 	
 	var _self = this;
-	var _objGame, _objTutor, _contract, _objCurSession, _objPrevSession;
+	var _objGame, _objTutor, _contract, _objCurSession, _objNextSession;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
 	var _tfBalance, _tfBet, _tfWinStr, __tfAddress;
 	var _fRequestFullScreen, _fCancelFullScreen;
@@ -64,7 +64,7 @@ var ScrGame = function(){
 		_self.createArrays();
 		_self.createStrings();
 		_self.createObjects();
-		_self.loadGame();
+		// _self.loadGame();
 		_self.createGui();
 		_self.createBtn();
 		_self.refreshData();
@@ -86,7 +86,7 @@ var ScrGame = function(){
 		loginObj["signBankroll"] = _signBankroll;
 		loginObj["objGame"] = _objGame;
 		loginObj["objCurSession"] = _objCurSession;
-		loginObj["objPrevSession"] = _objPrevSession;
+		loginObj["objPrevSession"] = _objNextSession;
 		loginObj["gameOver"] = _gameOver;
 		loginObj["openChannel"] = _bOpenChannel;
 		loginObj["room"] = _idRoom; 
@@ -110,7 +110,7 @@ var ScrGame = function(){
 			_signBankroll = loginObj["signBankroll"];
 			_objGame = loginObj["objGame"];
 			_objCurSession = loginObj["objCurSession"];
-			_objPrevSession = loginObj["objPrevSession"];
+			_objNextSession = loginObj["objPrevSession"];
 			_bOpenChannel = loginObj["openChannel"];
 			_idRoom = loginObj["room"]; 
 			_gameOver = loginObj["gameOver"];
@@ -178,7 +178,7 @@ var ScrGame = function(){
 			signPlayer: "",
 			signBankroll: ""
 		}
-		_objPrevSession = {
+		_objNextSession = {
 			session: 0,
 			winstrict: 0,
 			player_balance: 0,
@@ -716,10 +716,16 @@ var ScrGame = function(){
 						})
 					})					
 				} else {
-					_self.showError("disconnected");
+					_self.showError("disconnected", function(){
+						_self.removeAllListener();
+						window.location.reload();
+					});
 				}
 			 } else {
-				 _self.showError("disconnected");
+				 _self.showError("disconnected", function(){
+						_self.removeAllListener();
+						window.location.reload();
+					});
 			 }
 		})
 	}
@@ -752,7 +758,10 @@ var ScrGame = function(){
 					_self.createWndInfo(getText("close_channel"));
 					_self.saveGame();
 				} else {
-					_self.showError("disconnected");
+					_self.showError("disconnected", function(){
+						_self.removeAllListener();
+						window.location.reload();
+					});
 				}
 			})
 		}
@@ -767,7 +776,10 @@ var ScrGame = function(){
 						_bCloseChannel = true;
 						App.request({action: 'disconnect'})
 						_self.closeWindow()
-						_self.showError("disconnected");
+						_self.showError("disconnected", function(){
+							_self.removeAllListener();
+							window.location.reload();
+						});
 					}
 				})
 			}
@@ -908,18 +920,22 @@ var ScrGame = function(){
 	
 	_self.updateChannel = function() {
 		if (options_debug) return
-		// App.updateChannel({
-		// 	session: App.logic.session(), 
-		// 	signed_args: _signStateChannel}, result => {
-		// 	App.updateGame({
-		// 		session      : _signSession,
-		// 		round        : App.logic.getGame().countWinStr + 1,
-		// 		seed         : DCLib.Utils.makeSeed(),
-		// 		game_data    : {type:'uint', value:[_betGame, App.logic.getGame().countWinStr, _idBox]},
-		// 		sig_player   : _signPlayer,
-		// 		sig_bankroll : _signBankroll
-		// 	})
-		// })
+		
+		
+		const player_balance     = params.player_balance
+		const bankroller_balance = params.bankroller_balance
+		const session            = params.session
+		const signed_args        = params.signed_args
+		const signed_args2       = params.signed_args2
+		
+		console.log('updateChannel', _objCurSession)
+		App.updateChannel({
+			player_balance: _objCurSession.player_balance,
+			bankroller_balance: _objCurSession.bankroller_balance,
+			session: _objCurSession.session,
+			signed_args: _objCurSession.signBankroll
+		})
+		// }, _self.updateGame)
 	}
 	
 	_self.sendDispute = function() {
