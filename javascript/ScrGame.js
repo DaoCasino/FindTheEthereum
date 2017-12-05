@@ -850,6 +850,7 @@ var ScrGame = function(){
 			 if(App.logic.getBalance() == result.balance){
 				 _objGame = result.objGame;
 				_balanceSession = result.balance;
+				console.log("closeGame_balanceSession:", _balanceSession);
 				if(options_debug){
 					_balanceSession = _depositPlayer + App.logic.payChannel.getProfit();
 				}
@@ -934,8 +935,11 @@ var ScrGame = function(){
 			bankroller_balance: _objCurSession.bankroller_balance,
 			session: _objCurSession.session,
 			signed_args: _objCurSession.signBankroll
-		})
-		// }, _self.updateGame)
+		}, _self.updateGame)
+	}
+	
+	_self.updateGame = function() {
+		console.log('updateGame')
 	}
 	
 	_self.sendDispute = function() {
@@ -999,6 +1003,7 @@ var ScrGame = function(){
 			function(result){
 				if(result.error){
 					_self.showError(result.error);
+					// TODO dispute
 					console.log(result.error);
 					return;
 				}
@@ -1011,6 +1016,7 @@ var ScrGame = function(){
 						if(result.error){
 							if(result.error == "invalid_signature_bankroll"){
 								_self.showError(strError, _self.sendDispute);
+								// TODO dispute
 							} else {
 								_self.showError(result.error);
 							}
@@ -1244,6 +1250,7 @@ var ScrGame = function(){
 		if(options_debug){
 			_balanceSession = _depositPlayer + App.logic.payChannel.getProfit()
 		}
+		console.log("showResult_balanceSession:", _balanceSession);
 		_self.refreshBalance();
 		_balanceGame = _objGame.bufferProfit;
 		_tfWinStr.setText(_objGame.countWinStr);
