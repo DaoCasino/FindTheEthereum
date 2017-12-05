@@ -45,7 +45,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	_self.initGame = function(addressPlayer, addressBankroll){
 		_addressPlayer = addressPlayer;
 		_addressBankroll = addressBankroll;
-		
+		console.log("initGame balance:", _self.payChannel.getBalance());
 		return true;
 	}
 	
