@@ -17,10 +17,11 @@
 var ScrGame = function(){
 	PIXI.Container.call( this );
 	
-	const TIME_ONLINE = 5000;
+	const TIME_ONLINE = 3000;
 	
 	var _self = this;
-	var _objGame, _objTutor, _contract, _objCurSession, _objNextSession;
+	var _objGame, _objTutor, _contract,
+	_objCurSessionChannel, _objNextSessionChannel, _objCurSessionGame;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
 	var _tfBalance, _tfBet, _tfWinStr, __tfAddress;
 	var _fRequestFullScreen, _fCancelFullScreen;
@@ -40,7 +41,7 @@ var ScrGame = function(){
 	// arrays
 	var _arBoxes;
 	// strings
-	var _openkey, _addressBankroll, _idChannel, _signPlayer, _signBankroll, _idRoom;
+	var _openkey, _addressBankroll, _idChannel, _idRoom;
 	
 	// INIT
 	_self.init = function(){
@@ -82,11 +83,9 @@ var ScrGame = function(){
 		loginObj["depositPlayer"] = _depositPlayer;
 		loginObj["addressBankroll"] = _addressBankroll;
 		loginObj["idChannel"] = _idChannel;
-		loginObj["signPlayer"] = _signPlayer;
-		loginObj["signBankroll"] = _signBankroll;
 		loginObj["objGame"] = _objGame;
-		loginObj["objCurSession"] = _objCurSession;
-		loginObj["objPrevSession"] = _objNextSession;
+		loginObj["objCurSession"] = _objCurSessionChannel;
+		loginObj["objNextSession"] = _objNextSessionChannel;
 		loginObj["gameOver"] = _gameOver;
 		loginObj["openChannel"] = _bOpenChannel;
 		loginObj["room"] = _idRoom; 
@@ -106,11 +105,9 @@ var ScrGame = function(){
 			_depositPlayer = loginObj["depositPlayer"];
 			_addressBankroll = loginObj["addressBankroll"];
 			_idChannel = loginObj["idChannel"];
-			_signPlayer = loginObj["signPlayer"];
-			_signBankroll = loginObj["signBankroll"];
 			_objGame = loginObj["objGame"];
-			_objCurSession = loginObj["objCurSession"];
-			_objNextSession = loginObj["objPrevSession"];
+			_objCurSessionChannel = loginObj["objCurSession"];
+			_objNextSessionChannel = loginObj["objNextSession"];
 			_bOpenChannel = loginObj["openChannel"];
 			_idRoom = loginObj["room"]; 
 			_gameOver = loginObj["gameOver"];
@@ -170,7 +167,7 @@ var ScrGame = function(){
 	}
 	
 	_self.createObjects = function () {
-		_objCurSession = {
+		_objCurSessionChannel = {
 			session: 0,
 			winstrict: 0,
 			player_balance: 0,
@@ -178,13 +175,21 @@ var ScrGame = function(){
 			signPlayer: "",
 			signBankroll: ""
 		}
-		_objNextSession = {
+		_objNextSessionChannel = {
 			session: 0,
 			winstrict: 0,
 			player_balance: 0,
 			bankroller_balance: 0,
 			signPlayer: "",
 			signBankroll: ""
+		}
+		_objCurSessionGame = {
+			session: 0,
+			round: 0,
+			seed: "",
+			game_data: [],
+			sig_player: "",
+			sig_bankroll: ""
 		}
 	}
 	
@@ -905,12 +910,12 @@ var ScrGame = function(){
 			signed_args: signPlayer,
 			}, result => {
 				console.log("result:", result);
-				_objCurSession.session = session;
-				_objCurSession.winstrict = App.logic.getGame().countWinStr;
-				_objCurSession.player_balance = balancePlayer;
-				_objCurSession.bankroller_balance = balanceBankroll;
-				_objCurSession.signPlayer = signPlayer;
-				_objCurSession.signBankroll = result.signed_bankroller;
+				_objCurSessionChannel.session = session;
+				_objCurSessionChannel.winstrict = App.logic.getGame().countWinStr;
+				_objCurSessionChannel.player_balance = balancePlayer;
+				_objCurSessionChannel.bankroller_balance = balanceBankroll;
+				_objCurSessionChannel.signPlayer = signPlayer;
+				_objCurSessionChannel.signBankroll = result.signed_bankroller;
 				
 				if(typeof callback == "function"){
 					callback();
@@ -922,26 +927,32 @@ var ScrGame = function(){
 	_self.updateChannel = function() {
 		if (options_debug) return
 		
-		console.log('updateChannel', _objCurSession);
+		console.log('updateChannel:', _objCurSessionChannel);
 		App.updateChannel({
-			player_balance: _objCurSession.player_balance,
-			bankroller_balance: _objCurSession.bankroller_balance,
-			session: _objCurSession.session,
-			signed_args: _objCurSession.signBankroll
+			player_balance: _objCurSessionChannel.player_balance,
+			bankroller_balance: _objCurSessionChannel.bankroller_balance,
+			session: _objCurSessionChannel.session,
+			signed_args: _objCurSessionChannel.signBankroll
 		}, _self.updateGame);
 	}
 	
 	_self.updateGame = function() {
 		if (options_debug) return
 		
-		console.log('updateGame');
+		console.log('updateGame:', _objCurSessionGame);
 		
-		// App.updateGame({
-			// player_balance: _objCurSession.player_balance,
-			// bankroller_balance: _objCurSession.bankroller_balance,
-			// session: _objCurSession.session,
-			// signed_args: _objCurSession.signBankroll
-		// }, _self.updateGame);
+		App.updateGame({
+			session: _objCurSessionGame.session,
+			round: _objCurSessionGame.round,
+			seed: _objCurSessionGame.seed,
+			game_data: _objCurSessionGame.game_data,
+			sig_player: _objCurSessionGame.sig_player,
+			sig_bankroll: _objCurSessionGame.sig_bankroll,
+		}, _self.openDispute);
+	}
+	
+	_self.openDispute = function() {
+		
 	}
 	
 	_self.sendDispute = function() {
@@ -986,7 +997,7 @@ var ScrGame = function(){
 		
 		var idChannel = _idChannel;
 		var session = App.logic.session();
-		var round = App.logic.getGame().countWinStr + 1;
+		var round = App.logic.getGame().countWinStr;
 		var seed = DCLib.Utils.makeSeed();
 		var betGame = _betGame;
 		if(App.logic.getGame().countWinStr > 0){
@@ -998,7 +1009,6 @@ var ScrGame = function(){
 		var signPlayer = DCLib.Account.signHash(hash);
 
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
-		_signPlayer = signPlayer;
 		
 		App.call('signBankroll', 
 			[idChannel, session, round, seed, gameData, signPlayer], 
@@ -1009,8 +1019,13 @@ var ScrGame = function(){
 					console.log(result.error);
 					return;
 				}
-
-				_signBankroll = result.signBankroll
+				
+				// _objCurSessionGame.session = session;
+				// _objCurSessionGame.round = round;
+				// _objCurSessionGame.seed = seed;
+				// _objCurSessionGame.game_data = gameData;
+				// _objCurSessionGame.sig_player = signPlayer;
+				// _objCurSessionGame.sig_bankroll = result.signBankroll;
 
 				App.call('clickBox', 
 					[idChannel, session, round, seed, gameData, result.signBankroll], 
@@ -1024,8 +1039,6 @@ var ScrGame = function(){
 							}
 							return;
 						}
-
-						_sigSession = App.logic.session();
 
 						if(!DCLib.checkHashSig(hash, result.signBankroll, _addressBankroll)){
 							_self.showError(strError, _self.sendDispute);
@@ -1228,8 +1241,19 @@ var ScrGame = function(){
 			_timeOnline += diffTime;
 			if(_timeOnline > TIME_ONLINE){
 				_timeOnline = 0;
-				if(App.checkPlayer && _bOpenChannel && !_bCloseChannel){
-					App.checkPlayer();
+				if(_bOpenChannel && !_bCloseChannel){
+					App.request({action: "close_timeout"}, function(res) {
+						console.log("state_channel:", res.response.state_channel);
+						if (res.response.state_channel == false) {
+							_bCloseChannel = true;
+							App.request({action: 'disconnect'})
+							_self.closeWindow()
+							_self.showError("disconnected", function(){
+								_self.removeAllListener();
+								window.location.reload();
+							});
+						}
+					})
 				}
 			}
 		}
