@@ -25,7 +25,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		result       : false,
 		play         : false,
 		win          : false,
-		round  		 : 0,
+		round  		 : 1,
 		countWinStr  : 0,
 		valueBankroller : 0,
 		valuePlayer  : 0,

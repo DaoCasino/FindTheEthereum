@@ -847,7 +847,7 @@ var ScrGame = function(){
 		_bgDark.visible = false;
 		_itemTutorial.visible = false;
 		// _self.refreshBoxes();
-		_self.updateState(_self.refreshBoxes);
+		_self.updateState(_self.refreshBoxes, false);
 	}
 	
 	_self.closeGame = function() {
@@ -879,18 +879,21 @@ var ScrGame = function(){
 		if (options_debug) {
 			_btnStart.visible = true;
 		} else {
-			_self.updateState(function(){
-				if(_balanceSession == 0){
-					_self.closeGameChannel();
-				} else {
-					_btnStart.visible = true;
-				}
-				_self.saveGame();
-			});
+			_self.updateState(
+				function(){
+					if(_balanceSession == 0){
+						_self.closeGameChannel();
+					} else {
+						_btnStart.visible = true;
+					}
+					_self.saveGame();
+				},
+				true
+			);
 		}
 	}
 	
-	_self.updateState = function(callback) {
+	_self.updateState = function(callback, bSaveChannel) {
 		if (options_debug) {
 			return;
 		}
@@ -908,15 +911,17 @@ var ScrGame = function(){
 			player_balance: balancePlayer,
 			bankroller_balance: balanceBankroll,
 			session: session,
-			signed_args: signPlayer,
+			signed_args: signPlayer
 			}, result => {
 				console.log("result:", result);
-				_objCurSessionChannel.session = session;
-				_objCurSessionChannel.winstrict = App.logic.getGame().countWinStr;
-				_objCurSessionChannel.player_balance = balancePlayer;
-				_objCurSessionChannel.bankroller_balance = balanceBankroll;
-				_objCurSessionChannel.signPlayer = signPlayer;
-				_objCurSessionChannel.signBankroll = result.signed_bankroller;
+				if(bSaveChannel){
+					_objCurSessionChannel.session = session;
+					_objCurSessionChannel.winstrict = App.logic.getGame().countWinStr;
+					_objCurSessionChannel.player_balance = balancePlayer;
+					_objCurSessionChannel.bankroller_balance = balanceBankroll;
+					_objCurSessionChannel.signPlayer = signPlayer;
+					_objCurSessionChannel.signBankroll = result.signed_bankroller;
+				}
 				
 				if(typeof callback == "function"){
 					callback();
@@ -929,12 +934,18 @@ var ScrGame = function(){
 		if (options_debug) return
 		
 		console.log('updateChannel:', _objCurSessionChannel);
+		var round = App.logic.getGame().round;
+		var callback = undefined;
+		if(round > 1){
+			callback = _self.updateGame;
+		}
+		
 		App.updateChannel({
 			player_balance: _objCurSessionChannel.player_balance,
 			bankroller_balance: _objCurSessionChannel.bankroller_balance,
 			session: _objCurSessionChannel.session,
 			signed_args: _objCurSessionChannel.signBankroll
-		});
+		}, callback);
 	}
 	
 	_self.updateGame = function() {
@@ -948,12 +959,27 @@ var ScrGame = function(){
 			seed: _objCurSessionGame.seed,
 			game_data: _objCurSessionGame.game_data,
 			sig_player: _objCurSessionGame.sig_player,
-			sig_bankroll: _objCurSessionGame.sig_bankroll,
+			sig_bankroll: _objCurSessionGame.sig_bankroll
 		}, _self.openDispute);
 	}
 	
 	_self.openDispute = function() {
+		if (options_debug) return
 		
+		console.log('openDispute');
+		var betGame = _betGame;
+		if(App.logic.getGame().countWinStr > 0){
+			betGame = 0;
+		}
+		betGame = DCLib.Utils.bet2dec(0.01)// FOR TEST
+		var round = App.logic.getGame().round;
+		var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, _idBox]};
+		console.log("gameData:", gameData);
+		App.openDispute({
+			round: round,
+			dispute_seed: DCLib.Utils.makeSeed(),
+			gamedata: gameData
+		});
 	}
 	
 	_self.sendDispute = function() {
@@ -964,22 +990,13 @@ var ScrGame = function(){
 		_self.showWndWarning(getText("dispute_resolve"));
 		console.log("sendDispute");
 		
-		// var idChannel = _idChannel;
-		// var session = App.logic.session();
-		// var round = App.logic.getGame().countWinStr + 1;
-		// var seed = DCLib.Utils.makeSeed();
-		// var betGame = _betGame;
-		// if(App.logic.getGame().countWinStr > 0){
-			// betGame = 0;
-		// }
-		// var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, _idBox]};
-		// var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
-		// var signPlayer = DCLib.Account.sign(hash);
+		var session = App.logic.session();
 		
-		// TODO call function on the smart contract
-		// 1. updateChannel
-		// 2. updateGame
-		// 3. openDispute
+		if(session > 1){
+			_self.updateChannel();
+		} else {
+			_self.openDispute();
+		}
 	}
 	
 	// CLICK
@@ -1008,6 +1025,11 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, box.id]};
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.signHash(hash);
+		
+		// if(1){
+			// _self.openDispute();
+			// return;
+		// }
 
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
 		
@@ -1015,8 +1037,7 @@ var ScrGame = function(){
 			[idChannel, session, round, seed, gameData, signPlayer], 
 			function(result){
 				if(result.error){
-					_self.showError(result.error);
-					// TODO dispute
+					_self.showError(result.error, _self.sendDispute);
 					console.log(result.error);
 					return;
 				}
@@ -1027,7 +1048,6 @@ var ScrGame = function(){
 						if(result.error){
 							if(result.error == "invalid_signature_bankroll"){
 								_self.showError(strError, _self.sendDispute);
-								// TODO dispute
 							} else {
 								_self.showError(result.error);
 							}
