@@ -174,7 +174,7 @@ var ScrGame = function(){
 			session: 0,
 			winstrict: 0,
 			player_balance: 0,
-			bankroll_balance: 0,
+			bankroller_balance: 0,
 			signPlayer: "",
 			signBankroll: ""
 		}
@@ -182,7 +182,7 @@ var ScrGame = function(){
 			session: 0,
 			winstrict: 0,
 			player_balance: 0,
-			bankroll_balance: 0,
+			bankroller_balance: 0,
 			signPlayer: "",
 			signBankroll: ""
 		}
@@ -767,6 +767,7 @@ var ScrGame = function(){
 	}
 	
 	_self.checkOnline = function(){
+		console.log("checkOnline", _bCloseChannel, _addressBankroll);
 		if(App){
 			if(App.Room && _addressBankroll && _bCloseChannel == false){
 				App.request({action: "close_timeout"}, function(res) {
@@ -907,7 +908,7 @@ var ScrGame = function(){
 				_objCurSession.session = session;
 				_objCurSession.winstrict = App.logic.getGame().countWinStr;
 				_objCurSession.player_balance = balancePlayer;
-				_objCurSession.bankroll_balance = balanceBankroll;
+				_objCurSession.bankroller_balance = balanceBankroll;
 				_objCurSession.signPlayer = signPlayer;
 				_objCurSession.signBankroll = result.signed_bankroller;
 				
@@ -921,24 +922,26 @@ var ScrGame = function(){
 	_self.updateChannel = function() {
 		if (options_debug) return
 		
-		
-		const player_balance     = params.player_balance
-		const bankroller_balance = params.bankroller_balance
-		const session            = params.session
-		const signed_args        = params.signed_args
-		const signed_args2       = params.signed_args2
-		
-		console.log('updateChannel', _objCurSession)
+		console.log('updateChannel', _objCurSession);
 		App.updateChannel({
 			player_balance: _objCurSession.player_balance,
 			bankroller_balance: _objCurSession.bankroller_balance,
 			session: _objCurSession.session,
 			signed_args: _objCurSession.signBankroll
-		}, _self.updateGame)
+		}, _self.updateGame);
 	}
 	
 	_self.updateGame = function() {
-		console.log('updateGame')
+		if (options_debug) return
+		
+		console.log('updateGame');
+		
+		// App.updateGame({
+			// player_balance: _objCurSession.player_balance,
+			// bankroller_balance: _objCurSession.bankroller_balance,
+			// session: _objCurSession.session,
+			// signed_args: _objCurSession.signBankroll
+		// }, _self.updateGame);
 	}
 	
 	_self.sendDispute = function() {
