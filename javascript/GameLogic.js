@@ -25,6 +25,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		result       : false,
 		play         : false,
 		win          : false,
+		round  		 : 0,
 		countWinStr  : 0,
 		valueBankroller : 0,
 		valuePlayer  : 0,
@@ -112,12 +113,14 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 			_session ++;
 			_self.payChannel.addTX(-betGame);
 			_objGame.betGame = betGame;
+			_objGame.round = 1;
 			_objGame.countWinStr = 0;
 			_objGame.bufferProfit = 0;
 			_objGame.result = false;
 			_objGame.play = false;
 			_history.push(objHistory);
 		} else {
+			_objGame.round ++;
 			objHistory = _history[_session-1];
 		}
 		
@@ -157,12 +160,18 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		objHistory.balance = _self.payChannel.getBalance();
 		objHistory.profit =_objGame.bufferProfit - _objGame.betGame;
 		
+		// sign result game
+		gameData = {type:'uint', value:[betGame, _objGame.countWinStr, valPlayer]};
+		randomHash = DCLib.web3.utils.soliditySha3(idChannel, _session, _objGame.round, seed, gameData);
+		var signStateBankroll = DCLib.Account.signHash(randomHash);
+		
 		return {
-			objGame 	: _objGame,
-			balance     : _self.payChannel.getBalance(),
+			objGame: _objGame,
+			balance: _self.payChannel.getBalance(),
 			signBankroll: signBankroll,
-			history		: _history,
-			timestamp   : new Date().getTime()
+			signStateBankroll: signStateBankroll,
+			history: _history,
+			timestamp: new Date().getTime()
 		};
 	}
 	

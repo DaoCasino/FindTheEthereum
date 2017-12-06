@@ -17,7 +17,7 @@
 var ScrGame = function(){
 	PIXI.Container.call( this );
 	
-	const TIME_ONLINE = 3000;
+	const TIME_ONLINE = 5000;
 	
 	var _self = this;
 	var _objGame, _objTutor, _contract,
@@ -900,7 +900,8 @@ var ScrGame = function(){
 		console.log("updateState:", _idChannel, _openkey, balancePlayer, balanceBankroll, session);
 		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, session);
 		var signPlayer = DCLib.Account.signHash(hash);
-		
+		console.log("hash:", hash);
+		console.log("signPlayer:", signPlayer);
 		App.updateState({
 			channel_id: _idChannel,
 			player_address: _openkey,
@@ -933,7 +934,7 @@ var ScrGame = function(){
 			bankroller_balance: _objCurSessionChannel.bankroller_balance,
 			session: _objCurSessionChannel.session,
 			signed_args: _objCurSessionChannel.signBankroll
-		}, _self.updateGame);
+		});
 	}
 	
 	_self.updateGame = function() {
@@ -997,7 +998,7 @@ var ScrGame = function(){
 		
 		var idChannel = _idChannel;
 		var session = App.logic.session();
-		var round = App.logic.getGame().countWinStr;
+		var round = App.logic.getGame().round;
 		var seed = DCLib.Utils.makeSeed();
 		var betGame = _betGame;
 		if(App.logic.getGame().countWinStr > 0){
@@ -1020,13 +1021,6 @@ var ScrGame = function(){
 					return;
 				}
 				
-				// _objCurSessionGame.session = session;
-				// _objCurSessionGame.round = round;
-				// _objCurSessionGame.seed = seed;
-				// _objCurSessionGame.game_data = gameData;
-				// _objCurSessionGame.sig_player = signPlayer;
-				// _objCurSessionGame.sig_bankroll = result.signBankroll;
-
 				App.call('clickBox', 
 					[idChannel, session, round, seed, gameData, result.signBankroll], 
 					function(result){
@@ -1039,13 +1033,27 @@ var ScrGame = function(){
 							}
 							return;
 						}
-
+						
 						if(!DCLib.checkHashSig(hash, result.signBankroll, _addressBankroll)){
 							_self.showError(strError, _self.sendDispute);
 							return;
 						}
 						console.log("clickBox result:", result);
+						
 						_objGame = result.objGame;
+						session = App.logic.session();
+						round = _objGame.round;
+						gameData = {type:'uint', value:[betGame, _objGame.countWinStr, _idBox]};
+						hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
+						signPlayer = DCLib.Account.signHash(hash);
+						
+						_objCurSessionGame.session = session;
+						_objCurSessionGame.round = round;
+						_objCurSessionGame.seed = seed;
+						_objCurSessionGame.game_data = gameData;
+						_objCurSessionGame.sig_player = signPlayer;
+						_objCurSessionGame.sig_bankroll = result.signStateBankroll;
+						
 						var valueBankroller = DCLib.numFromHash(result.signBankroll, 1, _objGame.countBox);
 						
 						if(valueBankroller == _objGame.valueBankroller){
