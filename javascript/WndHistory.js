@@ -170,7 +170,7 @@ var WndHistory = function(prnt, deposit){
 			_tfBalance.setText(strBalance);
 		}
 		
-		if(_tfNum.height > _hMask){
+		if(_tfNum.height + 20 > _hMask){
 			_thinLine.visible = true;
 			_headScroll.visible = true;
 		}

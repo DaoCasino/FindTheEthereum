@@ -9,7 +9,7 @@
  * for use it in frontend and bankroller side
  */
 
-DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
+DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	var _self = this;
 	
 	const MIN_VALUE = 1;
@@ -46,7 +46,6 @@ DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
 	_self.initGame = function(addressPlayer, addressBankroll){
 		_addressPlayer = addressPlayer;
 		_addressBankroll = addressBankroll;
-		console.log("initGame balance:", _self.payChannel.getBalance());
 		return true;
 	}
 	
@@ -91,7 +90,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
 	 * @return {Object} objGame Returns the changed game object.
 	 */
 	_self.clickBox = function(idChannel, session, round, seed, gameData, signBankroll){
-		var betGame = gameData.value[0];
+		var betGame = DCLib.Utils.dec2bet(gameData.value[0]);
 		var countWinStr = gameData.value[1];
 		var valPlayer = gameData.value[2];
 		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
@@ -161,7 +160,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
 		objHistory.profit =_objGame.bufferProfit - _objGame.betGame;
 		
 		// sign result game
-		gameData = {type:'uint', value:[betGame, _objGame.countWinStr, valPlayer]};
+		gameData = {type:'uint', value:[DCLib.Utils.bet2dec(betGame), _objGame.countWinStr, valPlayer]};
 		randomHash = DCLib.web3.utils.soliditySha3(idChannel, _session, _objGame.round, seed, gameData);
 		var signStateBankroll = DCLib.Account.signHash(randomHash);
 		

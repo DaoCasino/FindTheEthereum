@@ -559,7 +559,7 @@ var ScrGame = function(){
 			_wndHistory = new WndHistory(_self, _depositPlayer);
 			_wndHistory.x = _W/2;
 			_wndHistory.y = _H/2;
-			wnd_mc.addChild(_wndHistory);
+			tooltip_mc.addChild(_wndHistory);
 		}
 		if(_tooltip){
 			_tooltip.visible = false;
@@ -608,7 +608,7 @@ var ScrGame = function(){
 			var bg = addObj("bgWndWarning");
 			_wndWarning.addChild(bg);
 			var tfTitle = addText(getText("please_wait"), 40, "#FFCC00", "#000000", "center", 500, 3)
-			tfTitle.y = - 90;
+			tfTitle.y = - 100;
 			_wndWarning.addChild(tfTitle);
 			var tf = addText("", 26, "#FFFFFF", "#000000", "center", 500, 3)
 			tf.y = - 30;
@@ -616,7 +616,7 @@ var ScrGame = function(){
 			
 			var loading = new ItemLoading();
 			loading.x = 0;
-			loading.y = 70;
+			loading.y = 80;
 			_wndWarning.addChild(loading);
 			
 			_wndWarning.tf = tf;
@@ -762,8 +762,12 @@ var ScrGame = function(){
 						_balanceBet = Number(resBal.bets);
 						_self.refreshBalance();
 					})
+					var transactionHash = res.channel.receipt.transactionHash;
 					_bOpenChannel = false;
-					_self.createWndInfo(getText("close_channel"));
+					_self.createWndInfo(getText("close_channel"), function(){
+						var url = "https://ropsten.etherscan.io/tx/" + transactionHash;
+						window.open(url, "_blank");
+					});
 					_self.saveGame();
 				} else {
 					_self.showError("disconnected", function(){
@@ -973,14 +977,13 @@ var ScrGame = function(){
 		
 		console.log('openDispute');
 		_self.showWndWarning(getText("dispute_resolve") + "\n" + getText("open_dispute"));
-		var betGame = _betGame;
+		var betGame = DCLib.Utils.bet2dec(_betGame);
 		if(App.logic.getGame().countWinStr > 0){
 			betGame = 0;
 		}
-		// betGame = DCLib.Utils.bet2dec(0.01); // FOR TEST
+		
 		var round = App.logic.getGame().round;
 		var session = App.logic.session();
-		// session = 1; // FOR TEST
 		var seed = DCLib.Utils.makeSeed();
 		var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, _idBox]};
 		console.log("gameData:", gameData);
@@ -1036,7 +1039,7 @@ var ScrGame = function(){
 		var session = App.logic.session();
 		var round = App.logic.getGame().round;
 		var seed = DCLib.Utils.makeSeed();
-		var betGame = _betGame;
+		var betGame = DCLib.Utils.bet2dec(_betGame);
 		if(App.logic.getGame().countWinStr > 0){
 			betGame = 0;
 		}
