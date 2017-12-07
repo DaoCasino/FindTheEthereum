@@ -64,15 +64,15 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	 * @return {Object} signBankroll Returns the signature of the bankroll.
 	 */
 	_self.signBankroll = function(idChannel, session, round, seed, gameData, signPlayer){
-		var randomHash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
-		var signBankroll = DCLib.Account.signHash(randomHash);
+		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
+		var signBankroll = DCLib.Account.signHash(hash);
 		
-		if(!DCLib.checkHashSig(randomHash, signPlayer, _addressPlayer)){
+		if(!DCLib.checkHashSig(hash, signPlayer, _addressPlayer)){
 			return {error: "invalid_signature_player"};
 		}
 		
 		return {
-			randomHash: randomHash,
+			hash: hash,
 			signBankroll: signBankroll
 		};
 	}

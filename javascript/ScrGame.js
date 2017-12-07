@@ -33,7 +33,7 @@ var ScrGame = function(){
 	// windows
 	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin, _wndHistory;
 	// boolean
-	var _gameOver, _bWindow, _bCloseChannel, _bOpenChannel;
+	var _gameOver, _bWindow, _bCloseChannel, _bOpenChannel, _bSendDispute;
 	// numbers
 	var _idTutor, _idBox,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
@@ -95,9 +95,7 @@ var ScrGame = function(){
 		saveData();
 	}
 	
-	_self.loadGame = function(){
-		loadData();
-		
+	_self.loadGame = function(){		
 		if(loginObj["openChannel"]){
 			addressContract = loginObj["addressContract"];
 			_balanceSession = loginObj["balanceSession"];
@@ -142,6 +140,7 @@ var ScrGame = function(){
 		_bWindow = false;
 		_bCloseChannel = false;
 		_bOpenChannel = false;
+		_bSendDispute = false;
 	}
 	
 	_self.createNumbers = function(){
@@ -617,7 +616,7 @@ var ScrGame = function(){
 			
 			var loading = new ItemLoading();
 			loading.x = 0;
-			loading.y = 60;
+			loading.y = 70;
 			_wndWarning.addChild(loading);
 			
 			_wndWarning.tf = tf;
@@ -720,9 +719,10 @@ var ScrGame = function(){
 							})
 						})					
 					} else {
-						_self.showError("disconnected", function(){
-							_self.removeAllListener();
-							window.location.reload();
+						_self.showError("Please, wait 2 minutes and try again", function(){
+							_self.startChannelGame(deposit)
+							// _self.removeAllListener();
+							// window.location.reload();
 						});
 					}
 				} else {
@@ -751,6 +751,10 @@ var ScrGame = function(){
 			App.disconnect({session:session}, function(res){
 				_wndWarning.visible = false;
 				_balanceSession = 0;
+				for (var i = 0; i < _self.arButtons.length; i++) {
+					var item_mc = _self.arButtons[i];
+					item_mc._selected = false;
+				}
 				console.log('Game disconnect:', res);
 				if(res.channel.receipt){
 					DCLib.Eth.getBalances(_openkey, function(resBal) {
@@ -772,11 +776,9 @@ var ScrGame = function(){
 	}
 	
 	_self.checkOnline = function(){
-		console.log("checkOnline", _bCloseChannel, _addressBankroll);
 		if(App){
 			if(App.Room && _addressBankroll && _bCloseChannel == false){
 				App.request({action: "close_timeout"}, function(res) {
-					console.log("state_channel:", res.response.state_channel);
 					if (res.response.state_channel == false) {
 						_bCloseChannel = true;
 						App.request({action: 'disconnect'})
@@ -934,24 +936,27 @@ var ScrGame = function(){
 		if (options_debug) return
 		
 		console.log('updateChannel:', _objCurSessionChannel);
+		_self.showWndWarning(getText("dispute_resolve") + "\n" + getText("update_channel"));
 		var round = App.logic.getGame().round;
-		var callback = undefined;
-		if(round > 1){
-			callback = _self.updateGame;
-		}
-		
-		App.updateChannel({
+		var obj = {
 			player_balance: _objCurSessionChannel.player_balance,
 			bankroller_balance: _objCurSessionChannel.bankroller_balance,
 			session: _objCurSessionChannel.session,
 			signed_args: _objCurSessionChannel.signBankroll
-		}, callback);
+		};
+		
+		if(round > 1){
+			App.updateChannel(obj, _self.updateGame);
+		} else {
+			App.updateChannel(obj, _self.openDispute);
+		}
 	}
 	
 	_self.updateGame = function() {
 		if (options_debug) return
 		
 		console.log('updateGame:', _objCurSessionGame);
+		_self.showWndWarning(getText("dispute_resolve") + "\n" + getText("update_game"));
 		
 		App.updateGame({
 			session: _objCurSessionGame.session,
@@ -967,19 +972,26 @@ var ScrGame = function(){
 		if (options_debug) return
 		
 		console.log('openDispute');
+		_self.showWndWarning(getText("dispute_resolve") + "\n" + getText("open_dispute"));
 		var betGame = _betGame;
 		if(App.logic.getGame().countWinStr > 0){
 			betGame = 0;
 		}
-		betGame = DCLib.Utils.bet2dec(0.01)// FOR TEST
+		// betGame = DCLib.Utils.bet2dec(0.01); // FOR TEST
 		var round = App.logic.getGame().round;
+		var session = App.logic.session();
+		// session = 1; // FOR TEST
+		var seed = DCLib.Utils.makeSeed();
 		var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, _idBox]};
 		console.log("gameData:", gameData);
+		console.log("round:", round);
+		console.log("seed:", seed);
 		App.openDispute({
 			round: round,
-			dispute_seed: DCLib.Utils.makeSeed(),
+			session: session,
+			dispute_seed: seed,
 			gamedata: gameData
-		});
+		}, _self.closeDispute);
 	}
 	
 	_self.sendDispute = function() {
@@ -988,15 +1000,22 @@ var ScrGame = function(){
 		}
 		
 		_self.showWndWarning(getText("dispute_resolve"));
+		_bSendDispute = true;
 		console.log("sendDispute");
 		
 		var session = App.logic.session();
 		
-		if(session > 1){
+		if(session > 0){
 			_self.updateChannel();
 		} else {
 			_self.openDispute();
 		}
+	}
+	
+	_self.closeDispute = function() {
+		console.log("closeDispute");
+		_wndWarning.visible = false;
+		_self.createWndInfo("close_dispute");
 	}
 	
 	// CLICK
@@ -1026,10 +1045,10 @@ var ScrGame = function(){
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.signHash(hash);
 		
-		// if(1){
-			// _self.openDispute();
-			// return;
-		// }
+		if(session >= 1){
+			_self.sendDispute();
+			return;
+		}
 
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
 		
@@ -1271,15 +1290,16 @@ var ScrGame = function(){
 				_timeOnline = 0;
 				if(_bOpenChannel && !_bCloseChannel){
 					App.request({action: "close_timeout"}, function(res) {
-						console.log("state_channel:", res.response.state_channel);
 						if (res.response.state_channel == false) {
 							_bCloseChannel = true;
-							App.request({action: 'disconnect'})
-							_self.closeWindow()
-							_self.showError("disconnected", function(){
-								_self.removeAllListener();
-								window.location.reload();
-							});
+							if(!_bSendDispute){
+								App.request({action: 'disconnect'})
+								_self.closeWindow()
+								_self.showError("disconnected", function(){
+									_self.removeAllListener();
+									window.location.reload();
+								});
+							}
 						}
 					})
 				}

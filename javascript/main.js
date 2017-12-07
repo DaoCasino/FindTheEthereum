@@ -85,7 +85,7 @@ function loadData() {
 	if(isLocalStorageAvailable()){
 		if (localStorage.getItem('dc_fte')){
 			var loginStr = localStorage.getItem('dc_fte')
-			// loginObj = JSON.parse(loginStr);
+			loginObj = JSON.parse(loginStr);
 			// console.log("Loading: ok!");
 		} else {
 			// console.log("Loading: fail!");
