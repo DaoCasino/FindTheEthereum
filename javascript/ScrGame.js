@@ -785,12 +785,14 @@ var ScrGame = function(){
 				App.request({action: "close_timeout"}, function(res) {
 					if (res.response.state_channel == false) {
 						_bCloseChannel = true;
-						App.request({action: 'disconnect'})
-						_self.closeWindow()
-						_self.showError("disconnected", function(){
-							_self.removeAllListener();
-							window.location.reload();
-						});
+						if(!_bSendDispute){
+							App.request({action: 'disconnect'})
+							_self.closeWindow()
+							_self.showError("disconnected", function(){
+								_self.removeAllListener();
+								window.location.reload();
+							});
+						}
 					}
 				})
 			}
@@ -950,10 +952,11 @@ var ScrGame = function(){
 		};
 		
 		if(round > 1){
-			App.updateChannel(obj, _self.updateGame);
+			// App.updateChannel(obj, _self.updateGame);
 		} else {
-			App.updateChannel(obj, _self.openDispute);
+			// App.updateChannel(obj, _self.openDispute);
 		}
+		App.updateChannel(obj);
 	}
 	
 	_self.updateGame = function() {
@@ -969,7 +972,8 @@ var ScrGame = function(){
 			game_data: _objCurSessionGame.game_data,
 			sig_player: _objCurSessionGame.sig_player,
 			sig_bankroll: _objCurSessionGame.sig_bankroll
-		}, _self.openDispute);
+		});
+		// }, _self.openDispute);
 	}
 	
 	_self.openDispute = function() {
@@ -983,7 +987,9 @@ var ScrGame = function(){
 		}
 		
 		var round = App.logic.getGame().round;
+		round++; // FOR TEST: UC -> UG -> OD
 		var session = App.logic.session();
+		// session++; // FOR TEST: UC -> OD
 		var seed = DCLib.Utils.makeSeed();
 		var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, _idBox]};
 		console.log("gameData:", gameData);
@@ -1048,7 +1054,7 @@ var ScrGame = function(){
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.signHash(hash);
 		
-		// if(session >= 1){
+		// if(session >= 2){
 			// _self.sendDispute();
 			// return;
 		// }
