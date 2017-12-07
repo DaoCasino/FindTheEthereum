@@ -1045,10 +1045,10 @@ var ScrGame = function(){
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.signHash(hash);
 		
-		if(session >= 1){
-			_self.sendDispute();
-			return;
-		}
+		// if(session >= 1){
+			// _self.sendDispute();
+			// return;
+		// }
 
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
 		
