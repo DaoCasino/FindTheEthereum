@@ -660,8 +660,7 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
 		var objConnect = {
-			// bankroller : "0xad55c218e43a01fbd104d5edf76a35f28a3c4fa8", 
-			bankroller : "0x146c5e3b9395738eb67feceb5e37cd5a56d63342", 
+			bankroller : "0xad55c218e43a01fbd104d5edf76a35f28a3c4fa8", 
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
@@ -983,12 +982,12 @@ var ScrGame = function(){
 		console.log('openDispute');
 		_self.showWndWarning(getText("dispute_resolve") + "\n" + getText("open_dispute"));
 		var betGame = DCLib.Utils.bet2dec(_betGame);
-		if(App.logic.getGame().countWinStr > 0){
-			betGame = 0;
-		}
+		// if(App.logic.getGame().countWinStr > 0){
+			// betGame = 0;
+		// }
 		
 		var round = App.logic.getGame().round;
-		round++; // FOR TEST: UC -> UG -> OD
+		// round++; // FOR TEST: UC -> UG -> OD
 		var session = App.logic.session();
 		// session++; // FOR TEST: UC -> OD
 		var seed = DCLib.Utils.makeSeed();
@@ -1055,7 +1054,8 @@ var ScrGame = function(){
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.signHash(hash);
 		
-		// if(session >= 2){
+		// for test dispute
+		// if(session >= 1){
 			// _self.sendDispute();
 			// return;
 		// }
@@ -1104,7 +1104,6 @@ var ScrGame = function(){
 						_objCurSessionGame.sig_bankroll = result.signStateBankroll;
 						
 						var valueBankroller = DCLib.numFromHash(result.signBankroll, 1, _objGame.countBox);
-						valueBankroller = 1; //for test
 						
 						if(valueBankroller == _objGame.valueBankroller){
 							_self.showResult(result, box);
