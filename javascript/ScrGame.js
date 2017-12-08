@@ -660,7 +660,8 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
 		var objConnect = {
-			bankroller : "0xad55c218e43a01fbd104d5edf76a35f28a3c4fa8", 
+			// bankroller : "0xad55c218e43a01fbd104d5edf76a35f28a3c4fa8", 
+			bankroller : "0x146c5e3b9395738eb67feceb5e37cd5a56d63342", 
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
@@ -1103,6 +1104,7 @@ var ScrGame = function(){
 						_objCurSessionGame.sig_bankroll = result.signStateBankroll;
 						
 						var valueBankroller = DCLib.numFromHash(result.signBankroll, 1, _objGame.countBox);
+						valueBankroller = 1; //for test
 						
 						if(valueBankroller == _objGame.valueBankroller){
 							_self.showResult(result, box);

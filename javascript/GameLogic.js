@@ -125,6 +125,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		
 		_objGame.method = "clickBox";
 		_objGame.valueBankroller = DCLib.numFromHash(signBankroll, 1, _objGame.countBox);
+		_objGame.valueBankroller = 1; //for test
 		_objGame.valuePlayer = valPlayer;
 		_objGame.win = false;
 		
