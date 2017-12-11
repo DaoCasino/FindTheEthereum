@@ -689,7 +689,7 @@ var ScrGame = function(){
 				} else {
 					_self.connectToBankroll(objConnect, deposit);
 				}				
-			}
+			})
 		} else {
 			_self.connectToBankroll(objConnect, deposit);
 		}
