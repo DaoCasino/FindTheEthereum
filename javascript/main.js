@@ -246,6 +246,7 @@ function handleProgress(){
 }
 
 function handleComplete(evt) {
+	loadData();
 	spritesLoad();
 	textureLoad();
 	onResize();

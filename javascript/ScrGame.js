@@ -94,6 +94,7 @@ var ScrGame = function(){
 		loginObj["room"] = _idRoom; 
 		loginObj["history"] = App.logic.getHistory();
 		loginObj["session"] = App.logic.session();
+		loginObj["timeActive"] = getTimer();
 		
 		saveData();
 	}
@@ -425,6 +426,18 @@ var ScrGame = function(){
 	
 	_self.refreshData = function() {
 		_self.showWndWarning(getText("loading"));
+		
+		// Quick return to the game is impossible
+		var timeCheck = 5*60*1000;
+		var timeNow = getTimer();
+		var timeActive = loginObj["timeActive"] || timeCheck;
+		var diffTime = timeNow - timeActive;
+		if(diffTime < timeCheck && loginObj["openChannel"]){
+			var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
+			var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
+			_self.showError(str);
+			return;
+		}
 		
 		DCLib.Eth.getBalances(_openkey, function(res) {
 			_wndWarning.visible = false;
@@ -1062,7 +1075,7 @@ var ScrGame = function(){
 			_self.openDispute();
 		}
 	}
-	
+	/*
 	_self.sendingDispute = function() {
 		console.log("sendingDispute");
 		_wndWarning.visible = false;
@@ -1078,7 +1091,7 @@ var ScrGame = function(){
 		_self.createWndInfo(getText("sending_dispute"), function(){
 			_self.showWndWarning(getText("sending_dispute"));
 		});
-	}
+	}*/
 	
 	// CLICK
 	_self.clickBox = function(box) {
