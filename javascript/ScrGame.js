@@ -428,16 +428,19 @@ var ScrGame = function(){
 		_self.showWndWarning(getText("loading"));
 		
 		// Quick return to the game is impossible
-		var timeCheck = 5*60*1000;
+		/*var timeCheck = 5*60*1000;
 		var timeNow = getTimer();
 		var timeActive = loginObj["timeActive"] || timeCheck;
 		var diffTime = timeNow - timeActive;
 		if(diffTime < timeCheck && loginObj["openChannel"]){
 			var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
 			var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
-			_self.showError(str);
+			_self.showError(str, function(){
+				_self.removeAllListener();
+				window.location.reload();
+			});
 			return;
-		}
+		}*/
 		
 		DCLib.Eth.getBalances(_openkey, function(res) {
 			_wndWarning.visible = false;
