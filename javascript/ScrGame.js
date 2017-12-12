@@ -946,6 +946,7 @@ var ScrGame = function(){
 		}
 	}
 	
+	// DISPUTE
 	_self.updateState = function(callback, bSaveChannel) {
 		if (options_debug) {
 			return;
@@ -1050,8 +1051,7 @@ var ScrGame = function(){
 			session: session,
 			dispute_seed: seed,
 			gamedata: gameData
-		// }, _self.sendingDispute);
-		});
+		}, _self.sendingDispute);
 	}
 	
 	_self.sendDispute = function() {
@@ -1075,12 +1075,12 @@ var ScrGame = function(){
 			_self.openDispute();
 		}
 	}
-	/*
+	
 	_self.sendingDispute = function() {
 		console.log("sendingDispute");
 		_wndWarning.visible = false;
 		App.request({
-			action: 'close_dispute'
+			action: 'close_dispute',
 			close_args: {
 				player_address: _openkey
 			}
@@ -1088,10 +1088,12 @@ var ScrGame = function(){
 			console.log("close_dispute", res);
 		   // ...body
 		})
+		console.log("TODO getBlockNumber");
+		// DCLib.web3.eth.getBlockNumber().then(console.log)
 		_self.createWndInfo(getText("sending_dispute"), function(){
 			_self.showWndWarning(getText("sending_dispute"));
 		});
-	}*/
+	}
 	
 	// CLICK
 	_self.clickBox = function(box) {
