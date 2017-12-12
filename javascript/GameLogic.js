@@ -111,7 +111,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		if(betGame > 0){
 			_session ++;
 			console.log('addTX', -betGame, _addressPlayer)
-			App.paychannelAddTX({user_id:_addressPlayer, profit:-betGame});
+			_self.payChannel.addTX(-betGame);
 			_objGame.betGame = betGame;
 			_objGame.round = 1;
 			_objGame.countWinStr = 0;
@@ -188,7 +188,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		
 		_objGame.countWinStr = 0;
 		console.log('addTX', _objGame.bufferProfit, _addressPlayer)
-		App.paychannelAddTX({user_id:_addressPlayer, profit:_objGame.bufferProfit});
+		_self.payChannel.addTX(_objGame.bufferProfit);
 		var objHistory = _history[_session-1];
 		objHistory.balance = _self.payChannel.getBalance();
 		objHistory.profit =_objGame.bufferProfit - _objGame.betGame;
