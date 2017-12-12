@@ -1,6 +1,6 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 0.0.1";
+var version = "v. 0.0.2";
 var loginObj = {};
 var dataAnima = [];
 var dataMovie = [];
@@ -246,7 +246,6 @@ function handleProgress(){
 }
 
 function handleComplete(evt) {
-	loadData();
 	spritesLoad();
 	textureLoad();
 	onResize();
