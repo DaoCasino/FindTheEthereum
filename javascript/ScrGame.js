@@ -45,7 +45,7 @@ var ScrGame = function(){
 	// arrays
 	var _arBoxes;
 	// strings
-	var _openkey, _addressBankroll, _idChannel, _idRoom;
+	var _openkey, _addressBankroll, _idChannel, _idRoom, _disputeSeed;
 	
 	// INIT
 	_self.init = function(){
@@ -438,15 +438,15 @@ var ScrGame = function(){
 		var timeNow = getTimer();
 		var timeActive = loginObj["timeActive"] || timeCheck;
 		var diffTime = timeNow - timeActive;
-		if(diffTime < timeCheck && loginObj["openChannel"]){
-			var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
-			var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
-			_self.showError(str, function(){
-				_self.removeAllListener();
-				window.location.reload();
-			});
-			return;
-		}
+		// if(diffTime < timeCheck && loginObj["openChannel"]){
+		// 	var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
+		// 	var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
+		// 	_self.showError(str, function(){
+		// 		_self.removeAllListener();
+		// 		window.location.reload();
+		// 	});
+		// 	return;
+		// }
 		
 		DCLib.Eth.getBalances(_openkey, function(res) {
 			_wndWarning.visible = false;
@@ -1042,9 +1042,11 @@ var ScrGame = function(){
 		var betGame = DCLib.Utils.bet2dec(_betGame);		
 		var round = App.logic.getGame().round;
 		// round++; // FOR TEST: UC -> UG -> OD
+		// TODO Не работает
+
 		var session = App.logic.session();
 		// session++; // FOR TEST: UC -> OD
-		var seed = DCLib.Utils.makeSeed();
+		_disputeSeed = DCLib.Utils.makeSeed();
 		var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, _idBox]};
 		
 		if(_bOfflineBankroll){
@@ -1058,7 +1060,7 @@ var ScrGame = function(){
 		App.openDispute({
 			round: round,
 			session: session,
-			dispute_seed: seed,
+			dispute_seed: _disputeSeed,
 			gamedata: gameData
 		}, _self.sendingDispute);
 	}
@@ -1091,7 +1093,7 @@ var ScrGame = function(){
 		_disputeBlock = obj.blockNumber;
 		_self.getEndBlock();
 		_self.getCurBlock();
-		console.log("_disputeBlock", _disputeBlock);
+		// console.log("_disputeBlock", _disputeBlock);
 		
 		_self.createWndInfo(getText("sending_dispute"), function(){
 			_self.showWndWarning(getText("sending_dispute"));
@@ -1100,6 +1102,8 @@ var ScrGame = function(){
 		App.request({
 			action: 'close_dispute',
 			close_args: {
+				dispute_seed: _disputeSeed,
+				channel_id: _idChannel,
 				player_address: _openkey
 			}
 		}).then(function(res) {
@@ -1117,14 +1121,14 @@ var ScrGame = function(){
 		
 		_self.showWndWarning(getText("dispute_close"));
 		
-		App.closeByTime({
-		}, _self.closedDispute);
+		App.closeByTime(_self.closedDispute);
 	}
 	
 	_self.closedDispute = function(obj) {
 		_wndWarning.visible = false;
-		_self.createWndInfo(getText("sending_dispute"), function(){
-			
+		_self.createWndInfo(getText("closed_dispute"), function(){
+			var url = "https://ropsten.etherscan.io/tx/" + obj.transactionHash;
+			window.open(url, "_blank");
 		});
 	}
 	
@@ -1183,10 +1187,10 @@ var ScrGame = function(){
 			return;
 		}
 		
-		// for test dispute
-		// if(session > 0){
-			// _self.sendDispute();
-			// return;
+		//for test dispute
+		// if(session > 1){
+		// 	_self.sendDispute();
+		// 	return;
 		// }
 
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
