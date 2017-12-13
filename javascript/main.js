@@ -1,6 +1,6 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 0.0.4";
+var version = "v. 0.0.5";
 var loginObj = {};
 var dataAnima = [];
 var dataMovie = [];
