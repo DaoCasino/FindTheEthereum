@@ -1104,7 +1104,6 @@ var ScrGame = function(){
 						_objCurSessionGame.sig_bankroll = result.signStateBankroll;
 						
 						var valueBankroller = DCLib.numFromHash(result.signBankroll, 1, _objGame.countBox);
-						valueBankroller = 1; //for test
 						
 						if(valueBankroller == _objGame.valueBankroller){
 							_self.showResult(result, box);
