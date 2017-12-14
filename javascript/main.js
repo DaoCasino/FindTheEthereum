@@ -1,6 +1,6 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 0.0.2";
+var version = "v. 0.0.1";
 var loginObj = {};
 var dataAnima = [];
 var dataMovie = [];
@@ -64,7 +64,7 @@ function loadLib() {
 		window.App = new DCLib.DApp({
 			slug: 'DC_FindTheEthereum',
 			contract: {
-				contract_address: '0x2255fe94dacf97a3e9905d3b5b588dac83839860',
+				contract_address: '0xdd77beae775b16b4f659f4a93a46e8751554d79f',
 				contract_abi: abiContract
 			}
 		})

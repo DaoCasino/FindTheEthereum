@@ -65,7 +65,6 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	_self.signBankroll = function(idChannel, session, round, seed, gameData, signPlayer){
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signBankroll = DCLib.Account.signHash(hash);
-		
 		if(!DCLib.checkHashSig(hash, signPlayer, _addressPlayer)){
 			return {error: "invalid_signature_player"};
 		}

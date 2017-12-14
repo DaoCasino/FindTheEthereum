@@ -19,7 +19,7 @@ var ScrGame = function(){
 	
 	const TIME_ONLINE = 5000;
 	const TIME_BLOCK = 30000;
-	const COUNT_BANKR_OFFLINE = 1;
+	const COUNT_BANKR_OFFLINE = 2;
 	
 	var _self = this;
 	var _objGame, _objTutor, _contract,
@@ -438,6 +438,7 @@ var ScrGame = function(){
 		var timeNow = getTimer();
 		var timeActive = loginObj["timeActive"] || timeCheck;
 		var diffTime = timeNow - timeActive;
+		console.log("TODO: timeActive off");
 		// if(diffTime < timeCheck && loginObj["openChannel"]){
 		// 	var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
 		// 	var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
@@ -689,7 +690,7 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
 		var objConnect = {
-			bankroller : "0x2424085f4a19ec00b24cf4bc367b84358d8c1c3e",
+			bankroller : "0xc893e4813f1f0e5811023ae6dab8b19e52bf2358",
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
@@ -997,7 +998,7 @@ var ScrGame = function(){
 		if (options_debug) return
 		
 		console.log('updateChannel:', _objCurSessionChannel);
-		_self.showWndWarning(getText("dispute_resolve") + "\n" + getText("update_channel"));
+		_self.showWndWarning(getText("contract_process") + "\n" + getText("update_channel"));
 		var round = App.logic.getGame().round;
 		var obj = {
 			player_balance: _objCurSessionChannel.player_balance,
@@ -1009,6 +1010,7 @@ var ScrGame = function(){
 		if(_bOfflineBankroll && App.logic.getGame().countWinStr > 0){
 			round ++;
 		}
+		// round++; // FOR TEST: UC -> UG -> OD
 		
 		if(round > 1){
 			App.updateChannel(obj, _self.updateGame);
@@ -1022,7 +1024,7 @@ var ScrGame = function(){
 		
 		console.log('updateGame:', _objCurSessionGame);
 		_bUpdateGame = true;
-		_self.showWndWarning(getText("dispute_resolve") + "\n" + getText("update_game"));
+		_self.showWndWarning(getText("contract_process") + "\n" + getText("update_game"));
 		
 		App.updateGame({
 			session: _objCurSessionGame.session,
@@ -1038,7 +1040,7 @@ var ScrGame = function(){
 		if (options_debug) return
 		
 		console.log('openDispute');
-		_self.showWndWarning(getText("dispute_resolve") + "\n" + getText("open_dispute"));
+		_self.showWndWarning(getText("contract_process") + "\n" + getText("open_dispute"));
 		var betGame = DCLib.Utils.bet2dec(_betGame);		
 		var round = App.logic.getGame().round;
 		// round++; // FOR TEST: UC -> UG -> OD
@@ -1093,7 +1095,6 @@ var ScrGame = function(){
 		_disputeBlock = obj.blockNumber;
 		_self.getEndBlock();
 		_self.getCurBlock();
-		// console.log("_disputeBlock", _disputeBlock);
 		
 		_self.createWndInfo(getText("sending_dispute"), function(){
 			_self.showWndWarning(getText("sending_dispute"));
@@ -1108,7 +1109,7 @@ var ScrGame = function(){
 			}
 		}).then(function(res) {
 			_bCloseDispute = true;
-			console.log("closed_dispute", res);
+			console.log("closed_dispute TODO", res);
 		})
 	}
 	
@@ -1126,10 +1127,14 @@ var ScrGame = function(){
 	
 	_self.closedDispute = function(obj) {
 		_wndWarning.visible = false;
-		_self.createWndInfo(getText("closed_dispute"), function(){
-			var url = "https://ropsten.etherscan.io/tx/" + obj.transactionHash;
-			window.open(url, "_blank");
-		});
+		console.log("closedDispute", obj);
+		
+		if(obj.transactionHash){
+			_self.createWndInfo(getText("closed_dispute"), function(){
+				var url = "https://ropsten.etherscan.io/tx/" + obj.transactionHash;
+				window.open(url, "_blank");
+			});
+		}
 	}
 	
 	_self.getCurBlock = function() {
