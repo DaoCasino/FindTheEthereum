@@ -1150,11 +1150,13 @@ var ScrGame = function(){
 			_curBlock = value;
 			var difBlock = _endBlock - _curBlock;
 			if(_endBlock && _curBlock){
-				var strBl = difBlock + " " + getText("block");
-				if(difBlock > 1){
-					strBl = difBlock + " " + getText("blocks");
+				if(!_bCloseChannel && _bOpenChannel && difBlock > 0){
+					var strBl = difBlock + " " + getText("block");
+					if(difBlock > 1){
+						strBl = difBlock + " " + getText("blocks");
+					}
+					_tfTime.setText(strBl);
 				}
-				_tfTime.setText(strBl);
 				if(_disputeBlock && !_bCloseDispute){
 					if(difBlock > 0){
 						var str = getText("dispute_process").replace(new RegExp("NUM"), difBlock);
