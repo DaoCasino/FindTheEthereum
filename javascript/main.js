@@ -64,7 +64,7 @@ function loadLib() {
 		window.App = new DCLib.DApp({
 			slug: 'DC_FindTheEthereum',
 			contract: {
-				contract_address: '0xdd77beae775b16b4f659f4a93a46e8751554d79f',
+				contract_address: '0x0a8907c6db70c0031bd7ca0dbe3cf07ed1b2e8bb',
 				contract_abi: abiContract
 			}
 		})

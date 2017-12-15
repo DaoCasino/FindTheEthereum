@@ -438,16 +438,16 @@ var ScrGame = function(){
 		var timeNow = getTimer();
 		var timeActive = loginObj["timeActive"] || timeCheck;
 		var diffTime = timeNow - timeActive;
-		console.log("TODO: timeActive off");
-		// if(diffTime < timeCheck && loginObj["openChannel"]){
-		// 	var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
-		// 	var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
-		// 	_self.showError(str, function(){
-		// 		_self.removeAllListener();
-		// 		window.location.reload();
-		// 	});
-		// 	return;
-		// }
+		// console.log("TODO: timeActive off");
+		if(diffTime < timeCheck && loginObj["openChannel"]){
+			var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
+			var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
+			_self.showError(str, function(){
+				_self.removeAllListener();
+				window.location.reload();
+			});
+			return;
+		}
 		
 		DCLib.Eth.getBalances(_openkey, function(res) {
 			_wndWarning.visible = false;
@@ -805,13 +805,13 @@ var ScrGame = function(){
 					item_mc._selected = false;
 				}
 				console.log('Game disconnect:', res);
-				if(res.channel.receipt){
+				if(res.channel){
 					DCLib.Eth.getBalances(_openkey, function(resBal) {
 						_balanceEth = Number(resBal.eth);
 						_balanceBet = Number(resBal.bets);
 						_self.refreshBalance();
 					})
-					var transactionHash = res.channel.receipt.transactionHash;
+					var transactionHash = res.channel.transactionHash;
 					_bOpenChannel = false;
 					_self.createWndInfo(getText("close_channel"), function(){
 						var url = "https://ropsten.etherscan.io/tx/" + transactionHash;
@@ -1044,8 +1044,6 @@ var ScrGame = function(){
 		var betGame = DCLib.Utils.bet2dec(_betGame);		
 		var round = App.logic.getGame().round;
 		// round++; // FOR TEST: UC -> UG -> OD
-		// TODO Не работает
-
 		var session = App.logic.session();
 		// session++; // FOR TEST: UC -> OD
 		_disputeSeed = DCLib.Utils.makeSeed();
@@ -1090,11 +1088,11 @@ var ScrGame = function(){
 	}
 	
 	_self.sendingDispute = function(obj) {
-		console.log("sendingDispute", obj);
 		_wndWarning.visible = false;
 		_disputeBlock = obj.blockNumber;
 		_self.getEndBlock();
 		_self.getCurBlock();
+		console.log("sendingDispute", _disputeBlock, obj);
 		
 		_self.createWndInfo(getText("sending_dispute"), function(){
 			_self.showWndWarning(getText("sending_dispute"));
@@ -1109,7 +1107,12 @@ var ScrGame = function(){
 			}
 		}).then(function(res) {
 			_bCloseDispute = true;
-			console.log("closed_dispute TODO", res);
+			_wndWarning.visible = false;
+			
+			_self.createWndInfo(getText("closed_dispute"), function(){
+				var url = "https://ropsten.etherscan.io/tx/" + res.receipt.transactionHash;
+				window.open(url, "_blank");
+			});
 		})
 	}
 	
@@ -1119,9 +1122,7 @@ var ScrGame = function(){
 		}
 		
 		_bCloseDispute = true;
-		
 		_self.showWndWarning(getText("dispute_close"));
-		
 		App.closeByTime(_self.closedDispute);
 	}
 	
@@ -1193,9 +1194,9 @@ var ScrGame = function(){
 		}
 		
 		//for test dispute
-		// if(session > 1){
-		// 	_self.sendDispute();
-		// 	return;
+		// if(session > 0){
+			// _self.sendDispute();
+			// return;
 		// }
 
 		var strError = getText("invalid_signature_bankroll").replace(new RegExp("ADR"), addressContract);
@@ -1440,7 +1441,7 @@ var ScrGame = function(){
 			}
 			
 			// dispute
-			if(/*_disputeBlock &&*/ _curBlock && _endBlock && !_bCloseDispute){
+			if(_disputeBlock && _curBlock && _endBlock && !_bCloseDispute){
 				_timeBlock += diffTime;
 				if(_timeBlock > TIME_BLOCK){
 					_timeBlock = 0;
