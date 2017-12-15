@@ -4,6 +4,8 @@
 	address="Address"
 	balance="Balance"
 	bet="Bet"
+	block="block"
+	blocks="blocks"
 	cashout="Cashout"
 	close_channel="Tokens are successfully distributed."
 	closed_dispute="The dispute was successfully closed."
@@ -50,6 +52,7 @@
 	error_balance_eth="You do not have enough ETH."
 	error_balance_bankroll_bet="Bankroll do not have enough BET. Try to choose a deposit less."
 	error_quick_return="The previous session of the game is not closed. Try later (NUM min)."
+	error_address_contract="You do not have the address of a smart contract."
 	invalid_data="You sent invalid data."
 	invalid_signature_bankroll="Bankroll did not sign the current event. We sent the dispute to smart contract ADR."
 	

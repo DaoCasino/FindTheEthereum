@@ -25,7 +25,7 @@ var ScrGame = function(){
 	var _objGame, _objTutor, _contract,
 	_objCurSessionChannel, _objNextSessionChannel, _objCurSessionGame;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
-	var _tfBalance, _tfBet, _tfWinStr, __tfAddress;
+	var _tfBalance, _tfBet, _tfWinStr, _tfAddress, _tfTime;
 	var _fRequestFullScreen, _fCancelFullScreen;
 	// layers
 	var back_mc, game_mc, face_mc, wnd_mc, warning_mc, tutor_mc, tooltip_mc;
@@ -221,7 +221,9 @@ var ScrGame = function(){
 		face_mc.addChild(icoKey);
 		var icoBet = addObj("icoBet", 52, posY+offsetY*1);
 		face_mc.addChild(icoBet);
-		var icoWS = addObj("icoWS", 52, posY+offsetY*2);
+		var icoTime = addObj("icoTime", 52, posY+offsetY*2);
+		face_mc.addChild(icoTime);
+		var icoWS = addObj("icoWS", 52, posY+offsetY*3);
 		face_mc.addChild(icoWS);
 		_tfAddress = addText(_openkey, sizeTf, "#ffffff", "#000000", "left", 600, 4);
 		_tfAddress.x = icoKey.x + icoKey.w/2 + 10;
@@ -231,7 +233,11 @@ var ScrGame = function(){
 		_tfBalance.x = _tfAddress.x;
 		_tfBalance.y = icoBet.y - _tfBalance.height/2;
 		face_mc.addChild(_tfBalance);
-		_tfWinStr= addText("0", sizeTf, "#ffffff", "#000000", "left", 400, 4);
+		_tfTime = addText("0", sizeTf, "#ffffff", "#000000", "left", 400, 4);
+		_tfTime.x = _tfAddress.x;
+		_tfTime.y =  icoTime.y - _tfTime.height/2;
+		face_mc.addChild(_tfTime);
+		_tfWinStr = addText("0", sizeTf, "#ffffff", "#000000", "left", 400, 4);
 		_tfWinStr.x = _tfAddress.x;
 		_tfWinStr.y =  icoWS.y - _tfWinStr.height/2;
 		face_mc.addChild(_tfWinStr);
@@ -454,7 +460,7 @@ var ScrGame = function(){
 			_balanceEth = Number(res.eth);
 			_balanceBet = Number(res.bets);
 			_self.refreshBalance();
-			if(_balanceEth == 0){
+			if(_balanceEth < 0.1){
 				_self.showError("error_balance_eth");
 			} else {
 				// load game
@@ -727,6 +733,7 @@ var ScrGame = function(){
 					var transactionHash = "";
 					if(info.channel){
 						_idChannel = info.channel.channel_id;
+						_curBlock = info.channel.blockNumber;
 						addressContract = info.channel.contract_address;
 						_depositBankroll = DCLib.Utils.dec2bet(info.channel.bankroller_deposit);
 						if(info.channel.receipt){
@@ -739,6 +746,7 @@ var ScrGame = function(){
 						_depositPlayer = deposit;
 						if(addressContract){
 							_contract = new DCLib.web3.eth.Contract(abiContract, addressContract);
+							_self.getEndBlock();
 							_bOpenChannel = true;
 						}
 
@@ -1090,7 +1098,6 @@ var ScrGame = function(){
 	_self.sendingDispute = function(obj) {
 		_wndWarning.visible = false;
 		_disputeBlock = obj.blockNumber;
-		_self.getEndBlock();
 		_self.getCurBlock();
 		console.log("sendingDispute", _disputeBlock, obj);
 		
@@ -1143,11 +1150,18 @@ var ScrGame = function(){
 			_curBlock = value;
 			var difBlock = _endBlock - _curBlock;
 			if(_endBlock && _curBlock){
-				if(difBlock > 0){
-					var str = getText("dispute_process").replace(new RegExp("NUM"), difBlock);
-					_self.showWndWarning(str);
-				} else {
-					_self.closeDispute();
+				var strBl = difBlock + " " + getText("block");
+				if(difBlock > 1){
+					strBl = difBlock + " " + getText("blocks");
+				}
+				_tfTime.setText(strBl);
+				if(_disputeBlock && !_bCloseDispute){
+					if(difBlock > 0){
+						var str = getText("dispute_process").replace(new RegExp("NUM"), difBlock);
+						_self.showWndWarning(str);
+					} else {
+						_self.closeDispute();
+					}
 				}
 			}
 		})
@@ -1158,6 +1172,7 @@ var ScrGame = function(){
 			// get end block for dispute
 			_contract.methods.channels(_idChannel).call().then(function(res) {
 				_endBlock = Number(res.endBlock) + 1;
+				_self.getCurBlock();
 			});
 		}
 	}
@@ -1441,14 +1456,14 @@ var ScrGame = function(){
 			}
 			
 			// dispute
-			if(_disputeBlock && _curBlock && _endBlock && !_bCloseDispute){
+			// if(_disputeBlock && _curBlock && _endBlock && !_bCloseDispute){
 				_timeBlock += diffTime;
 				if(_timeBlock > TIME_BLOCK){
 					_timeBlock = 0;
 					_self.getCurBlock();
 					
 				}
-			}
+			// }
 		}
 		
 		if(_wndWarning){
