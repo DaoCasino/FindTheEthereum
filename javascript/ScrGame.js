@@ -19,7 +19,7 @@ var ScrGame = function(){
 	
 	const TIME_ONLINE = 5000;
 	const TIME_BLOCK = 30000;
-	const COUNT_BANKR_OFFLINE = 2;
+	const COUNT_BANKR_OFFLINE = 15;
 	
 	var _self = this;
 	var _objGame, _objTutor, _contract,
@@ -36,7 +36,7 @@ var ScrGame = function(){
 	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin, _wndHistory;
 	// boolean
 	var _gameOver, _bWindow, _bCloseChannel, _bOpenChannel, _bSendDispute,
-	_bOfflineBankroll, _bUpdateGame, _bCloseDispute;
+	_bOfflineBankroll, _bUpdateGame, _bCloseDispute, _bReconnectBankroll;
 	// numbers
 	var _idTutor, _idBox,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
@@ -842,6 +842,10 @@ var ScrGame = function(){
 				_offlineBanroller ++;
 				App.request({action: "close_timeout"}, function(res) {
 					_offlineBanroller = 0;
+					if(_bReconnectBankroll){
+						_bReconnectBankroll = false;
+						_wndWarning.visible = false;
+					}
 					if (res.response.state_channel == false) {
 						_bCloseChannel = true;
 						if(!_bSendDispute){
@@ -857,8 +861,15 @@ var ScrGame = function(){
 			}
 		}
 		
-		if(_offlineBanroller > COUNT_BANKR_OFFLINE && _idBox > 0){
-			_self.sendDispute();
+		if(_offlineBanroller > 1 && _idBox > 0){
+			if(_offlineBanroller > COUNT_BANKR_OFFLINE){
+				_self.sendDispute();
+			} else {
+				if(!_wndWarning.visible){
+					_bReconnectBankroll = true;
+					_self.showWndWarning(getText("reconnect_bankroll"));
+				}
+			}
 		}
 	}
 	
