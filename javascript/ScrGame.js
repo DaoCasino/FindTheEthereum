@@ -466,10 +466,7 @@ var ScrGame = function(){
 			_balanceBet = Number(res.bets);
 			_self.refreshBalance();
 			if(_balanceEth < 0.1){
-				_self.showError(getText("error_balance_eth"), function(){
-					_self.removeAllListener();
-					window.open("/", "_blank");
-				);
+				_self.showError("error_balance_eth");
 			} else {
 				// load game
 				if(_bOpenChannel){
@@ -704,8 +701,7 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
 		var objConnect = {
-			bankroller : "0xebe939a37055e300651f768588796b954f684af7", // dev
-			// bankroller : "0xc893e4813f1f0e5811023ae6dab8b19e52bf2358",
+			bankroller : "0xebe939a37055e300651f768588796b954f684af7", // develop
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
@@ -918,10 +914,7 @@ var ScrGame = function(){
 	
 	_self.newGame = function() {
 		if(_balanceSession < 0.01){
-			_self.showError(getText("error_balance_bet"), function(){
-				_self.removeAllListener();
-				window.open("/", "_blank");
-			});
+			_self.showError(getText("error_balance_bet"));
 		} else {
 			if(_idTutor == 4){
 				_itemTutorial.visible = false;
