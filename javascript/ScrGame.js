@@ -1575,7 +1575,7 @@ var ScrGame = function(){
 	_self.fixResult = function(){
 		_idBox = 0;
 		if(_objGame.win){
-			if(_objGame.countWinStr < 5){
+			if(_objGame.round < 5){
 				_bgDark.visible = true;
 				_pirateSave.visible = true;
 				_pirateContinue.visible = true;
