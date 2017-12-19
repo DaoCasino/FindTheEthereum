@@ -19,7 +19,7 @@ var ScrGame = function(){
 	
 	const TIME_ONLINE = 5000;
 	const TIME_BLOCK = 30000;
-	const COUNT_BANKR_OFFLINE = 15; // 15
+	const COUNT_BANKR_OFFLINE = 15;
 	
 	var _self = this;
 	var _objGame, _objTutor, _contract, _objDispute,
@@ -449,16 +449,16 @@ var ScrGame = function(){
 		var timeNow = getTimer();
 		var timeActive = loginObj["timeActive"] || timeCheck;
 		var diffTime = timeNow - timeActive;
-		console.log("TODO: timeActive off");
-		// if(diffTime < timeCheck && loginObj["openChannel"]){
-			// var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
-			// var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
-			// _self.showError(str, function(){
-				// _self.removeAllListener();
-				// window.location.reload();
-			// });
-			// return;
-		// }
+		
+		if(diffTime < timeCheck && loginObj["openChannel"]){
+			var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
+			var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
+			_self.showError(str, function(){
+				_self.removeAllListener();
+				window.location.reload();
+			});
+			return;
+		}
 		
 		DCLib.Eth.getBalances(_openkey, function(res) {
 			_wndWarning.visible = false;
@@ -701,7 +701,7 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
 		var objConnect = {
-			bankroller : "0xc893e4813f1f0e5811023ae6dab8b19e52bf2358",
+			bankroller : "0xebe939a37055e300651f768588796b954f684af7", // develop
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
@@ -1020,7 +1020,7 @@ var ScrGame = function(){
 		if (options_debug) return
 		
 		console.log('updateChannel:', _objCurSessionChannel);
-		_self.showWndWarning(getText("contract_process") + "\n" + getText("update_channel"));
+		_self.showWndWarning(getText("stay_in_the_game") + "\n" + getText("update_channel"));
 		var round = App.logic.getGame().round;
 		var obj = {
 			player_balance: _objCurSessionChannel.player_balance,
@@ -1037,22 +1037,18 @@ var ScrGame = function(){
 		if(round > 1){
 			App.updateChannel(obj, 
 				function(params) {
-					setTimeout(_self.updateGame(params), 15000)
 					_objDispute.action = "updateGame";
 					_objDispute.params = params;
 					_objDispute.time = 15000;
 				}
-				// _self.updateGame
 			);
 		} else {
 			App.updateChannel(obj,
 				function(params) {
-					// setTimeout(_self.openDispute(params), 15000)
 					_objDispute.action = "openDispute";
 					_objDispute.params = params;
 					_objDispute.time = 15000;
 				}
-				// _self.openDispute
 			);
 		}
 	}
@@ -1060,9 +1056,8 @@ var ScrGame = function(){
 	_self.updateGame = function() {
 		if (options_debug || _bUpdateGame) return
 		
-		console.log('updateGame:', _objCurSessionGame);
 		_bUpdateGame = true;
-		_self.showWndWarning(getText("contract_process") + "\n" + getText("update_game"));
+		_self.showWndWarning(getText("stay_in_the_game") + "\n" + getText("update_game"));
 		
 		App.updateGame({
 			session: _objCurSessionGame.session,
@@ -1073,12 +1068,10 @@ var ScrGame = function(){
 			sig_bankroll: _objCurSessionGame.sig_bankroll
 		}, 
 			function(params) {
-				// setTimeout(_self.openDispute(params), 15000)
 				_objDispute.action = "openDispute";
 				_objDispute.params = params;
 				_objDispute.time = 15000;
 			}
-			// _self.openDispute
 		);
 	}
 	
@@ -1086,7 +1079,7 @@ var ScrGame = function(){
 		if (options_debug) return
 		
 		console.log('openDispute', _bOfflineBankroll);
-		_self.showWndWarning(getText("contract_process") + "\n" + getText("open_dispute"));
+		_self.showWndWarning(getText("stay_in_the_game") + "\n" + getText("open_dispute"));
 		var betGame = DCLib.Utils.bet2dec(_betGame);		
 		var round = App.logic.getGame().round;
 		// round++; // FOR TEST: UC -> UG -> OD
@@ -1140,7 +1133,7 @@ var ScrGame = function(){
 		_self.saveGame();
 		
 		_self.createWndInfo(getText("sending_dispute"), function(){
-			_self.showWndWarning(getText("sending_dispute"));
+			_self.showWndWarning(getText("stay_in_the_game") + "\n" + getText("sending_dispute"));
 		});
 		
 		App.request({
@@ -1199,7 +1192,7 @@ var ScrGame = function(){
 				if(_disputeBlock && !_bCloseDispute){
 					if(difBlock > 0){
 						var str = getText("dispute_process").replace(new RegExp("NUM"), difBlock);
-						_self.showWndWarning(str);
+						_self.showWndWarning(getText("stay_in_the_game") + "\n" + str);
 					} else {
 						_self.closeDispute();
 					}
@@ -1213,6 +1206,7 @@ var ScrGame = function(){
 			// get end block for dispute
 			_contract.methods.channels(_idChannel).call().then(function(res) {
 				_endBlock = Number(res.endBlock) + 1;
+					console.log("_endBlock:", _endBlock);
 				_self.getCurBlock();
 			});
 		}
@@ -1299,11 +1293,10 @@ var ScrGame = function(){
 						_objCurSessionGame.sig_bankroll = result.signStateBankroll;
 						
 						var valueBankroller = DCLib.numFromHash(result.signBankroll, 1, _objGame.countBox);
-						valueBankroller = 1; // for test
 						if(valueBankroller == _objGame.valueBankroller){
 							_self.showResult(result, box);
 						} else {
-							_self.showError(getText("Conflict clickBox"));
+							_self.showError(getText("conflict_box"));
 						}
 					}
 				)

@@ -9,7 +9,7 @@
  * for use it in frontend and bankroller side
  */
 
-DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
+DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	var _self = this;
 	
 	const MIN_VALUE = 1;
@@ -113,7 +113,6 @@ DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
 		var objHistory = {balance:0, profit:0, countWinStr:0};
 		if(betGame > 0){
 			_session ++;
-			console.log('addTX', -betGame, _addressPlayer)
 			_self.payChannel.addTX(-betGame);
 			_objGame.betGame = betGame;
 			_objGame.round = 1;
@@ -129,7 +128,6 @@ DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
 		
 		_objGame.method = "clickBox";
 		_objGame.valueBankroller = DCLib.numFromHash(signBankroll, 1, _objGame.countBox);
-		_objGame.valueBankroller = 1; // for test
 		_objGame.valuePlayer = valPlayer;
 		_objGame.win = false;
 		
@@ -191,7 +189,6 @@ DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
 		_objGame.play = false;
 		
 		_objGame.countWinStr = 0;
-		console.log('addTX', _objGame.bufferProfit, _addressPlayer)
 		_self.payChannel.addTX(_objGame.bufferProfit);
 		var objHistory = _history[_session-1];
 		objHistory.balance = _self.payChannel.getBalance();
