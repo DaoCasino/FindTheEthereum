@@ -19,10 +19,10 @@ var ScrGame = function(){
 	
 	const TIME_ONLINE = 5000;
 	const TIME_BLOCK = 30000;
-	const COUNT_BANKR_OFFLINE = 15;
+	const COUNT_BANKR_OFFLINE = 15; // 15
 	
 	var _self = this;
-	var _objGame, _objTutor, _contract,
+	var _objGame, _objTutor, _contract, _objDispute,
 	_objCurSessionChannel, _objNextSessionChannel, _objCurSessionGame;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
 	var _tfBalance, _tfBet, _tfWinStr, _tfAddress, _tfTime;
@@ -203,6 +203,11 @@ var ScrGame = function(){
 			game_data: [],
 			sig_player: "",
 			sig_bankroll: ""
+		}
+		_objDispute = {
+			action:"",
+			params:{},
+			time:0,
 		}
 	}
 	
@@ -444,16 +449,16 @@ var ScrGame = function(){
 		var timeNow = getTimer();
 		var timeActive = loginObj["timeActive"] || timeCheck;
 		var diffTime = timeNow - timeActive;
-		// console.log("TODO: timeActive off");
-		if(diffTime < timeCheck && loginObj["openChannel"]){
-			var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
-			var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
-			_self.showError(str, function(){
-				_self.removeAllListener();
-				window.location.reload();
-			});
-			return;
-		}
+		console.log("TODO: timeActive off");
+		// if(diffTime < timeCheck && loginObj["openChannel"]){
+			// var minutes = Math.ceil((timeCheck-diffTime)/(60*1000))
+			// var str = getText("error_quick_return").replace(new RegExp("NUM"), minutes);
+			// _self.showError(str, function(){
+				// _self.removeAllListener();
+				// window.location.reload();
+			// });
+			// return;
+		// }
 		
 		DCLib.Eth.getBalances(_openkey, function(res) {
 			_wndWarning.visible = false;
@@ -783,7 +788,7 @@ var ScrGame = function(){
 						});
 					}
 				} else {
-					 _self.showError("disconnected", function(){
+					 _self.showError(getText("error_bankroll_offline"), function(){
 						_self.removeAllListener();
 						window.location.reload();
 					});
@@ -827,7 +832,7 @@ var ScrGame = function(){
 					});
 					_self.saveGame();
 				} else {
-					_self.showError("disconnected", function(){
+					_self.showError(getText("disconnected"), function(){
 						_self.removeAllListener();
 						window.location.reload();
 					});
@@ -851,7 +856,7 @@ var ScrGame = function(){
 						if(!_bSendDispute){
 							App.request({action: 'disconnect'})
 							_self.closeWindow()
-							_self.showError("disconnected", function(){
+							_self.showError(getText("disconnected"), function(){
 								_self.removeAllListener();
 								window.location.reload();
 							});
@@ -986,8 +991,7 @@ var ScrGame = function(){
 		console.log("updateState:", _idChannel, _openkey, balancePlayer, balanceBankroll, session);
 		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, session);
 		var signPlayer = DCLib.Account.signHash(hash);
-		console.log("hash:", hash);
-		console.log("signPlayer:", signPlayer);
+		
 		App.updateState({
 			channel_id: _idChannel,
 			player_address: _openkey,
@@ -996,7 +1000,6 @@ var ScrGame = function(){
 			session: session,
 			signed_args: signPlayer
 			}, result => {
-				console.log("result:", result);
 				if(bSaveChannel){
 					_objCurSessionChannel.session = session;
 					_objCurSessionChannel.winstrict = App.logic.getGame().countWinStr;
@@ -1032,9 +1035,25 @@ var ScrGame = function(){
 		// round++; // FOR TEST: UC -> UG -> OD
 		
 		if(round > 1){
-			App.updateChannel(obj, _self.updateGame);
+			App.updateChannel(obj, 
+				function(params) {
+					setTimeout(_self.updateGame(params), 15000)
+					_objDispute.action = "updateGame";
+					_objDispute.params = params;
+					_objDispute.time = 15000;
+				}
+				// _self.updateGame
+			);
 		} else {
-			App.updateChannel(obj, _self.openDispute);
+			App.updateChannel(obj,
+				function(params) {
+					// setTimeout(_self.openDispute(params), 15000)
+					_objDispute.action = "openDispute";
+					_objDispute.params = params;
+					_objDispute.time = 15000;
+				}
+				// _self.openDispute
+			);
 		}
 	}
 	
@@ -1052,13 +1071,21 @@ var ScrGame = function(){
 			game_data: _objCurSessionGame.game_data,
 			sig_player: _objCurSessionGame.sig_player,
 			sig_bankroll: _objCurSessionGame.sig_bankroll
-		}, _self.openDispute);
+		}, 
+			function(params) {
+				// setTimeout(_self.openDispute(params), 15000)
+				_objDispute.action = "openDispute";
+				_objDispute.params = params;
+				_objDispute.time = 15000;
+			}
+			// _self.openDispute
+		);
 	}
 	
 	_self.openDispute = function(res) {
 		if (options_debug) return
 		
-		console.log('openDispute');
+		console.log('openDispute', _bOfflineBankroll);
 		_self.showWndWarning(getText("contract_process") + "\n" + getText("open_dispute"));
 		var betGame = DCLib.Utils.bet2dec(_betGame);		
 		var round = App.logic.getGame().round;
@@ -1095,7 +1122,6 @@ var ScrGame = function(){
 		_self.showWndWarning(getText("dispute_resolve"));
 		_bSendDispute = true;
 		_bOfflineBankroll = (_offlineBanroller > COUNT_BANKR_OFFLINE);
-		console.log("sendDispute");
 		
 		var session = App.logic.session();
 		
@@ -1110,7 +1136,8 @@ var ScrGame = function(){
 		_wndWarning.visible = false;
 		_disputeBlock = obj.blockNumber;
 		_self.getCurBlock();
-		console.log("sendingDispute", _disputeBlock, obj);
+		loginObj["openChannel"] = false;
+		_self.saveGame();
 		
 		_self.createWndInfo(getText("sending_dispute"), function(){
 			_self.showWndWarning(getText("sending_dispute"));
@@ -1139,6 +1166,7 @@ var ScrGame = function(){
 			return;
 		}
 		
+		_tfTime.setText("0 " + getText("block"));
 		_bCloseDispute = true;
 		_self.showWndWarning(getText("dispute_close"));
 		App.closeByTime(_self.closedDispute);
@@ -1271,7 +1299,7 @@ var ScrGame = function(){
 						_objCurSessionGame.sig_bankroll = result.signStateBankroll;
 						
 						var valueBankroller = DCLib.numFromHash(result.signBankroll, 1, _objGame.countBox);
-						// valueBankroller = 1; // for test
+						valueBankroller = 1; // for test
 						if(valueBankroller == _objGame.valueBankroller){
 							_self.showResult(result, box);
 						} else {
@@ -1468,14 +1496,26 @@ var ScrGame = function(){
 				_self.checkOnline();
 			}
 			
+			_timeBlock += diffTime;
+			if(_timeBlock > TIME_BLOCK){
+				_timeBlock = 0;
+				_self.getCurBlock();
+				
+			}
+			
 			// dispute
-			// if(_disputeBlock && _curBlock && _endBlock && !_bCloseDispute){
-				_timeBlock += diffTime;
-				if(_timeBlock > TIME_BLOCK){
-					_timeBlock = 0;
-					_self.getCurBlock();
-					
+			if(_objDispute && _objDispute.time > 0){
+				_objDispute.time -= diffTime;
+				if(_objDispute.time < 1){
+					if(_objDispute.action == "updateGame"){
+						_self.updateGame(_objDispute.params);
+					} else if(_objDispute.action == "openDispute"){
+						_self.openDispute(_objDispute.params);
+					}
 				}
+			}
+			// if(_disputeBlock && _curBlock && _endBlock && !_bCloseDispute){
+				
 			// }
 		}
 		

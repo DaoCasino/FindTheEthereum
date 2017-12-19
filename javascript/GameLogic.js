@@ -9,7 +9,7 @@
  * for use it in frontend and bankroller side
  */
 
-DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
+DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
 	var _self = this;
 	
 	const MIN_VALUE = 1;
@@ -63,6 +63,10 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 	 * @return {Object} signBankroll Returns the signature of the bankroll.
 	 */
 	_self.signBankroll = function(idChannel, session, round, seed, gameData, signPlayer){
+		if(round != _objGame.round){
+			return {error: "invalid_round_player"};
+		}
+		
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signBankroll = DCLib.Account.signHash(hash);
 		if(!DCLib.checkHashSig(hash, signPlayer, _addressPlayer)){
@@ -125,7 +129,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum', function(){
 		
 		_objGame.method = "clickBox";
 		_objGame.valueBankroller = DCLib.numFromHash(signBankroll, 1, _objGame.countBox);
-		// _objGame.valueBankroller = 1; // for test
+		_objGame.valueBankroller = 1; // for test
 		_objGame.valuePlayer = valPlayer;
 		_objGame.win = false;
 		
