@@ -95,7 +95,6 @@ var WndDeposit = function(prnt, style){
 		if(_curBet == 0){
 			_curBet = Number((_maxBet/10).toFixed(2)) || 0.01;
 		}
-		_curBet = 0.01; // todo delete
 		var posX = _stX + (_curBet/_maxBet)*_endX*2;
 		_headScroll.x = posX;
 		var sc = (posX + _endX)/(_endX*2);

@@ -147,7 +147,7 @@ var WndHistory = function(prnt, deposit){
 					} else if(tag == "countWinStr"){
 						strWS += value;
 					} else if(tag == "profit"){
-						stProfit += value;
+						stProfit += value.toFixed(2);
 					} else if(tag == "balance"){
 						if(options_debug){
 							value = (deposit + value).toFixed(2);

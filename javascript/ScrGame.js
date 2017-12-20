@@ -500,6 +500,13 @@ var ScrGame = function(){
 		})
 	}
 	
+	_self.refreshButtons = function() {
+		for (var i = 0; i < _self.arButtons.length; i++) {
+			var item_mc = _self.arButtons[i];
+			item_mc._selected = false;
+		}
+	}
+	
 	// CLOSE
 	_self.closeWindow = function(wnd) {
 		if(wnd){
@@ -678,6 +685,7 @@ var ScrGame = function(){
 		if(_wndWarning){
 			_wndWarning.visible = false;
 		}
+		_self.refreshButtons();
 		
 		_self.createWndInfo(str, 
             function() {
@@ -704,8 +712,8 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
 		var objConnect = {
-			bankroller : "0xebe939a37055e300651f768588796b954f684af7", // develop
-			// bankroller : "0xf67dc689473e620a715bcf595bf5ebb5a71360e3", // my bankroll
+			// bankroller : "0xebe939a37055e300651f768588796b954f684af7", // develop
+			bankroller : "0xf67dc689473e620a715bcf595bf5ebb5a71360e3", // my bankroll
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
@@ -770,10 +778,7 @@ var ScrGame = function(){
 							
 							App.call('initGame', [_openkey, _addressBankroll], function(result){
 								_btnContract.setAplhaDisabled(false);
-								for (var i = 0; i < _self.arButtons.length; i++) {
-									var item_mc = _self.arButtons[i];
-									item_mc._selected = false;
-								}
+								_self.refreshButtons();
 								if(_tooltip){
 									_tooltip.visible = false;
 								}
@@ -817,10 +822,7 @@ var ScrGame = function(){
 			App.disconnect({session:session}, function(res){
 				_wndWarning.visible = false;
 				_balanceSession = 0;
-				for (var i = 0; i < _self.arButtons.length; i++) {
-					var item_mc = _self.arButtons[i];
-					item_mc._selected = false;
-				}
+				_self.refreshButtons();
 				console.log('Game disconnect:', res);
 				if(res.channel){
 					DCLib.Eth.getBalances(_openkey, function(resBal) {
