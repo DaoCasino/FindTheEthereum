@@ -3,7 +3,7 @@ window.FTEdebug = (function(){
 	var app = new DCLib.DApp({
 		slug: 'DC_FindTheEthereum',
 		contract: {
-			contract_address: '0xd0ad1c0c392cc6f99baf990580aba830aa3a3aad',
+			contract_address: '0xf4b062b7eb7ae80fb5fdfbb3eae16399eaca3647',
 			contract_abi: abiContract
 		}
 	})

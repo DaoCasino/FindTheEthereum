@@ -1215,7 +1215,7 @@ var ScrGame = function(){
 		if(_idChannel){
 			// get end block for dispute
 			_contract.methods.channels(_idChannel).call().then(function(res) {
-				_endBlock = Number(res.endBlock) + 1;
+				_endBlock = Number(res.endBlock) + 3;
 					console.log("_endBlock:", _endBlock);
 				_self.getCurBlock();
 			});
