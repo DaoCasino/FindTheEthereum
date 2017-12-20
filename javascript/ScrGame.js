@@ -712,8 +712,8 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
 		var objConnect = {
-			// bankroller : "0xebe939a37055e300651f768588796b954f684af7", // develop
-			bankroller : "0xf67dc689473e620a715bcf595bf5ebb5a71360e3", // my bankroll
+			bankroller : "0xebe939a37055e300651f768588796b954f684af7", // develop
+			// bankroller : "0xf67dc689473e620a715bcf595bf5ebb5a71360e3", // my bankroll
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
