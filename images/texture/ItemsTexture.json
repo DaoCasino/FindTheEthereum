@@ -2,7 +2,7 @@
 
 "bgBet.png":
 {
-	"frame": {"x":1099,"y":1115,"w":389,"h":134},
+	"frame": {"x":1532,"y":1,"w":389,"h":134},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":134},
@@ -10,7 +10,7 @@
 },
 "btnCashout.png":
 {
-	"frame": {"x":1844,"y":253,"w":113,"h":113},
+	"frame": {"x":1671,"y":1077,"w":113,"h":113},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":1,"y":1,"w":113,"h":113},
@@ -18,7 +18,7 @@
 },
 "btnContract.png":
 {
-	"frame": {"x":1875,"y":368,"w":113,"h":113},
+	"frame": {"x":1485,"y":1151,"w":113,"h":113},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":1,"y":1,"w":113,"h":113},
@@ -26,7 +26,7 @@
 },
 "btnDao.png":
 {
-	"frame": {"x":1875,"y":483,"w":113,"h":113},
+	"frame": {"x":1786,"y":1077,"w":113,"h":113},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":1,"y":1,"w":113,"h":113},
@@ -34,7 +34,7 @@
 },
 "btnFacebook.png":
 {
-	"frame": {"x":1875,"y":917,"w":63,"h":63},
+	"frame": {"x":1869,"y":960,"w":63,"h":63},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":63,"h":63},
@@ -42,23 +42,47 @@
 },
 "btnFullscreen.png":
 {
-	"frame": {"x":1875,"y":598,"w":113,"h":113},
+	"frame": {"x":1793,"y":615,"w":113,"h":113},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":1,"y":1,"w":113,"h":113},
 	"sourceSize": {"w":115,"h":115}
 },
+"btnHistory.png":
+{
+	"frame": {"x":1793,"y":730,"w":113,"h":113},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":1,"w":113,"h":113},
+	"sourceSize": {"w":115,"h":115}
+},
+"btnInstruct.png":
+{
+	"frame": {"x":1711,"y":435,"w":114,"h":114},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":1,"w":114,"h":114},
+	"sourceSize": {"w":115,"h":115}
+},
 "btnOk.png":
 {
-	"frame": {"x":1891,"y":1,"w":96,"h":92},
+	"frame": {"x":1827,"y":435,"w":96,"h":92},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":96,"h":92},
 	"sourceSize": {"w":96,"h":92}
 },
+"btnSave.png":
+{
+	"frame": {"x":1793,"y":845,"w":113,"h":113},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":1,"w":113,"h":113},
+	"sourceSize": {"w":115,"h":115}
+},
 "btnText.png":
 {
-	"frame": {"x":703,"y":1169,"w":250,"h":72},
+	"frame": {"x":1419,"y":1077,"w":250,"h":72},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":250,"h":72},
@@ -66,7 +90,7 @@
 },
 "btnTwitter.png":
 {
-	"frame": {"x":1875,"y":785,"w":64,"h":64},
+	"frame": {"x":1600,"y":1151,"w":64,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -74,7 +98,7 @@
 },
 "btnVK.png":
 {
-	"frame": {"x":1875,"y":851,"w":64,"h":64},
+	"frame": {"x":1600,"y":1217,"w":64,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -82,7 +106,7 @@
 },
 "designWndDeposit.png":
 {
-	"frame": {"x":1099,"y":320,"w":566,"h":379},
+	"frame": {"x":703,"y":236,"w":566,"h":379},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":0,"y":17,"w":566,"h":379},
@@ -90,7 +114,7 @@
 },
 "headScroll.png":
 {
-	"frame": {"x":1963,"y":181,"w":22,"h":56},
+	"frame": {"x":1882,"y":1192,"w":22,"h":56},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":56},
@@ -98,7 +122,7 @@
 },
 "icoBet.png":
 {
-	"frame": {"x":1891,"y":181,"w":70,"h":70},
+	"frame": {"x":1666,"y":1192,"w":70,"h":70},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":70,"h":70},
@@ -106,7 +130,7 @@
 },
 "icoKey.png":
 {
-	"frame": {"x":955,"y":1169,"w":70,"h":70},
+	"frame": {"x":1738,"y":1192,"w":70,"h":70},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":70,"h":70},
@@ -114,7 +138,7 @@
 },
 "icoTime.png":
 {
-	"frame": {"x":1027,"y":1169,"w":70,"h":70},
+	"frame": {"x":1810,"y":1192,"w":70,"h":70},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":70,"h":70},
@@ -122,7 +146,7 @@
 },
 "icoWS.png":
 {
-	"frame": {"x":1875,"y":713,"w":70,"h":70},
+	"frame": {"x":1797,"y":960,"w":70,"h":70},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":70,"h":70},
@@ -130,7 +154,7 @@
 },
 "itemBet.png":
 {
-	"frame": {"x":1891,"y":95,"w":92,"h":84},
+	"frame": {"x":1827,"y":529,"w":92,"h":84},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":92,"h":84},
@@ -138,7 +162,7 @@
 },
 "itemDialog.png":
 {
-	"frame": {"x":1490,"y":1062,"w":400,"h":94},
+	"frame": {"x":1532,"y":137,"w":400,"h":94},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":3,"y":2,"w":400,"h":94},
@@ -146,7 +170,7 @@
 },
 "light.png":
 {
-	"frame": {"x":1061,"y":701,"w":372,"h":412},
+	"frame": {"x":1419,"y":597,"w":372,"h":412},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":372,"h":412},
@@ -154,7 +178,7 @@
 },
 "lightL.png":
 {
-	"frame": {"x":703,"y":1,"w":356,"h":582},
+	"frame": {"x":703,"y":617,"w":356,"h":582},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":5,"y":0,"w":356,"h":582},
@@ -162,7 +186,7 @@
 },
 "lightR.png":
 {
-	"frame": {"x":703,"y":585,"w":356,"h":582},
+	"frame": {"x":1061,"y":617,"w":356,"h":582},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":6,"y":0,"w":356,"h":582},
@@ -170,7 +194,7 @@
 },
 "lineScrollB.png":
 {
-	"frame": {"x":54,"y":1246,"w":502,"h":16},
+	"frame": {"x":1,"y":1246,"w":502,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":502,"h":16},
@@ -178,7 +202,7 @@
 },
 "lineScrollM.png":
 {
-	"frame": {"x":558,"y":1246,"w":502,"h":16},
+	"frame": {"x":1,"y":1264,"w":502,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":502,"h":16},
@@ -186,7 +210,7 @@
 },
 "logo.png":
 {
-	"frame": {"x":1667,"y":368,"w":200,"h":200},
+	"frame": {"x":1711,"y":233,"w":200,"h":200},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":200},
@@ -194,7 +218,7 @@
 },
 "logoDaoCasino.png":
 {
-	"frame": {"x":1490,"y":1158,"w":376,"h":64},
+	"frame": {"x":1419,"y":1011,"w":376,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":376,"h":64},
@@ -210,7 +234,7 @@
 },
 "pointDark.png":
 {
-	"frame": {"x":34,"y":1246,"w":18,"h":18},
+	"frame": {"x":1271,"y":597,"w":18,"h":18},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":18},
@@ -218,7 +242,7 @@
 },
 "pointLight.png":
 {
-	"frame": {"x":1,"y":1246,"w":31,"h":33},
+	"frame": {"x":1882,"y":1250,"w":31,"h":33},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":2,"y":1,"w":31,"h":33},
@@ -226,7 +250,7 @@
 },
 "tableLogo.png":
 {
-	"frame": {"x":1062,"y":236,"w":780,"h":82},
+	"frame": {"x":703,"y":1201,"w":780,"h":82},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":780,"h":82},
@@ -234,7 +258,7 @@
 },
 "tableLogoMenu.png":
 {
-	"frame": {"x":1062,"y":1,"w":827,"h":233},
+	"frame": {"x":703,"y":1,"w":827,"h":233},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":827,"h":233},
@@ -242,7 +266,7 @@
 },
 "titleGame.png":
 {
-	"frame": {"x":1435,"y":701,"w":438,"h":359},
+	"frame": {"x":1271,"y":236,"w":438,"h":359},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":16,"y":0,"w":438,"h":359},
@@ -253,8 +277,8 @@
 	"version": "1.0",
 	"image": "ItemsTexture.png",
 	"format": "RGBA8888",
-	"size": {"w":1989,"h":1280},
+	"size": {"w":1933,"h":1284},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:7bd3c7c9e4f216abf11470ca46b8ddbb:e450b0294d1ff98b0a51188bbf6b9390:29ffe990510fa8f85301e924bd91231e$"
+	"smartupdate": "$TexturePacker:SmartUpdate:66f5483775141a4b3f6e952d3512af97:966cfe12f2bae61ecfed650d99583362:29ffe990510fa8f85301e924bd91231e$"
 }
 }

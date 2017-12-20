@@ -53,12 +53,15 @@ function ItemBox(prnt, name) {
 		this.addChild(_boxSelected);
 		
 		_self.refresh();
+		_self.setDisabled(false);
 		_self.main = _boxLock;
 		_self.over = _boxOver;
 	}
 	
 	_self.setDisabled = function(value) {
 		_self._disabled = value;
+		_self.buttonMode = !value;
+		_self.interactive = !value;
 	}
 	
 	_self.setSelected = function(value) {

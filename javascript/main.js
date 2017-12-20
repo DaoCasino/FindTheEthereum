@@ -1,15 +1,13 @@
-/*eslint no-undef: "none"*/
-
 var _W = 1920;
 var _H = 1080;
-var version = "v. 1.0.0";
+var version = "v. 0.0.2";
+var loginObj = {};
 var dataAnima = [];
 var dataMovie = [];
 var arClips = [];
 var language;
-var addressContract = "0x";
-var urlEtherscan = "https://api.etherscan.io/";
-var gameCode = "DC_FindTheEthereum";
+var addressContract;
+var urlEtherscan = "https://ropsten.etherscan.io/";
 
 var currentScreen, scrContainer;
 var LoadBack, LoadPercent;
@@ -59,17 +57,54 @@ function init() {
 	loadManifest();
 }
 
-function loadLib() {
+function loadLib() {	
 	// Wait when DClib loaded
 	DCLib.on('ready', function(){
 		// Create our DApp
 		window.App = new DCLib.DApp({
-			code  : gameCode, // unique DApp code
-			logic : GameLogic, // inject logic constructor in your DApp
+			slug: 'DC_FindTheEthereum',
+			contract: {
+				contract_address: '0xf4b062b7eb7ae80fb5fdfbb3eae16399eaca3647',
+				contract_abi: abiContract
+			}
 		})
 		
 		init();
 	})
+}
+
+function saveData() {
+	if(isLocalStorageAvailable()){
+		var loginStr = JSON.stringify(loginObj);
+		localStorage.setItem('dc_fte', loginStr);
+		// console.log("Saving: ok!");
+	}
+}
+
+function loadData() {
+	if(isLocalStorageAvailable()){
+		if (localStorage.getItem('dc_fte')){
+			var loginStr = localStorage.getItem('dc_fte')
+			loginObj = JSON.parse(loginStr);
+			// console.log("Loading: ok!");
+		} else {
+			// console.log("Loading: fail!");
+		}
+	}
+}
+
+function resetData() {
+	loginObj = {};
+	saveData();
+}
+
+function isLocalStorageAvailable() {
+    try {
+        return 'localStorage' in window && window['localStorage'] !== null;
+    } catch (e) {
+		console.log("localStorage_failed:",e);
+        return false;
+    }
 }
 
 function createScreenLoader(){
@@ -104,6 +139,7 @@ function loadManifest(){
 	preloader.add("bgWndWarning", "images/bg/bgWndWarning.png");
 	preloader.add("bgWndWS", "images/bg/bgWndWS.png");
 	preloader.add("bgWndWS1", "images/bg/bgWndWS1.png");
+	preloader.add("bgWndBet", "images/bg/bgWndBet.png");
 		
 	preloader.add("images/texture/BoxesTexture.json");
 	preloader.add("images/texture/ItemsTexture.json");
@@ -210,6 +246,7 @@ function handleProgress(){
 }
 
 function handleComplete(evt) {
+	loadData();
 	spritesLoad();
 	textureLoad();
 	onResize();
@@ -231,19 +268,18 @@ function update() {
 	requestAnimationFrame(update);
 	renderer.render(stage);
 	
-	if(options_pause){
-		return;
-	}
 	var diffTime = getTimer() - startTime;
 	if(diffTime > 29){
 		if (currentScreen) {
 			currentScreen.update(diffTime);
 		}
 		
-		for (var i = 0; i < arClips.length; i++) {
-			var clip = arClips[i];
-			if(clip){
-				clip.enter_frame();
+		if(!options_pause){
+			for (var i = 0; i < arClips.length; i++) {
+				var clip = arClips[i];
+				if(clip){
+					clip.enter_frame();
+				}
 			}
 		}
 		
@@ -539,6 +575,15 @@ function addButton(name, _x, _y, _scGr, _scaleX, _scaleY) {
 		}
 	};
 	
+	obj.setAplhaDisabled = function(value){
+		obj._disabled = value;
+		if(value){
+			obj.alpha = 0.5;
+		} else {
+			obj.alpha = 1;
+		}
+	};
+	
 	obj.setImg(name);
 	
 	return obj;
@@ -693,6 +738,27 @@ function makeID(){
 	
 	return str;
 }
+function copyToClipboard(value) {
+	window.prompt("Copy to clipboard: Ctrl+C", value);
+}
+function getNormalTime(ms){
+	if (ms<0) {
+		return "00:00";
+	}
+	var s = Math.round(ms/1000);
+	var m = Math.floor(s / 60);
+	s = s - m * 60;
+	var tS = String(s);
+	var tM = String(m);
+	
+	if (s<10 && s>=0) {
+		tS = "0" + String(s);
+	}
+	if (m<10 && m>=0) {
+		tM = "0" + String(m);
+	}
+	return tM + ":" + tS;
+}
 
 function visGame() {
 	//play
@@ -700,7 +766,9 @@ function visGame() {
 	refreshTime();
 	
 	if(currentScreen){
-		// ScreenGame.resetTimer();
+		if(currentScreen.name == "ScrGame"){
+			currentScreen.checkOnline();
+		}
 	}
 }
 
@@ -713,31 +781,5 @@ function hideGame() {
 visibly.onVisible(visGame);
 visibly.onHidden(hideGame);
 
-function Refresh() {
-    var bankroll = 3;
-    var bal = 0;
-	var deposit = 1
-    var p = bal - deposit;
-    var user_bet = 0;
-    
-	var _bet = ((deposit * 2 + p)) / ((65536 - 1310) / chance);
-	
-	var _b = ((bankroll - bal)/100000000 * chance)/(65536 - 1310);
-	maxuser_bet = Math.min(_bet, bal, _b, 10);
-	
-	if (user_bet > maxuser_bet) {
-		user_bet = Casino.Utils.toFixed(maxuser_bet, 4);
-	}
-	if (user_bet < 0.001) {
-		user_bet = 0.001;
-	}
-	console.log(_bet, bal, _b)
-	$("#profit-on-win").val((Casino.Utils.toFixed(user_bet * (65536 - 1310) / chance - user_bet, 8).toFixed(8)));
-	$("#payout").val("x" + Casino.Utils.toFixed((65536 - 1310) / chance, 5));
-	$("#slider-dice-one").slider("option", "max", maxuser_bet * 1000);
-	$("#amount-one").val(user_bet);
-	$("#slider-dice-one").slider("value", user_bet * 1000);
-    
-}
 
 document.addEventListener('DOMContentLoaded', loadLib);

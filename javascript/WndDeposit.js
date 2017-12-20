@@ -6,7 +6,7 @@
 
 /*eslint no-undef: "none"*/
 
-var WndDeposit = function(prnt){
+var WndDeposit = function(prnt, style){
 	PIXI.Container.call( this );
 	
 	var _self = this;
@@ -21,6 +21,11 @@ var WndDeposit = function(prnt){
 	var _tfDesc, _tfBet;
 	var _pressHead = false;
 	
+	if(style == undefined){
+		style = {bg:"bgWndDeposit",
+			colorDesc:"#ED9829"};
+	}
+	
 	// INIT
 	_self.init = function(){
 		_self.initData();
@@ -31,7 +36,7 @@ var WndDeposit = function(prnt){
 		rect.beginFill(0x000000).drawRect(-_W/2, -_H/2, _W, _H).endFill();
 		rect.alpha = 0.5;
 		_self.addChild(rect);
-		var bg = addObj("bgWndDeposit");
+		var bg = addObj(style.bg);
 		_self.addChild(bg);
 		var posLineY = 50;
 		var thinLine = addObj("lineScrollM", 0, posLineY);
@@ -75,7 +80,7 @@ var WndDeposit = function(prnt){
 		_self.addChild(_headScroll);
 		_arButtons.push(_headScroll);
 		
-		_tfDesc = addText("", 26, "#ED9829", undefined, "center", 500, 3)
+		_tfDesc = addText("", 26, style.colorDesc, undefined, "center", 500, 3)
 		_tfDesc.y = -125;
 		_self.addChild(_tfDesc);
 		_tfBet = addText("0.00 BET", 40, "#FFFFFF", undefined, "center", 350, 4)
@@ -87,6 +92,9 @@ var WndDeposit = function(prnt){
 		_callback = callback;
 		_tfDesc.setText(str);
 		_maxBet = maxBet;
+		if(_curBet == 0){
+			_curBet = Number((_maxBet/10).toFixed(2)) || 0.01;
+		}
 		var posX = _stX + (_curBet/_maxBet)*_endX*2;
 		_headScroll.x = posX;
 		var sc = (posX + _endX)/(_endX*2);
@@ -95,10 +103,14 @@ var WndDeposit = function(prnt){
 		
 		if(_curBet > _maxBet){
 			_curBet = _maxBet.toFixed(2);
-			_tfBet.setText(String(_curBet) + " BET");
 			_headScroll.x = _endX;
 			_fatLine.x = 0;
 			_fatLine.scale.x = 1;
+		}
+		
+		_tfBet.setText(String(_curBet) + " BET");
+		if(posX > _stX && _curBet >= 0.01){
+			_btnOk.setDisabled(false);
 		}
 	}
 	
