@@ -19,6 +19,7 @@ var ScrGame = function(){
 	
 	const TIME_ONLINE = 5000;
 	const TIME_BLOCK = 30000;
+	const TIME_OPENCHANNEL = 300000;
 	const COUNT_BANKR_OFFLINE = 15;
 	
 	var _self = this;
@@ -33,14 +34,14 @@ var ScrGame = function(){
 	var _btnStart, _btnClose, _btnStart, _pirateContinue, _pirateSave, 
 	_btnCashout, _btnSave, _btnContract;
 	// windows
-	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin, _wndHistory;
+	var _wndDeposit, _wndBet, _wndWarning, _wndInfo, _wndWS, _wndWin, _wndHistory, _wndInstruction;
 	// boolean
 	var _gameOver, _bWindow, _bCloseChannel, _bOpenChannel, _bSendDispute,
 	_bOfflineBankroll, _bUpdateGame, _bCloseDispute, _bReconnectBankroll;
 	// numbers
 	var _idTutor, _idBox,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
-	_timeCloseWnd, _depositPlayer, _depositBankroll, _signSession, _timeOnline, _timeBlock, 
+	_timeCloseWnd, _depositPlayer, _depositBankroll, _signSession, _timeOnline, _timeBlock, _timeOpenChannel, 
 	_offlineBanroller, _curBlock, _disputeBlock, _endBlock;
 	// arrays
 	var _arBoxes;
@@ -242,6 +243,10 @@ var ScrGame = function(){
 		_tfTime.x = _tfAddress.x;
 		_tfTime.y =  icoTime.y - _tfTime.height/2;
 		face_mc.addChild(_tfTime);
+		_tfOpenTime = addText("", sizeTf, "#ffffff", "#000000", "left", 400, 4);
+		_tfOpenTime.x = _W/2;
+		_tfOpenTime.y =  _H - 100 - _tfOpenTime.height/2;
+		face_mc.addChild(_tfOpenTime);
 		_tfWinStr = addText("0", sizeTf, "#ffffff", "#000000", "left", 400, 4);
 		_tfWinStr.x = _tfAddress.x;
 		_tfWinStr.y =  icoWS.y - _tfWinStr.height/2;
@@ -364,12 +369,17 @@ var ScrGame = function(){
 		// _btnSave.overSc = true;
 		// face_mc.addChild(_btnSave);
 		// _self.arButtons.push(_btnSave);
-		var btnHistory = addButton("btnHistory", posX, posY - 3*offsetY);
+		var btnInstruct = addButton("btnInstruct", posX, posY - 3*offsetY);
+		btnInstruct.tooltip = "instruction";
+		btnInstruct.overSc = true;
+		face_mc.addChild(btnInstruct);
+		_self.arButtons.push(btnInstruct);
+		var btnHistory = addButton("btnHistory", posX, posY - 4*offsetY);
 		btnHistory.tooltip = "show_history";
 		btnHistory.overSc = true;
 		face_mc.addChild(btnHistory);
 		_self.arButtons.push(btnHistory);
-		_btnCashout = addButton("btnCashout", posX, posY - 4*offsetY);
+		_btnCashout = addButton("btnCashout", posX, posY - 5*offsetY);
 		_btnCashout.tooltip = "cashout";
 		_btnCashout.overSc = true;
 		face_mc.addChild(_btnCashout);
@@ -649,6 +659,19 @@ var ScrGame = function(){
 		_itemTutorial.visible = true;
 	}
 	
+	_self.showInstruction = function() {		
+		if(_wndInstruction == undefined){
+			_wndInstruction = new WndInstruction(this);
+			_wndInstruction.x = _W/2;
+			_wndInstruction.y = _H/2;
+			_self.addChild(_wndInstruction);
+		}
+		
+		_bWindow = true;
+		_wndInstruction.visible = true;
+		_curWindow = _wndInstruction;
+	}
+	
 	_self.showWndWarning = function(str) {
 		if(_wndWarning == undefined){
 			_wndWarning = new PIXI.Container();
@@ -706,6 +729,7 @@ var ScrGame = function(){
 		}
 		
 		_bWindow = false;
+		_timeOpenChannel = TIME_OPENCHANNEL;
 		var betGame = 0;
 		var countWinStr = 0;
 		var valPlayer = 0;
@@ -743,65 +767,67 @@ var ScrGame = function(){
 	
 	_self.connectToBankroll = function(objConnect, deposit){
 		App.connect(objConnect, function(connected, info){
-				console.log('Game connect:', connected, info);
-				if (connected){
-					_addressBankroll = info.bankroller_address;
-					_idRoom = info.room_name;
-					var transactionHash = "";
-					if(info.channel){
-						_idChannel = info.channel.channel_id;
-						_curBlock = info.channel.blockNumber;
-						addressContract = info.channel.contract_address;
-						_depositBankroll = DCLib.Utils.dec2bet(info.channel.bankroller_deposit);
-						if(info.channel.receipt){
-							transactionHash = info.channel.receipt.transactionHash;
-						}
+			console.log('Game connect:', connected, info);
+			_timeOpenChannel = 0;
+			_tfOpenTime.setText("");
+			if (connected){
+				_addressBankroll = info.bankroller_address;
+				_idRoom = info.room_name;
+				var transactionHash = "";
+				if(info.channel){
+					_idChannel = info.channel.channel_id;
+					_curBlock = info.channel.blockNumber;
+					addressContract = info.channel.contract_address;
+					_depositBankroll = DCLib.Utils.dec2bet(info.channel.bankroller_deposit);
+					if(info.channel.receipt){
+						transactionHash = info.channel.receipt.transactionHash;
 					}
-					_wndWarning.visible = false;
-					if(addressContract  || options_debug){
-						_balanceSession = deposit;
-						_depositPlayer = deposit;
-						if(addressContract){
-							_contract = new DCLib.web3.eth.Contract(abiContract, addressContract);
-							_self.getEndBlock();
-							_bOpenChannel = true;
-						}
-
-						// App.Room.on('timeout', function(receipt) {
-						// 	console.log('listen bankroll',receipt)
-						// })
-
-						DCLib.Eth.getBalances(_openkey, function(resBal) {
-							_balanceEth = Number(resBal.eth);
-							_balanceBet = Number(resBal.bets);
-							_self.refreshBalance();
-							
-							App.call('initGame', [_openkey, _addressBankroll], function(result){
-								_btnContract.setAplhaDisabled(false);
-								_self.refreshButtons();
-								if(_tooltip){
-									_tooltip.visible = false;
-								}
-								_objGame = _self.getGame();
-								_self.closeWindow();
-								_self.createTreasure();
-								_self.showWndBet();
-								_self.saveGame();
-							})
-						})					
-					} else {
-						_self.showError("Please, wait 2 minutes and try again", function(){
-							_self.startChannelGame(deposit)
-							// _self.removeAllListener();
-							// window.location.reload();
-						});
+				}
+				_wndWarning.visible = false;
+				if(addressContract  || options_debug){
+					_balanceSession = deposit;
+					_depositPlayer = deposit;
+					if(addressContract){
+						_contract = new DCLib.web3.eth.Contract(abiContract, addressContract);
+						_self.getEndBlock();
+						_bOpenChannel = true;
 					}
+
+					// App.Room.on('timeout', function(receipt) {
+					// 	console.log('listen bankroll',receipt)
+					// })
+
+					DCLib.Eth.getBalances(_openkey, function(resBal) {
+						_balanceEth = Number(resBal.eth);
+						_balanceBet = Number(resBal.bets);
+						_self.refreshBalance();
+						
+						App.call('initGame', [_openkey, _addressBankroll], function(result){
+							_btnContract.setAplhaDisabled(false);
+							_self.refreshButtons();
+							if(_tooltip){
+								_tooltip.visible = false;
+							}
+							_objGame = _self.getGame();
+							_self.closeWindow();
+							_self.createTreasure();
+							_self.showWndBet();
+							_self.saveGame();
+						})
+					})					
 				} else {
-					 _self.showError(getText("error_bankroll_offline"), function(){
-						_self.removeAllListener();
-						window.location.reload();
+					_self.showError("Please, wait 2 minutes and try again", function(){
+						_self.startChannelGame(deposit)
+						// _self.removeAllListener();
+						// window.location.reload();
 					});
 				}
+			} else {
+				 _self.showError(getText("error_bankroll_offline"), function(){
+					_self.removeAllListener();
+					window.location.reload();
+				});
+			}
 		})
 	}
 	
@@ -1394,6 +1420,8 @@ var ScrGame = function(){
 			_self.clickCashout();
 		} else if(item_mc.name == "btnSave"){
 			_self.updateChannel();
+		} else if(item_mc.name == "btnInstruct"){
+			_self.showInstruction();
 		} else if(item_mc.name == "btnAddress"){
 			var url = urlEtherscan + "address/" + _openkey;
 			window.open(url, "_blank");
@@ -1485,6 +1513,18 @@ var ScrGame = function(){
 				_curWindow.visible = false;
 				_curWindow = undefined;
 				_bWindow = false;
+			}
+		}
+		
+		if(_timeOpenChannel > 0){
+			_timeOpenChannel -= diffTime;
+			_tfOpenTime.setText(getNormalTime(_timeOpenChannel));
+			if(_timeOpenChannel < 1){
+				_tfOpenTime.setText("");
+				_self.showError(getText("error_bankroll_offline"), function(){
+					_self.removeAllListener();
+					window.location.reload();
+				});
 			}
 		}
 		

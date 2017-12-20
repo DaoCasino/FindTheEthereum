@@ -11,7 +11,7 @@ var ScrMenu = function(){
 	
 	var _self = this;
 	var _btnStart;
-	var _wndWarning;
+	var _wndWarning, _wndInfo;
 	
 	// INIT
 	_self.init = function(){
@@ -104,10 +104,41 @@ var ScrMenu = function(){
 		_wndWarning.visible = true;
 	}
 	
+	_self.showTutor = function() {
+		loginObj["tutor_intro"] = true;
+		_btnStart.setDisabled(true);
+		
+		if(_wndInfo == undefined){
+			_wndInfo = new WndInstruction(this);
+			_wndInfo.x = _W/2;
+			_wndInfo.y = _H/2;
+			_self.addChild(_wndInfo);
+		}
+		
+		_wndInfo.show(_self.clickStart)
+		_wndInfo.visible = true;
+		_curWindow = _wndInfo;
+	}
+	
+	// CLOSE
+	_self.closeWindow = function(wnd) {
+		if(wnd){
+			_curWindow = wnd;
+		}
+		if(_curWindow){
+			_curWindow.visible = false;
+			_curWindow = undefined;
+		}
+	}
+	
 	// CLICK
 	_self.clickStart = function() {
-		_self.removeAllListener();
-		addScreen("ScrGame");
+		if(loginObj["tutor_intro"]){
+			_self.removeAllListener();
+			addScreen("ScrGame");
+		}else{
+			_self.showTutor();
+		}
 	};
 	
 	_self.clickTwitter = function() {

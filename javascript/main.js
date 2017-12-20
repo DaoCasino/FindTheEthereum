@@ -1,6 +1,6 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 0.0.1";
+var version = "v. 0.0.2";
 var loginObj = {};
 var dataAnima = [];
 var dataMovie = [];
@@ -740,6 +740,24 @@ function makeID(){
 }
 function copyToClipboard(value) {
 	window.prompt("Copy to clipboard: Ctrl+C", value);
+}
+function getNormalTime(ms){
+	if (ms<0) {
+		return "00:00";
+	}
+	var s = Math.round(ms/1000);
+	var m = Math.floor(s / 60);
+	s = s - m * 60;
+	var tS = String(s);
+	var tM = String(m);
+	
+	if (s<10 && s>=0) {
+		tS = "0" + String(s);
+	}
+	if (m<10 && m>=0) {
+		tM = "0" + String(m);
+	}
+	return tM + ":" + tS;
 }
 
 function visGame() {
