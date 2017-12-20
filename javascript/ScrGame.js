@@ -466,7 +466,10 @@ var ScrGame = function(){
 			_balanceBet = Number(res.bets);
 			_self.refreshBalance();
 			if(_balanceEth < 0.1){
-				_self.showError("error_balance_eth");
+				_self.showError("error_balance_eth", function(){
+						_self.removeAllListener();
+						window.open("/", "_self");
+					});
 			} else {
 				// load game
 				if(_bOpenChannel){
@@ -702,6 +705,7 @@ var ScrGame = function(){
 		
 		var objConnect = {
 			bankroller : "0xebe939a37055e300651f768588796b954f684af7", // develop
+			// bankroller : "0xf67dc689473e620a715bcf595bf5ebb5a71360e3", // my bankroll
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
@@ -829,6 +833,7 @@ var ScrGame = function(){
 					_self.createWndInfo(getText("close_channel"), function(){
 						var url = "https://ropsten.etherscan.io/tx/" + transactionHash;
 						window.open(url, "_blank");
+						_self.showWndHistory();
 					});
 					_self.saveGame();
 				} else {
@@ -914,7 +919,10 @@ var ScrGame = function(){
 	
 	_self.newGame = function() {
 		if(_balanceSession < 0.01){
-			_self.showError(getText("error_balance_bet"));
+			_self.showError(getText("error_balance_bet"), function(){
+				_self.removeAllListener();
+				window.open("/", "_self");
+			});
 		} else {
 			if(_idTutor == 4){
 				_itemTutorial.visible = false;
