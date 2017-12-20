@@ -445,7 +445,7 @@ var ScrGame = function(){
 		_self.showWndWarning(getText("loading"));
 		
 		// Quick return to the game is impossible
-		var timeCheck = 5*60*1000;
+		var timeCheck = 3*60*1000; // 3 min
 		var timeNow = getTimer();
 		var timeActive = loginObj["timeActive"] || timeCheck;
 		var diffTime = timeNow - timeActive;
@@ -952,7 +952,6 @@ var ScrGame = function(){
 			 if(App.logic.getBalance() == result.balance){
 				 _objGame = result.objGame;
 				_balanceSession = result.balance;
-				console.log("closeGame_balanceSession:", _balanceSession);
 				if(options_debug){
 					_balanceSession = _depositPlayer + App.logic.payChannel.getProfit();
 				}
@@ -998,7 +997,6 @@ var ScrGame = function(){
 		var balancePlayer = DCLib.Utils.bet2dec(App.logic.payChannel.getBalance());
 		var balanceBankroll = DCLib.Utils.bet2dec(App.logic.payChannel.getBankrollBalance());
 		var session = App.logic.session();
-		console.log("updateState:", _idChannel, _openkey, balancePlayer, balanceBankroll, session);
 		var hash = DCLib.web3.utils.soliditySha3(_idChannel, balancePlayer, balanceBankroll, session);
 		var signPlayer = DCLib.Account.signHash(hash);
 		
@@ -1216,7 +1214,6 @@ var ScrGame = function(){
 			// get end block for dispute
 			_contract.methods.channels(_idChannel).call().then(function(res) {
 				_endBlock = Number(res.endBlock) + 3;
-					console.log("_endBlock:", _endBlock);
 				_self.getCurBlock();
 			});
 		}
@@ -1286,7 +1283,6 @@ var ScrGame = function(){
 							_self.showError(strError, _self.sendDispute);
 							return;
 						}
-						console.log("clickBox result:", result);
 						
 						_objGame = result.objGame;
 						session = App.logic.session();
