@@ -1,6 +1,6 @@
 var _W = 1920;
 var _H = 1080;
-var version = "v. 0.0.2";
+var version = "v. 0.0.3";
 var loginObj = {};
 var dataAnima = [];
 var dataMovie = [];
@@ -12,6 +12,8 @@ var urlEtherscan = "https://ropsten.etherscan.io/";
 var currentScreen, scrContainer;
 var LoadBack, LoadPercent;
 var startTime;
+var fps = 30;
+var interval = 1000/fps;
 var renderer, stage, preloader, colorFilter; // pixi;
 var sprites_loaded = false;
 var fontMain = "Archivo Black";
@@ -269,7 +271,7 @@ function update() {
 	renderer.render(stage);
 	
 	var diffTime = getTimer() - startTime;
-	if(diffTime > 29){
+	if (diffTime > interval) {
 		if (currentScreen) {
 			currentScreen.update(diffTime);
 		}
@@ -763,7 +765,7 @@ function getNormalTime(ms){
 function visGame() {
 	//play
 	options_pause = false;
-	refreshTime();
+	// refreshTime();
 	
 	if(currentScreen){
 		if(currentScreen.name == "ScrGame"){
@@ -775,7 +777,7 @@ function visGame() {
 function hideGame() {
 	//pause
 	options_pause = true;
-	refreshTime();
+	// refreshTime();
 }
 
 visibly.onVisible(visGame);

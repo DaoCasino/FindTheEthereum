@@ -19,14 +19,14 @@ var ScrGame = function(){
 	
 	const TIME_ONLINE = 5000;
 	const TIME_BLOCK = 30000;
-	const TIME_OPENCHANNEL = 300000;
+	const TIME_RESPONSE = 300000;
 	const COUNT_BANKR_OFFLINE = 15;
 	
 	var _self = this;
 	var _objGame, _objTutor, _contract, _objDispute,
 	_objCurSessionChannel, _objNextSessionChannel, _objCurSessionGame;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
-	var _tfBalance, _tfBet, _tfWinStr, _tfAddress, _tfTime;
+	var _tfBalance, _tfBet, _tfWinStr, _tfAddress, _tfTime, _tfBlockchain;
 	var _fRequestFullScreen, _fCancelFullScreen;
 	// layers
 	var back_mc, game_mc, face_mc, wnd_mc, warning_mc, tutor_mc, tooltip_mc;
@@ -41,7 +41,8 @@ var ScrGame = function(){
 	// numbers
 	var _idTutor, _idBox,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
-	_timeCloseWnd, _depositPlayer, _depositBankroll, _signSession, _timeOnline, _timeBlock, _timeOpenChannel, 
+	_timeCloseWnd, _depositPlayer, _depositBankroll, _signSession, 
+	_timeOnline, _timeBlock, _timeResponse, _timePhrase,
 	_offlineBanroller, _curBlock, _disputeBlock, _endBlock;
 	// arrays
 	var _arBoxes;
@@ -168,6 +169,8 @@ var ScrGame = function(){
 		_curBlock = 0;
 		_disputeBlock = 0;
 		_endBlock = 0;
+		_timeResponse = 0;
+		_timePhrase = 0;
 	}
 	
 	_self.createArrays = function(){
@@ -243,10 +246,14 @@ var ScrGame = function(){
 		_tfTime.x = _tfAddress.x;
 		_tfTime.y =  icoTime.y - _tfTime.height/2;
 		face_mc.addChild(_tfTime);
-		_tfOpenTime = addText("", sizeTf, "#ffffff", "#000000", "left", 400, 4);
+		_tfOpenTime = addText("", sizeTf, "#ffffff", "#000000", "center", 400, 4);
 		_tfOpenTime.x = _W/2;
 		_tfOpenTime.y =  _H - 100 - _tfOpenTime.height/2;
 		face_mc.addChild(_tfOpenTime);
+		_tfBlockchain = addText("", sizeTf, "#FFCC00", "#000000", "center", 700, 4);
+		_tfBlockchain.x = _W/2;
+		_tfBlockchain.y =  _H - 150 - _tfBlockchain.height/2;
+		face_mc.addChild(_tfBlockchain);
 		_tfWinStr = addText("0", sizeTf, "#ffffff", "#000000", "left", 400, 4);
 		_tfWinStr.x = _tfAddress.x;
 		_tfWinStr.y =  icoWS.y - _tfWinStr.height/2;
@@ -729,7 +736,7 @@ var ScrGame = function(){
 		}
 		
 		_bWindow = false;
-		_timeOpenChannel = TIME_OPENCHANNEL;
+		_timeResponse = TIME_RESPONSE;
 		var betGame = 0;
 		var countWinStr = 0;
 		var valPlayer = 0;
@@ -768,8 +775,9 @@ var ScrGame = function(){
 	_self.connectToBankroll = function(objConnect, deposit){
 		App.connect(objConnect, function(connected, info){
 			console.log('Game connect:', connected, info);
-			_timeOpenChannel = 0;
+			_timeResponse = 0;
 			_tfOpenTime.setText("");
+			_tfBlockchain.setText("");
 			if (connected){
 				_addressBankroll = info.bankroller_address;
 				_idRoom = info.room_name;
@@ -839,6 +847,7 @@ var ScrGame = function(){
 		_bCloseChannel = true;
 		_itemTutorial.visible = false;
 		_btnCashout.setAplhaDisabled(true);
+		_timeResponse = TIME_RESPONSE;
 		
 		if(App.logic){
 			_self.showWndWarning(getText("disconnecting"));
@@ -848,6 +857,9 @@ var ScrGame = function(){
 			App.disconnect({session:session}, function(res){
 				_wndWarning.visible = false;
 				_balanceSession = 0;
+				_timeResponse = 0;
+				_tfOpenTime.setText("");
+				_tfBlockchain.setText("");
 				_self.refreshButtons();
 				console.log('Game disconnect:', res);
 				if(res.channel){
@@ -1516,15 +1528,24 @@ var ScrGame = function(){
 			}
 		}
 		
-		if(_timeOpenChannel > 0){
-			_timeOpenChannel -= diffTime;
-			_tfOpenTime.setText(getNormalTime(_timeOpenChannel));
-			if(_timeOpenChannel < 1){
-				_tfOpenTime.setText("");
-				_self.showError(getText("error_bankroll_offline"), function(){
-					_self.removeAllListener();
-					window.location.reload();
-				});
+		if(_timeResponse > 0){
+			if(_objDispute && _objDispute.time > 0){}else{
+				_timeResponse -= diffTime;
+				_timePhrase += diffTime;
+				_tfOpenTime.setText(getNormalTime(_timeResponse));
+				if(_timePhrase > 3000){
+					_timePhrase = 0;
+					var str = "phrase_blockchain_" + Math.ceil(Math.random()*5);
+					_tfBlockchain.setText(getText(str));
+				}
+				if(_timeResponse < 1){
+					_tfOpenTime.setText("");
+					_tfBlockchain.setText("");
+					_self.showError(getText("error_bankroll_offline"), function(){
+						_self.removeAllListener();
+						window.location.reload();
+					});
+				}
 			}
 		}
 		
