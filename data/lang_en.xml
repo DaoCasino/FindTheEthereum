@@ -61,10 +61,9 @@
 	desc_site="Go to home page"
 	
 	phrase_blockchain_1="Wait, bankroller work"
-	phrase_blockchain_2="Wait when bankroller open channel"
-	phrase_blockchain_3="Yes its not so fast"
-	phrase_blockchain_4="This is Blockchain"
-	phrase_blockchain_5="Transaction mining..."
+	phrase_blockchain_2="Yes its not so fast"
+	phrase_blockchain_3="This is Blockchain"
+	phrase_blockchain_4="Transaction mining..."
 	
 	error_balance_bet="You do not have enough BET."
 	error_balance_eth="You do not have enough ETH."

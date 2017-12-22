@@ -1536,7 +1536,7 @@ var ScrGame = function(){
 				_tfOpenTime.setText(getNormalTime(_timeResponse));
 				if(_timePhrase > 3000){
 					_timePhrase = 0;
-					var str = "phrase_blockchain_" + Math.ceil(Math.random()*5);
+					var str = "phrase_blockchain_" + Math.ceil(Math.random()*4);
 					_tfBlockchain.setText(getText(str));
 				}
 				if(_timeResponse < 1){
