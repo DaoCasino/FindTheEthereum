@@ -743,8 +743,8 @@ var ScrGame = function(){
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
 		var objConnect = {
-			bankroller : "0xb5f7cf8128f763cee4c92de122c2c7e83904010c", // develop
-			// bankroller : "0xf67dc689473e620a715bcf595bf5ebb5a71360e3", // j0x
+			// bankroller : "0xb5f7cf8128f763cee4c92de122c2c7e83904010c", // develop
+			bankroller : "0xf67dc689473e620a715bcf595bf5ebb5a71360e3", // j0x
 			// bankroller : "0x146c5e3b9395738eb67feceb5e37cd5a56d63342", // ilya
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData

@@ -1,6 +1,6 @@
 {
 	"name" : "Find The Ethereum",
-	"slug" : "DC_FindTheEthereum",
+	"slug" : "DC_FindTheEthereum_v3",
 	
 	"index" : "./index.html",
 	"logic" : "./javascript/GameLogic.js",
