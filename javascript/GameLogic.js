@@ -9,7 +9,7 @@
  * for use it in frontend and bankroller side
  */
 
-DCLib.defineDAppLogic('DC_FindTheEthereum_v3', function(){
+DCLib.defineDAppLogic('DC_FindTheEthereum_v2017', function(){
 	var _self = this;
 	
 	const MIN_VALUE = 1;
