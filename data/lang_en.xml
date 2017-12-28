@@ -69,6 +69,7 @@
 	error_balance_eth="You do not have enough ETH."
 	error_balance_bankroll_bet="Bankroll do not have enough BET. Try to choose a deposit less."
 	error_bankroll_offline="Bankroll offline. Try later again."
+	error_bankroll_offline_to_arcade="Bankroll offline. We transfer you to the arcade mode."
 	error_quick_return="The previous session of the game is not closed. Try later (NUM min)."
 	error_address_contract="You do not have the address of a smart contract."
 	invalid_data="You sent invalid data."

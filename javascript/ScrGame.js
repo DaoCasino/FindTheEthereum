@@ -24,7 +24,8 @@ var ScrGame = function(){
 	
 	var _self = this;
 	var _objGame, _objTutor, _contract, _objDispute,
-	_objCurSessionChannel, _objNextSessionChannel, _objCurSessionGame;
+	_objCurSessionChannel, _objNextSessionChannel, _objCurSessionGame,
+	_logic;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
 	var _tfBalance, _tfBet, _tfWinStr, _tfAddress, _tfTime, _tfBlockchain;
 	var _fRequestFullScreen, _fCancelFullScreen;
@@ -634,7 +635,11 @@ var ScrGame = function(){
 		}
 		
 		_bWindow = true;
-		_wndHistory.show(App.logic.getHistory())
+		if(options_arcade){
+			_wndHistory.show(_logic.getHistory())
+		} else {
+			_wndHistory.show(App.logic.getHistory())
+		}
 		_timeCloseWnd = 0;
 		_wndHistory.visible = true;
 		_curWindow = _wndHistory;
@@ -742,6 +747,25 @@ var ScrGame = function(){
 		var valPlayer = 0;
 		var gameData = {type:'uint', value:[betGame, countWinStr, valPlayer]};
 		
+		_depositPlayer = deposit;
+		if(options_arcade){
+			_balanceSession = deposit;
+			_self.refreshBalance();
+			_idChannel = DCLib.Utils.makeSeed();
+			
+			_logic = new ArcadeLogic(deposit);
+			
+			_self.refreshButtons();
+			if(_tooltip){
+				_tooltip.visible = false;
+			}
+			_objGame = _self.getGame();
+			_self.closeWindow();
+			_self.createTreasure();
+			_self.showWndBet();
+			return;
+		}
+		
 		var objConnect = {
 			bankroller : "0xb5f7cf8128f763cee4c92de122c2c7e83904010c", // develop
 			// bankroller : "0xf67dc689473e620a715bcf595bf5ebb5a71360e3", // j0x
@@ -812,7 +836,9 @@ var ScrGame = function(){
 						_self.refreshBalance();
 						
 						App.call('initGame', [_openkey, _addressBankroll], function(result){
-							_btnContract.setAplhaDisabled(false);
+							if(addressContract){
+								_btnContract.setAplhaDisabled(false);
+							}
 							_self.refreshButtons();
 							if(_tooltip){
 								_tooltip.visible = false;
@@ -832,9 +858,9 @@ var ScrGame = function(){
 					});
 				}
 			} else {
-				 _self.showError(getText("error_bankroll_offline"), function(){
-					_self.removeAllListener();
-					window.location.reload();
+				_self.showError(getText("error_bankroll_offline_to_arcade"), function(){
+					options_arcade = true;
+					_self.startChannelGame(_depositPlayer);
 				});
 			}
 		})
@@ -982,11 +1008,24 @@ var ScrGame = function(){
 		_pirateContinue.visible = false;
 		_bgDark.visible = false;
 		_itemTutorial.visible = false;
-		// _self.refreshBoxes();
-		_self.updateState(_self.refreshBoxes, false);
+		if(options_debug || options_arcade){
+			_self.refreshBoxes();
+		} else {
+			_self.updateState(_self.refreshBoxes, false);
+		}
 	}
 	
 	_self.closeGame = function() {
+		if(options_arcade){
+			var result = _logic.closeGame();
+			_objGame = result.objGame;
+			_balanceSession = result.balance;
+			_self.refreshBalance();
+				_balanceGame = 0;
+				_self.closeGameUI();
+			return;
+		}
+		
 		App.call('closeGame', [], function(result){
 			 if(App.logic.getBalance() == result.balance){
 				 _objGame = result.objGame;
@@ -1010,10 +1049,10 @@ var ScrGame = function(){
 		_bgDark.visible = false;
 		_itemBet.visible = false;
 		_bCloseChannel = false;
-		_btnCashout.setAplhaDisabled(false);
-		if (options_debug) {
+		if (options_debug || options_arcade) {
 			_btnStart.visible = true;
 		} else {
+			_btnCashout.setAplhaDisabled(false);
 			_self.updateState(
 				function(){
 					if(_balanceSession == 0){
@@ -1280,10 +1319,19 @@ var ScrGame = function(){
 		if(App.logic.getGame().countWinStr > 0){
 			betGame = 0;
 		}
+		if(options_arcade && _logic.getGame().countWinStr > 0){
+			betGame = 0;
+		}
 		
 		var gameData = {type:'uint', value:[betGame, App.logic.getGame().countWinStr, box.id]};
 		var hash = DCLib.web3.utils.soliditySha3(idChannel, session, round, seed, gameData);
 		var signPlayer = DCLib.Account.signHash(hash);
+		
+		if(options_arcade){
+			var result = _logic.clickBox(session, round, gameData);
+			_self.showResult(result, box);
+			return;
+		}
 		
 		if(_offlineBanroller > COUNT_BANKR_OFFLINE && _idBox > 0){
 			return;
@@ -1529,7 +1577,7 @@ var ScrGame = function(){
 			}
 		}
 		
-		if(_timeResponse > 0){
+		if(_timeResponse > 0 && !options_arcade){
 			if(_objDispute && _objDispute.time > 0){}else{
 				_timeResponse -= diffTime;
 				_timePhrase += diffTime;
@@ -1542,15 +1590,22 @@ var ScrGame = function(){
 				if(_timeResponse < 1){
 					_tfOpenTime.setText("");
 					_tfBlockchain.setText("");
-					_self.showError(getText("error_bankroll_offline"), function(){
-						_self.removeAllListener();
-						window.location.reload();
-					});
+					if(_bOpenChannel){
+						_self.showError(getText("error_bankroll_offline"), function(){
+							_self.removeAllListener();
+							window.location.reload();
+						});
+					} else {
+						_self.showError(getText("error_bankroll_offline_to_arcade"), function(){
+							options_arcade = true;
+							_self.startChannelGame(_depositPlayer);
+						});
+					}
 				}
 			}
 		}
 		
-		if(!options_debug && _addressBankroll){
+		if(!options_arcade && !options_debug && _addressBankroll){
 			_timeOnline += diffTime;
 			if(_timeOnline > TIME_ONLINE){
 				_timeOnline = 0;
@@ -1594,7 +1649,11 @@ var ScrGame = function(){
 	// RESULT
 	_self.showResult = function(result, box){
 		_objGame = result.objGame;
-		_balanceSession =  App.logic.getBalance();
+		if(options_arcade){
+			_balanceSession =  _logic.getBalance();
+		} else {
+			_balanceSession =  App.logic.getBalance();
+		}
 		if(options_debug){
 			_balanceSession = _depositPlayer + App.logic.payChannel.getProfit()
 		}
@@ -1661,7 +1720,12 @@ var ScrGame = function(){
 	}
 
 	_self.getGame = function(){
-		if (!App.logic || !App.logic.getGame) { return false; }
+		if(options_arcade){
+			return _logic.getGame();
+		}
+		if (!App.logic || !App.logic.getGame) { 
+			return false; 
+		}
 		return App.logic.getGame()
 	}
 	
