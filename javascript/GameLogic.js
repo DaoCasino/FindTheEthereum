@@ -220,7 +220,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum_v2017', function(){
 	 * @return {number} Returns the player's balance.
 	 */
 	_self.getBalance = function(){
-		return _self.payChannel.getBalance()
+		return _self.payChannel.getBalance();
 	}
 	
 	/**
@@ -229,7 +229,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum_v2017', function(){
 	 * @return {array} Returns an array of game history.
 	 */
 	_self.getHistory = function(){
-		return _history
+		return _history;
 	}
 	
 	/**
@@ -238,7 +238,7 @@ DCLib.defineDAppLogic('DC_FindTheEthereum_v2017', function(){
 	 * @return {number} Returns the session number of the game.
 	 */
 	_self.session = function(){
-		return _session
+		return _session;
 	}
 	
 	_self.loadGame = function(objGame, hist, session){

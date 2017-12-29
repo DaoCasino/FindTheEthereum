@@ -152,6 +152,9 @@ var WndHistory = function(prnt, deposit){
 						if(options_debug){
 							value = (deposit + value).toFixed(2);
 						}
+						if(options_arcade){
+							value = value.toFixed(2);
+						}
 						strBalance += value;
 					}
 				}
