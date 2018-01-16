@@ -20,6 +20,7 @@ var ScrGame = function(){
 	const TIME_ONLINE = 5000;
 	const TIME_BLOCK = 30000;
 	const TIME_RESPONSE = 300000;
+	const TIME_SEARCH_BANKROLLER = 5000;
 	const COUNT_BANKR_OFFLINE = 15;
 	
 	var _self = this;
@@ -28,7 +29,7 @@ var ScrGame = function(){
 	_logic;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
 	var _tfBalance, _tfBet, _tfWinStr, _tfAddress, _tfTime, _tfBlockchain;
-	var _fRequestFullScreen, _fCancelFullScreen;
+	var _fRequestFullScreen, _fCancelFullScreen, _fCheckBankroller;
 	// layers
 	var back_mc, game_mc, face_mc, wnd_mc, warning_mc, tutor_mc, tooltip_mc;
 	// buttons
@@ -43,7 +44,7 @@ var ScrGame = function(){
 	var _idTutor, _idBox,
 	_betGame, _balanceBet, _balanceSession, _balanceGame, _balanceEth,
 	_timeCloseWnd, _depositPlayer, _depositBankroll, _signSession, 
-	_timeOnline, _timeBlock, _timeResponse, _timePhrase,
+	_timeOnline, _timeBlock, _timeResponse, _timePhrase, _timeSearchBankroller,
 	_offlineBanroller, _curBlock, _disputeBlock, _endBlock;
 	// arrays
 	var _arBoxes;
@@ -741,7 +742,6 @@ var ScrGame = function(){
 		}
 		
 		_bWindow = false;
-		_timeResponse = TIME_RESPONSE;
 		var betGame = 0;
 		var countWinStr = 0;
 		var valPlayer = 0;
@@ -766,10 +766,61 @@ var ScrGame = function(){
 			return;
 		}
 		
+		_self.showWndWarning(getText("search_bankroller"));
+		_timeSearchBankroller = TIME_SEARCH_BANKROLLER;
+		
+		var addressBankroll = "0xb5f7cf8128f763cee4c92de122c2c7e83904010c"; // develop
+		// var addressBankroll = "0xf67dc689473e620a715bcf595bf5ebb5a71360e3"; // j0x
+		// var addressBankroll = "0x146c5e3b9395738eb67feceb5e37cd5a56d63342"; // ilya
+		
+		_self.checkBankrollerOnline(addressBankroll, function(result){
+			_timeSearchBankroller = 0;
+			_tfOpenTime.setText("");
+			_tfBlockchain.setText("");
+				
+			if(result){
+				_timeResponse = TIME_RESPONSE;
+		
+				var objConnect = {
+					bankroller : addressBankroll,
+					paychannel:{deposit:deposit}, 
+					gamedata:gameData
+				};
+				if(options_debug){
+					objConnect = {bankroller : "auto"};
+					_idChannel = DCLib.Utils.makeSeed();
+				}
+				_self.showWndWarning(getText("connecting"));
+				
+				if(objConnect.bankroller != "auto"){
+					DCLib.Eth.getBalances(objConnect.bankroller, function(resBal) {
+						var bankrEth = Number(resBal.eth);
+						var bankrBet = Number(resBal.bets);
+						if(bankrEth == 0 || bankrBet < deposit*2){
+							_self.showError("error_balance_bankroll_bet", function(){
+								_self.removeAllListener();
+								window.location.reload();
+							});
+						} else {
+							_self.connectToBankroll(objConnect, deposit);
+						}				
+					})
+				} else {
+					_self.connectToBankroll(objConnect, deposit);
+				}
+			} else {
+				_self.showError(getText("error_bankroll_offline_to_arcade"), function(){
+					options_arcade = true;
+					_self.startChannelGame(_depositPlayer);
+				});
+			}
+		})
+		
+		/*
+		_timeResponse = TIME_RESPONSE;
+		
 		var objConnect = {
-			bankroller : "0xb5f7cf8128f763cee4c92de122c2c7e83904010c", // develop
-			// bankroller : "0xf67dc689473e620a715bcf595bf5ebb5a71360e3", // j0x
-			// bankroller : "0x146c5e3b9395738eb67feceb5e37cd5a56d63342", // ilya
+			bankroller : addressBankroll,
 			paychannel:{deposit:deposit}, 
 			gamedata:gameData
 		};
@@ -794,7 +845,22 @@ var ScrGame = function(){
 			})
 		} else {
 			_self.connectToBankroll(objConnect, deposit);
+		}*/
+	}
+	
+	_self.checkBankrollerOnline = function(address, callback){
+		var timeOut;
+		
+		_fCheckBankroller = function(data){
+			if (data.user_id!=address) {
+				return
+			}
+			
+			App.sharedRoom.off('action::bankroller_active', _fCheckBankroller)
+			callback(data)
 		}
+
+		App.sharedRoom.on('action::bankroller_active', _fCheckBankroller);
 	}
 	
 	_self.connectToBankroll = function(objConnect, deposit){
@@ -1574,6 +1640,19 @@ var ScrGame = function(){
 				_curWindow.visible = false;
 				_curWindow = undefined;
 				_bWindow = false;
+			}
+		}
+		
+		if(_timeSearchBankroller > 0 && !options_arcade){
+			_timeSearchBankroller -= diffTime;
+			if(_timeSearchBankroller < 1){
+				_tfOpenTime.setText("");
+				_tfBlockchain.setText("");
+				App.sharedRoom.off('action::bankroller_active', _fCheckBankroller);
+				_self.showError(getText("error_bankroll_offline_to_arcade"), function(){
+					options_arcade = true;
+					_self.startChannelGame(_depositPlayer);
+				});
 			}
 		}
 		
