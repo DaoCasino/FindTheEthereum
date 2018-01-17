@@ -531,12 +531,14 @@ var ScrGame = function(){
 	_self.onArcadeMode = function(str) {
 		if(str){}else{str = "error_balance_bet"};
 		_self.showError(getText(str), function(){
-			_balanceBet = 100;
-			_balanceEth = 1;
-			_self.refreshBalance();
-			options_arcade = true;
-			_self.showWndDeposit();
-			_self.showTutorial(1);
+			_self.showError(getText("error_bankroll_offline_to_arcade"), function(){
+				_balanceBet = 100;
+				_balanceEth = 1;
+				_self.refreshBalance();
+				options_arcade = true;
+				_self.showWndDeposit();
+				_self.showTutorial(1);
+			});
 		});
 	}
 	
