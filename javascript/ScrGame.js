@@ -20,7 +20,7 @@ var ScrGame = function(){
 	const TIME_ONLINE = 5000;
 	const TIME_BLOCK = 30000;
 	const TIME_RESPONSE = 300000;
-	const TIME_SEARCH_BANKROLLER = 5000;
+	const TIME_SEARCH_BANKROLLER = 10000;
 	const COUNT_BANKR_OFFLINE = 15;
 	
 	var _self = this;
@@ -28,7 +28,7 @@ var ScrGame = function(){
 	_objCurSessionChannel, _objNextSessionChannel, _objCurSessionGame,
 	_logic;
 	var _curWindow, _itemBet, _bgDark, _itemTutorial, _tooltip;
-	var _tfBalance, _tfBet, _tfWinStr, _tfAddress, _tfTime, _tfBlockchain;
+	var _tfBalance, _tfBet, _tfWinStr, _tfAddress, _tfTime, _tfBlockchain, _tfWarning;
 	var _fRequestFullScreen, _fCancelFullScreen, _fCheckBankroller;
 	// layers
 	var back_mc, game_mc, face_mc, wnd_mc, warning_mc, tutor_mc, tooltip_mc;
@@ -173,6 +173,7 @@ var ScrGame = function(){
 		_endBlock = 0;
 		_timeResponse = 0;
 		_timePhrase = 0;
+		_timeSearchBankroller = 0;
 	}
 	
 	_self.createArrays = function(){
@@ -256,6 +257,10 @@ var ScrGame = function(){
 		_tfBlockchain.x = _W/2;
 		_tfBlockchain.y =  _H - 150 - _tfBlockchain.height/2;
 		face_mc.addChild(_tfBlockchain);
+		_tfWarning = addText("", sizeTf, "#EC8200", "#000000", "center", 700, 4);
+		_tfWarning.x = _W/2;
+		_tfWarning.y =  _H - 200 - _tfWarning.height/2;
+		face_mc.addChild(_tfWarning);
 		_tfWinStr = addText("0", sizeTf, "#ffffff", "#000000", "left", 400, 4);
 		_tfWinStr.x = _tfAddress.x;
 		_tfWinStr.y =  icoWS.y - _tfWinStr.height/2;
@@ -484,7 +489,13 @@ var ScrGame = function(){
 			_balanceEth = Number(res.eth);
 			_balanceBet = Number(res.bets);
 			_self.refreshBalance();
-			if(_balanceEth < 0.1){
+			
+			if(_balanceEth == 0 || _balanceBet == 0){
+				_self.onArcadeMode();				
+				return;
+			}
+			
+			if(_balanceEth < 0.1 && !options_arcade){
 				_self.showError("error_balance_eth", function(){
 						_self.removeAllListener();
 						window.open("/", "_self");
@@ -500,9 +511,7 @@ var ScrGame = function(){
 						room: _idRoom,
 						player_address: _openkey
 					};
-					console.log("objConnect:", objConnect);
 					App.reconnect(objConnect, function(res){
-						console.log("!!!!!!!!!!!!!:", res);
 						_self.createTreasure();
 						if(_objGame.betGame == 0 && _balanceSession > 0){
 							_btnStart.visible = true;
@@ -517,6 +526,20 @@ var ScrGame = function(){
 				}
 			}
 		})
+	}
+	
+	_self.onArcadeMode = function(str) {
+		if(str){}else{str = "error_balance_bet"};
+		_self.showError(getText(str), function(){
+			_self.showError(getText("error_bankroll_offline_to_arcade"), function(){
+				_balanceBet = 100;
+				_balanceEth = 1;
+				_self.refreshBalance();
+				options_arcade = true;
+				_self.showWndDeposit();
+				_self.showTutorial(1);
+			});
+		});
 	}
 	
 	_self.refreshButtons = function() {
@@ -558,8 +581,8 @@ var ScrGame = function(){
 		_bWindow = true;
 		var str = getText("set_deposit").replace(new RegExp("SPL"), "\n");
 		_wndDeposit.show(str, function(value){
-					_self.startChannelGame(value);
-				}, _balanceBet)
+			_self.startChannelGame(value);
+		}, _balanceBet)
 		_timeCloseWnd = 0;
 		_wndDeposit.visible = true;
 		_curWindow = _wndDeposit;
@@ -791,6 +814,7 @@ var ScrGame = function(){
 					_idChannel = DCLib.Utils.makeSeed();
 				}
 				_self.showWndWarning(getText("connecting"));
+				_tfWarning.setText("warning_game");
 				
 				if(objConnect.bankroller != "auto"){
 					DCLib.Eth.getBalances(objConnect.bankroller, function(resBal) {
@@ -815,37 +839,6 @@ var ScrGame = function(){
 				});
 			}
 		})
-		
-		/*
-		_timeResponse = TIME_RESPONSE;
-		
-		var objConnect = {
-			bankroller : addressBankroll,
-			paychannel:{deposit:deposit}, 
-			gamedata:gameData
-		};
-		if(options_debug){
-			objConnect = {bankroller : "auto"};
-			_idChannel = DCLib.Utils.makeSeed();
-		}
-		_self.showWndWarning(getText("connecting"));
-		
-		if(objConnect.bankroller != "auto"){
-			DCLib.Eth.getBalances(objConnect.bankroller, function(resBal) {
-				var bankrEth = Number(resBal.eth);
-				var bankrBet = Number(resBal.bets);
-				if(bankrEth == 0 || bankrBet < deposit*2){
-					_self.showError("error_balance_bankroll_bet", function(){
-						_self.removeAllListener();
-						window.location.reload();
-					});
-				} else {
-					_self.connectToBankroll(objConnect, deposit);
-				}				
-			})
-		} else {
-			_self.connectToBankroll(objConnect, deposit);
-		}*/
 	}
 	
 	_self.checkBankrollerOnline = function(address, callback){
@@ -869,6 +862,7 @@ var ScrGame = function(){
 			_timeResponse = 0;
 			_tfOpenTime.setText("");
 			_tfBlockchain.setText("");
+			_tfWarning.setText("");
 			if (connected){
 				_addressBankroll = info.bankroller_address;
 				_idRoom = info.room_name;
@@ -1805,7 +1799,7 @@ var ScrGame = function(){
 		if (!App.logic || !App.logic.getGame) { 
 			return false; 
 		}
-		return App.logic.getGame()
+		return App.logic.getGame();
 	}
 	
 	// REMOVE
