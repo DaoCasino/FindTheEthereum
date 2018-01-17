@@ -814,7 +814,9 @@ var ScrGame = function(){
 					_idChannel = DCLib.Utils.makeSeed();
 				}
 				_self.showWndWarning(getText("connecting"));
-				_tfWarning.setText("warning_game");
+				
+				_tfWarning.y -= 50;
+				_tfWarning.setText(getText("warning_game"));
 				
 				if(objConnect.bankroller != "auto"){
 					DCLib.Eth.getBalances(objConnect.bankroller, function(resBal) {
