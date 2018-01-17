@@ -489,6 +489,12 @@ var ScrGame = function(){
 			_balanceEth = Number(res.eth);
 			_balanceBet = Number(res.bets);
 			_self.refreshBalance();
+			
+			if(_balanceEth == 0 || _balanceBet == 0){
+				_self.onArcadeMode();				
+				return;
+			}
+			
 			if(_balanceEth < 0.1 && !options_arcade){
 				_self.showError("error_balance_eth", function(){
 						_self.removeAllListener();
@@ -520,6 +526,18 @@ var ScrGame = function(){
 				}
 			}
 		})
+	}
+	
+	_self.onArcadeMode = function(str) {
+		if(str){}else{str = "error_balance_bet"};
+		_self.showError(getText(str), function(){
+			_balanceBet = 100;
+			_balanceEth = 1;
+			_self.refreshBalance();
+			options_arcade = true;
+			_self.showWndDeposit();
+			_self.showTutorial(1);
+		});
 	}
 	
 	_self.refreshButtons = function() {
