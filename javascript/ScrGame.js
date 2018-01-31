@@ -259,7 +259,7 @@ var ScrGame = function(){
 		face_mc.addChild(_tfBlockchain);
 		_tfWarning = addText("", sizeTf, "#EC8200", "#000000", "center", 700, 4);
 		_tfWarning.x = _W/2;
-		_tfWarning.y =  _H - 200 - _tfWarning.height/2;
+		_tfWarning.y =  _H - 250 - _tfWarning.height/2;
 		face_mc.addChild(_tfWarning);
 		_tfWinStr = addText("0", sizeTf, "#ffffff", "#000000", "left", 400, 4);
 		_tfWinStr.x = _tfAddress.x;
