@@ -60,10 +60,10 @@ var ScrMenu = function(){
 		tfStart.y = -tfStart.height/2;
 		_btnStart.addChild(tfStart);
 		
-		var btnDao = addButton("btnDao", 1836, 960);
-		btnDao.overSc = true;
-		_self.addChild(btnDao);
-		_self.arButtons.push(btnDao);
+		// var btnDao = addButton("btnDao", 1836, 960);
+		// btnDao.overSc = true;
+		// _self.addChild(btnDao);
+		// _self.arButtons.push(btnDao);
 		var btnFacebook = addButton("btnFacebook", 1870, 48);
 		btnFacebook.overSc = true;
 		_self.addChild(btnFacebook);
