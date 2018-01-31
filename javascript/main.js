@@ -143,7 +143,7 @@ function loadManifest(){
 	preloader.add("bgWndWS", "images/bg/bgWndWS.png");
 	preloader.add("bgWndWS1", "images/bg/bgWndWS1.png");
 	preloader.add("bgWndBet", "images/bg/bgWndBet.png");
-		
+	
 	preloader.add("images/texture/BoxesTexture.json");
 	preloader.add("images/texture/ItemsTexture.json");
 	

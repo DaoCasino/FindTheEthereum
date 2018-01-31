@@ -259,7 +259,7 @@ var ScrGame = function(){
 		face_mc.addChild(_tfBlockchain);
 		_tfWarning = addText("", sizeTf, "#EC8200", "#000000", "center", 700, 4);
 		_tfWarning.x = _W/2;
-		_tfWarning.y =  _H - 200 - _tfWarning.height/2;
+		_tfWarning.y =  _H - 250 - _tfWarning.height/2;
 		face_mc.addChild(_tfWarning);
 		_tfWinStr = addText("0", sizeTf, "#ffffff", "#000000", "left", 400, 4);
 		_tfWinStr.x = _tfAddress.x;
@@ -363,17 +363,17 @@ var ScrGame = function(){
 		var posX = 1840;
 		var posY = 960;
 		var offsetY = 135;
-		var btnDao = addButton("btnDao", posX-4, posY - 0*offsetY);
-		btnDao.tooltip = "home";
-		btnDao.overSc = true;
-		face_mc.addChild(btnDao);
-		_self.arButtons.push(btnDao);
-		var btnFullscreen = addButton("btnFullscreen", posX, posY - 1*offsetY);
+		// var btnDao = addButton("btnDao", posX-4, posY - 0*offsetY);
+		// btnDao.tooltip = "home";
+		// btnDao.overSc = true;
+		// face_mc.addChild(btnDao);
+		// _self.arButtons.push(btnDao);
+		var btnFullscreen = addButton("btnFullscreen", posX, posY - 0*offsetY);
 		btnFullscreen.tooltip = "fullscreen";
 		btnFullscreen.overSc = true;
 		face_mc.addChild(btnFullscreen);
 		_self.arButtons.push(btnFullscreen);
-		_btnContract = addButton("btnContract", posX, posY - 2*offsetY);
+		_btnContract = addButton("btnContract", posX, posY - 1*offsetY);
 		_btnContract.tooltip = "show_contract";
 		_btnContract.overSc = true;
 		face_mc.addChild(_btnContract);
@@ -383,17 +383,17 @@ var ScrGame = function(){
 		// _btnSave.overSc = true;
 		// face_mc.addChild(_btnSave);
 		// _self.arButtons.push(_btnSave);
-		var btnInstruct = addButton("btnInstruct", posX, posY - 3*offsetY);
+		var btnInstruct = addButton("btnInstruct", posX, posY - 2*offsetY);
 		btnInstruct.tooltip = "instruction";
 		btnInstruct.overSc = true;
 		face_mc.addChild(btnInstruct);
 		_self.arButtons.push(btnInstruct);
-		var btnHistory = addButton("btnHistory", posX, posY - 4*offsetY);
+		var btnHistory = addButton("btnHistory", posX, posY - 3*offsetY);
 		btnHistory.tooltip = "show_history";
 		btnHistory.overSc = true;
 		face_mc.addChild(btnHistory);
 		_self.arButtons.push(btnHistory);
-		_btnCashout = addButton("btnCashout", posX, posY - 5*offsetY);
+		_btnCashout = addButton("btnCashout", posX, posY - 4*offsetY);
 		_btnCashout.tooltip = "cashout";
 		_btnCashout.overSc = true;
 		face_mc.addChild(_btnCashout);
@@ -814,7 +814,7 @@ var ScrGame = function(){
 					_idChannel = DCLib.Utils.makeSeed();
 				}
 				_self.showWndWarning(getText("connecting"));
-				_tfWarning.setText("warning_game");
+				_tfWarning.setText(getText("warning_game"));
 				
 				if(objConnect.bankroller != "auto"){
 					DCLib.Eth.getBalances(objConnect.bankroller, function(resBal) {
@@ -841,9 +841,7 @@ var ScrGame = function(){
 		})
 	}
 	
-	_self.checkBankrollerOnline = function(address, callback){
-		var timeOut;
-		
+	_self.checkBankrollerOnline = function(address, callback){		
 		_fCheckBankroller = function(data){
 			if (data.user_id!=address) {
 				return
