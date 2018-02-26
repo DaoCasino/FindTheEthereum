@@ -997,7 +997,7 @@ var ScrGame = function(){
 		}
 		
 		if(_offlineBanroller > 1 && _idBox > 0){
-			if(_offlineBanroller > COUNT_BANKR_OFFLINE){
+			if(_offlineBanroller > COUNT_BANKR_OFFLINE && options_dispute){
 				_self.sendDispute();
 			} else {
 				if(!_wndWarning.visible){
@@ -1066,7 +1066,7 @@ var ScrGame = function(){
 		_pirateContinue.visible = false;
 		_bgDark.visible = false;
 		_itemTutorial.visible = false;
-		if(options_debug || options_arcade){
+		if(options_debug || options_arcade || options_dispute){
 			_self.refreshBoxes();
 		} else {
 			_self.updateState(_self.refreshBoxes, false);
@@ -1221,6 +1221,7 @@ var ScrGame = function(){
 	
 	_self.openDispute = function(res) {
 		if (options_debug) return
+		if (options_dispute) return
 		
 		console.log('openDispute', _bOfflineBankroll);
 		_self.showWndWarning(getText("stay_in_the_game") + "\n" + getText("open_dispute"));
@@ -1249,6 +1250,9 @@ var ScrGame = function(){
 	}
 	
 	_self.sendDispute = function() {
+		if(!options_dispute){
+			return;
+		}
 		if(options_debug){
 			return;
 		}
