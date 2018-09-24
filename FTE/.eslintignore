@@ -1,0 +1,7 @@
+scripts/**
+tmp/**
+dist/**
+build/**
+node_modules/**
+contracts/**
+migrations/config.js

@@ -1,0 +1,18 @@
+{
+  "name": "dc-env",
+  "version": "1.0.0",
+  "description": "Docker based dao casino protocol environment",
+  "main": "docker-compose.yml",
+  "scripts": {
+    "start":"sh ./_scripts/start.sh",
+    "logs_rpc":"docker logs -f env_dc_protocol_1",
+    "logs_bankroller":"docker logs -f env_dc_bankroller_1",
+    
+    "go_bankroller":"docker exec -i -t env_dc_bankroller_1 /bin/bash",
+
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "alex.step@dao.casino",
+  "license": "MIT"
+}
