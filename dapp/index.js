@@ -17,7 +17,7 @@ function loadLib() {
         console.warn('Dapp allready created')
     } else {
         let dapp_config = {
-            slug: process.env.DAPP_SLUG,
+            slug: "DCGame_FTE_v1",
             contract: require('config/dapp.contract.json'),
             rules: {
                 depositX: 2
