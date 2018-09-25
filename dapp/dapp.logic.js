@@ -1,6 +1,6 @@
 /*global DCLib*/
 
-DCLib.defineDAppLogic(process.env.DAPP_SLUG, function (payChannel){
+DCLib.defineDAppLogic("DCGame_FTE_v1", function (payChannel){
     const MIN_VALUE = 1;
     const MAX_VALUE = 3;
 
