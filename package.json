@@ -1,0 +1,92 @@
+{
+  "name": "dc-sdk-box",
+  "version": "0.0.3",
+  "description": "DApp on dao casino protocol example",
+  "author": "Alex Step",
+  "license": "MIT",
+  "meta": {
+    "_": "This section data used for generate manifest.json and meta-tags html",
+    "start_url": "./",
+    "appName": "Dapp example",
+    "appDescription": "Example DApp on dao casino protocol",
+    "background": "#1c2026",
+    "theme_color": "#1c2026",
+    "display": "standalone",
+    "orientation": "portrait"
+  },
+  "paths": {
+    "dapp": {
+      "contract_abi": "./dapp/config/dapp.contract.json"
+    },
+    "truffle": {
+      "contracts_directory": "./contracts",
+      "migrations_directory": "./migrations",
+      "contracts_build_directory": "./dapp/config/contracts/"
+    }
+  },
+  "scripts": {
+    "postinstall": "sh ./scripts/postinstall.sh",
+    "meta:generate": "cd ./scripts/tools/metainfo && npm i && npm start",
+    "meta:clean": "rm -rf  ./dapp/static/meta",
+    "watch_contracts": "node ./scripts/watch_contracts.js",
+    "start": "sh ./scripts/start.sh && npm run dev",
+    "dev": "node ./scripts/devserver.js",
+    "stop": "sh ./scripts/stop.sh",
+    "reset": "sh ./scripts/reset.sh",
+    "build": "node ./scripts/build.js",
+    "deploy:contracts:local": "truffle migrate --reset",
+    "deploy:contracts:ropsten": "DC_NETWORK=ropsten truffle migrate --network ropsten",
+    "deploy:frontend:ipfs": "cd ./scripts/tools/deploy_ipfs && npm run deploy",
+    "deploy:frontend:firebase": "cd ./scripts/tools/deploy_firebase && yarn && npm run deploy",
+    "deploy:frontend:ssh": "cd ./scripts/tools/deploy_ssh && yarn && npm run deploy",
+    "publish": "echo 'Publish to dao.casino marketeplace - coming soon'",
+    "logs:bankroller": "cd _env && npm run logs_bankroller",
+    "logs:rpc": "cd _env && npm run logs_rpc",
+    "lint": "eslint ./",
+    "test": "truffle test"
+  },
+  "dependencies": {
+    "ethereumjs-abi": "0.6.5",
+    "web3": "1.0.0-beta.35"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.22.2",
+    "babel-core": "^6.22.1",
+    "babel-eslint": "^6.1.2",
+    "babel-loader": "7.1.5",
+    "babel-plugin-transform-runtime": "^6.22.0",
+    "babel-preset-env": "^1.1.8",
+    "babel-register": "^6.22.0",
+    "case-sensitive-paths-webpack-plugin": "2.1.2",
+    "copy-webpack-plugin": "^4.0.1",
+    "css-loader": "^0.26.2",
+    "dotenv": "6.0.0",
+    "eslint": "^3.14.0",
+    "eslint-config-standard": "^6.0.0",
+    "eslint-loader": "2.1.0",
+    "eslint-plugin-babel": "^4.0.0",
+    "eslint-plugin-mocha": "^4.8.0",
+    "eslint-plugin-promise": "^3.0.0",
+    "eslint-plugin-standard": "^2.0.0",
+    "extra-watch-webpack-plugin": "1.0.3",
+    "extract-text-webpack-plugin": "3.0.2",
+    "file-loader": "1.1.11",
+    "fs-extra": "7.0.0",
+    "html-webpack-plugin": "^2.28.0",
+    "js-cryptico": "1.0.2",
+    "json-loader": "^0.5.4",
+    "postcss-loader": "2.1.6",
+    "promise": "8.0.1",
+    "react-dev-utils": "5",
+    "sass-loader": "7.1.0",
+    "serviceworker-webpack-plugin": "0.2.3",
+    "style-loader": "^0.13.2",
+    "truffle-contract": "^1.1.11",
+    "truffle-hdwallet-provider-privkey": "0.3.0",
+    "url-loader": "1.0.1",
+    "webpack": "3.12.0",
+    "webpack-dev-server": "2.11.2",
+    "webpack-manifest-plugin": "2.0.3",
+    "whatwg-fetch": "2.0.4"
+  }
+}

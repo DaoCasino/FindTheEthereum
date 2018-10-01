@@ -1,0 +1,16 @@
+{
+  "name": "deploy_ipscend",
+  "version": "1.0.0",
+  "description": "deploy files to ipfs tool",
+  "repository": "https://github.com/ipfs-shipyard/ipscend",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "node ./index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "react-dev-utils": "5"
+  }
+}
