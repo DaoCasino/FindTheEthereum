@@ -15,22 +15,17 @@ The game has a winstreak system. If the player guessed the box, he can continue 
 
 ## Table of Contents
 - [File structure](#-file-structure)
-  - [dapp.manifest](#dappmanifest)
-  - [GameLogic.js](#gamelogicjs)
-  - [bankroll.js](#bankrolljs)
+  - [dapp.manifest.js](#dappmanifest)
+  - [dapp.logic.js](#dapplogic)
   
 ## 📁 File structure
 |name|description|
 |---|---|
-|`dapp.mainfest`|Configuration file for the **bankroll app**|
-|`GameLogic.js`|The file contains the main logic and is a common file for the **bankroll app** and the client|
-|`bankroll.js`|The part that is executed inside the **bankroll app**|
+|`dapp.manifest.js`|Configuration file for the **bankroll app**|
+|`dapp.logic.js`|The file contains the main logic and is a common file for the **bankroll app** and the client|
 
-### dapp.manifest
+### dapp.manifest.js
 The application manifest contains basic information about the application and the path to the files.
 
-### GameLogic.js
+### dapp.logic.js
 The file contains the main logic of the application. The file is shared between the client and server parts.
-
-### bankroll.js
-The file contains executable code on the **bankroll app** side.
