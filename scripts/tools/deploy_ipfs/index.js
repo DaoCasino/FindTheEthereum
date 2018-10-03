@@ -9,9 +9,9 @@ const pathToVersions = path.join(__dirname, './links.json')
 
 function start () {
   const log = []
-  const cmd = spawn('docker exec ipfs_deployer ipfs add -r -Q /go/target', {
+  const cmd = spawn('docker exec ipfs_deployer ipfs add --pin -r -Q /go/target', {
     shell: true,
-    cwd: path.resolve(process.env.PWD, '../../..', '_env')
+    cwd: path.resolve(process.env.PWD, '../../..', 'node_modules/dc-scripts/_env')
   })
 
   cmd.stderr.on('data', errData => log.push(`${errData}`))
@@ -24,7 +24,7 @@ function start () {
       } else {
         console.error(log.join('\n'))
         process.exit()
-      } 
+      }
     })
     .on('error', err => {
       console.error(err)
@@ -43,7 +43,7 @@ function output (log) {
   if (fs.existsSync(pathToVersions)) {
     const output = require(pathToVersions)
     const open   = fs.openSync(pathToVersions, 'w')
-    
+
     for (let ver of output) {
       if (res.hash !== ver.hash) {
         output.push(res)

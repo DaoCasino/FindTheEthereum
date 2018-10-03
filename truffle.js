@@ -1,18 +1,7 @@
-require('babel-register')
-
-const web3_utils       = require('web3-utils')
-const HDWalletProvider = require('truffle-hdwallet-provider-privkey')
+const HDWalletProvider = require('truffle-hdwallet-provider')
 
 const path   = require('path')
-const paths  = require(path.join(process.cwd() , '/package.json')).paths.truffle
-
-const remove0x = el => (typeof el !== 'undefined' && el.length > 2 && el.substr(0, 2) === '0x')
-  ? el.substr(2)
-  : el
-
-process.env.PRIVKEY = (process.env.DC_NETWORK === 'ropsten') &&
- remove0x(process.env.PRIVKEY) || remove0x(require('./secrets.json').ropsten.privkey)
-
+const paths  = require(path.join(process.cwd(), '/package.json')).paths.truffle
 
 module.exports = {
   networks: {
@@ -22,10 +11,12 @@ module.exports = {
       network_id: '*'
     },
     ropsten: {
-      provider: new HDWalletProvider([process.env.PRIVKEY], 'https://ropsten.infura.io/v3/ddcb560cc5914992be33aa2aa7dd8e20'),
-      gas: 4200000,
-      gasPrice: web3_utils.toWei('20', 'gwei'),
-      network_id: 3
+      gas           : 5500000,
+      gasPrice      : 10000000000,
+      provider      : new HDWalletProvider(process.env.MNEMONIC || require('./secrets.json').ropsten.mnemonic, 'https://ropsten.infura.io'),
+      network_id    : 3,
+      skipDryRun    : true,
+      timeoutBlocks : 200
     }
   },
 

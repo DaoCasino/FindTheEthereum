@@ -10,9 +10,9 @@ const CaseSensitivePathsPlugin      = require('case-sensitive-paths-webpack-plug
 const InterpolateHtmlPlugin         = require('react-dev-utils/InterpolateHtmlPlugin')
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin')
 const eslintFormatter               = require('react-dev-utils/eslintFormatter')
-const ModuleScopePlugin             = require('react-dev-utils/ModuleScopePlugin')
 const SWPlugin                      = require('serviceworker-webpack-plugin')
 const fileWatcher                   = require('extra-watch-webpack-plugin')
+// const ModuleScopePlugin             = require('react-dev-utils/ModuleScopePlugin')
 
 const getClientEnvironment          = require('./env')
 const paths                         = require('./paths')
@@ -41,7 +41,7 @@ try {
   htmlReplacements.META_INFORMATION = ''
 }
 
-const protocol_contracts = require('../../_env/protocol/addresses.json')
+const protocol_contracts = require('../../dapp/config/addresses.json')
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -97,7 +97,6 @@ let front_dev_config = {
 
     // This is the URL that app is served from. We use "/" in development.
     publicPath: publicPath,
-    // publicPath: "/games/fte/",
 
     // Point sourcemap entries to original disk location
     devtoolModuleFilenameTemplate: info => path.resolve(info.absoluteResourcePath)
@@ -126,11 +125,11 @@ let front_dev_config = {
       // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
       // please link the files into your node_modules/ and let module-resolution kick in.
       // Make sure your source files are compiled, as they will not be processed in any way.
-      new ModuleScopePlugin(paths.appSrc)
+      // new ModuleScopePlugin(paths.appSrc, paths.distContract)
     ]
   },
   module: {
-    strictExportPresence: false,
+    strictExportPresence: true,
     rules: [
       // First, run the linter.
       // It's important to do this before Babel processes the JS.
@@ -162,6 +161,9 @@ let front_dev_config = {
           /\.html$/,
           /\.js$/,
           /\.css$/,
+          /\.scss$/,
+          /\.sass$/,
+          /\.styl$/,
           /\.less$/,
           /\.json$/,
           /\.svg$/,
@@ -335,44 +337,43 @@ let front_dev_config = {
 
 
 // SASS loader
+// front_dev_config.module.rules.push({
+//   test: /\.(scss|sass)$/,
+//   use: [
+//     // creates style nodes from JS strings
+//     { loader: 'style-loader' },
+//     // translates CSS into CommonJS
+//     { loader: 'css-loader'   },
+//     // compiles Sass to CSS
+//     { loader: 'sass-loader'  }
+//   ]
+// })
+
+// LESS loader
 front_dev_config.module.rules.push({
-  test: /\.(scss|sass)$/,
+  test: /\.less$/,
   use: [
     // creates style nodes from JS strings
     { loader: 'style-loader' },
     // translates CSS into CommonJS
     { loader: 'css-loader'   },
-    // compiles Sass to CSS
-    { loader: 'sass-loader'  }
+    // compiles Less to CSS
+    { loader: 'less-loader'  }
   ]
 })
 
-// LESS loader
-//   front_dev_config.module.rules.push({
-//     test: /\.less$/,
-//     use: [
-//       // creates style nodes from JS strings
-//       { loader: 'style-loader' },
-//       // translates CSS into CommonJS
-//       { loader: 'css-loader'   },
-//       // compiles Less to CSS
-//       { loader: 'less-loader'  }
-//     ]
-//   })
 
-
-// STYLUS loader
-//   front_dev_config.module.rules.push({
-//     test: /\.styl$/,
-//     use: [
-//       // creates style nodes from JS strings
-//       { loader: 'style-loader' },
-//       // translates CSS into CommonJS
-//       { loader: 'css-loader'   },
-//       // compiles stylus
-//       { loader: 'stylus-loader'  }
-//     ]
-//   })
+front_dev_config.module.rules.push({
+  test: /\.styl$/,
+  use: [
+    // creates style nodes from JS strings
+    { loader: 'style-loader' },
+    // translates CSS into CommonJS
+    { loader: 'css-loader'   },
+    // compiles stylus
+    { loader: 'stylus-loader'  }
+  ]
+})
 
 // module.exports = [front_dev_config]
 module.exports = [ front_dev_config ].concat( require('./copy.dapp').webpack )

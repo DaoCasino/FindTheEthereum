@@ -1,14 +1,15 @@
-module.exports = {
-  'slug': "DCGame_FTE_v1",
+export default {
+  'slug': 'DCGame_FTE_v1',
+  // 'disabled': false,
 
-   // if you want to change filename  - change it too in /scripts/config/paths
-  'logic' : './dapp.logic.js',
+  // if you want to change filename  - change it too in /scripts/config/paths
+  'logic': './dapp.logic.js',
 
-  'about' : './README.md',
+  'about': './README.md',
 
   'contract': require('./config/dapp.contract.json'),
 
   'rules': {
-    'depositX' : 2
+    'depositX': 2
   }
 }

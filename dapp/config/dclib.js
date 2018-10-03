@@ -1,13 +1,20 @@
 // Set global DCLib network config
 window.DCLIB_CONFIG = {
   network: 'local',
-  // rpc_url: 'http://127.0.0.1:1406',
-  rpc_url: 'https://ganache-cli.stage.dao.casino',
+  rpc_url: 'http://127.0.0.1:1406',
+
+  // signal : '/ip4/0.0.0.0/tcp/1407/ws/p2p-websocket-star/',
+  dappRoom : process.env.DAPP_ROOM || '',
+
+  tx_confirmations : 2,
+
+  gasPrice : process.env.DAPP_gasPrice * 1,
+  gasLimit : process.env.DAPP_gasLimit * 1,
 
   contracts: {
     erc20: {
-      address: require('protocol/addresses.json').ERC20,
-      abi: require('protocol/contracts/ERC20.json').abi
+      address: require('./addresses.json').ERC20,
+      abi: require('./contracts/ERC20.json').abi
     }
   }
 }

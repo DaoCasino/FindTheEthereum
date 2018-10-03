@@ -1,16 +1,18 @@
 const path = require('path')
 
-const root = (process.env.PWD || '../')+'/'
+const root = (process.env.PWD || '../') + '/'
 
 const paths     = require(path.join(root , '/package.json')).paths
-const protocol  = path.resolve(root + '_env/protocol/')
+const protocol  = path.resolve(root + './dapp/config')
 const contracts = path.resolve(protocol + '/contracts/')
 const dapp_abi  = path.resolve( root + paths.dapp.contract_abi )
 
-module.exports = function(network=false){
-  let addresses = require(path.resolve(protocol + '/addresses.json'))
-  
-  if (network === 'ropsten') {
+module.exports = function(network = false) {
+  let addresses = false
+
+  if (network !== 'ropsten') {
+    addresses = require(path.resolve(protocol + '/addresses.json'))
+  } else {
     addresses = {
       ERC20:    '0x5D1E47F703729fc87FdB9bA5C20fE4c1b7c7bf57',
       Referrer: '0x674ff87adfe928b8b0ffbbddf7faeb5ae7a1f9d6',
@@ -31,7 +33,7 @@ module.exports = function(network=false){
         provider:'https://ropsten.infura.io/JCnK5ifEPH9qcQkX0Ahl'
       }
     },
-    
+
     protocol : {
       addresses : addresses,
       contracts : contracts,

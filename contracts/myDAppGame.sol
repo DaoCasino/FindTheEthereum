@@ -1,5 +1,8 @@
 pragma solidity ^0.4.19;
+
 import './lib/oneStepGame.sol';
+
+
 
 contract myDAppGame is oneStepGame {
 
@@ -24,7 +27,7 @@ contract myDAppGame is oneStepGame {
         
         config = Config({
             maxBet: 100 ether,
-            minBet: 1 ether,
+            minBet: 1,
             gameDevReward: 25,
             bankrollReward: 25,
             platformReward: 25,
@@ -41,7 +44,7 @@ contract myDAppGame is oneStepGame {
     function checkGameData(uint[] _gameData, uint _bet) public view returns (bool) {
         uint playerNumber = _gameData[0];
         require(_bet >= config.minBet && _bet <= config.maxBet);
-        require(playerNumber >= 1 && playerNumber <= 3);
+        require(playerNumber > 0 && playerNumber < 64226);
         return true;
     }
 
@@ -78,7 +81,7 @@ contract myDAppGame is oneStepGame {
     */
     function getProfit(uint[] _gameData, uint _bet) public pure returns(uint _profit) {
         uint _playerNumber = _gameData[0];
-        _profit = _bet.mul(_playerNumber);
+        _profit = (_bet*2).sub(_bet);
     }
 
     /**

@@ -1,14 +1,17 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
-/build
-/dapp/static/meta
-/dapp/config/contracts
-/dapp/config/dapp.contract.json
+build
+dapp/static/meta
+dapp/config/contracts
+dapp/config/addresses.json
+dapp/config/dapp.contract.json
 
 # dependencies
 /node_modules
-
+.vscode
 
 # misc
+yarn.lock
+package-lock.json
 npm-debug.log
 yarn-error.log
 .DS_Store

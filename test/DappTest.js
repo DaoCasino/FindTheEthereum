@@ -1,3 +1,5 @@
+/* global contract before describe it assert */
+
 const myDAppGame = artifacts.require('myDAppGame')
 const web3_1  = require('web3')
 const web3js  = new web3_1(web3.currentProvider)

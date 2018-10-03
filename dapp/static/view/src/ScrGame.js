@@ -857,7 +857,7 @@ var ScrGame = function(){
 			_tfBlockchain.setText("");
 			_self.refreshButtons();
 			console.log('Game disconnect:', res);
-			/*if (res.channel) {
+			if (res.connection && res.connection.disconnected == true) {
 				DCLib.Eth.getBalances(_openkey, function (resBal) {
 					_balanceEth = Number(resBal.eth);
 					_balanceBet = Number(resBal.bets);
@@ -866,8 +866,8 @@ var ScrGame = function(){
 				var transactionHash = res.channel.transactionHash;
 				_bOpenChannel = false;
 				_self.createWndInfo(getText("close_channel"), function () {
-					var url = "https://ropsten.etherscan.io/tx/" + transactionHash;
-					window.open(url, "_blank");
+					//var url = "https://ropsten.etherscan.io/tx/" + transactionHash;
+					//window.open(url, "_blank");
 					_self.showWndHistory();
 				});
 				_self.saveGame();
@@ -876,7 +876,7 @@ var ScrGame = function(){
 					_self.removeAllListener();
 					window.location.reload();
 				});
-			}*/
+			}
 		})
 	}
 	

@@ -1,16 +1,8 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
+export DC_NETWORK=sdk
+export DAPP_ROOM=dapp_room
+export DAPP_PATH=$(PWD)/build/
+export PRIVATE_KEY=0x8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5
 
-sh `dirname "$0"`/../_env/_scripts/start.sh || exit 1
-
-clear
-echo ""
-echo " * Run your DApp migrations"
-echo ""
-
-BUILD_CONTRACT="./dapp/config/contracts"
-if [ -d "$BUILD_CONTRACT" ]; then
-  rm -rf $BUILD_CONTRACT
-fi
-
-truffle migrate
-# truffle migrate || clear && truffle migrate --reset || clear && rm -rf ./dapp/config/contracts && truffle migrate
+npm run watch_contracts &
+npm run dev

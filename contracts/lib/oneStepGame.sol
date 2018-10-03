@@ -7,7 +7,7 @@ contract oneStepGame is gameInterface {
 
     event logChannel(
         string  action,
-        bytes32 id,             
+        bytes32 id,
         uint    playerBalance,
         uint    bankrollerBalance,
         uint    session
@@ -55,7 +55,7 @@ contract oneStepGame is gameInterface {
         playerWL    = PlayerWLinterface(_playerWL);
         rsa         = RSA(_rsa);
     }
-    
+
     struct Config {
         uint maxBet;
         uint minBet;
@@ -67,12 +67,12 @@ contract oneStepGame is gameInterface {
 
     struct Channel {
         State   state;
-        address player;            
-        address bankroller;         
-        uint    playerBalance;      
-        uint    bankrollerBalance;    
-        uint    totalBet;  
-        uint    session;            
+        address player;
+        address bankroller;
+        uint    playerBalance;
+        uint    bankrollerBalance;
+        uint    totalBet;
+        uint    session;
         uint    endBlock;
         uint[]  gameData;
         bytes32 RSAHash;
@@ -104,28 +104,28 @@ contract oneStepGame is gameInterface {
     @param _bankrollerBalance Bankroller's deposit
     @param _openingBlock opening block
     @param _gameData Initial data (optional)
-    @param _N N-component of bankroller's rsa public key 
-    @param _E E-component of bankroller's rsa public key 
+    @param _N N-component of bankroller's rsa public key
+    @param _E E-component of bankroller's rsa public key
     @param _sign Signature from the player
     */
     function openChannel(
         bytes32 _id,
         address _player,
         address _bankroller,
-        uint _playerBalance,
-        uint _bankrollerBalance,
-        uint _openingBlock,
-        uint[] _gameData,
-        bytes _N,
-        bytes _E,
-        bytes _sign
+        uint    _playerBalance,
+        uint    _bankrollerBalance,
+        uint    _openingBlock,
+        uint[]  _gameData,
+        bytes   _N,
+        bytes   _E,
+        bytes   _sign
     )
         public
     {
         require(channels[_id].state == State.unused);
         require(_openingBlock.add(20) >= block.number);
-        require(playerWL.getMaxAmount(_player) >= _playerBalance);
-        require(gameWL.getStatus(this));
+        // require(playerWL.getMaxAmount(_player) >= _playerBalance);
+        // require(gameWL.getStatus(this));
         address _signer = recoverSigner(keccak256(abi.encodePacked(_id, _player, _bankroller, _playerBalance, _bankrollerBalance, _openingBlock, _gameData, _N, _E)), _sign);
         require((_signer == _player || _signer == _bankroller) && (msg.sender != _signer));
         require(msg.sender == _player || msg.sender == _bankroller);
@@ -146,7 +146,7 @@ contract oneStepGame is gameInterface {
         });
 
         channels[_id] = _channel;
-        
+
         emit logChannel("open channel", _id, _playerBalance, _bankrollerBalance, 0);
     }
 
@@ -216,13 +216,15 @@ contract oneStepGame is gameInterface {
         Channel storage _channel = channels[_id];
         require(_close);
         address _signer = recoverSigner(keccak256(abi.encodePacked(_id, _playerBalance, _bankrollerBalance, _totalBet, _session, _close)), _sign);
-        require(_playerBalance.add(_bankrollerBalance) == _channel.playerBalance.add(_channel.bankrollerBalance));
+        // require(_playerBalance.add(_bankrollerBalance) == _channel.playerBalance.add(_channel.bankrollerBalance));
         require(_signer != msg.sender);
         require(_signer == _channel.player || _signer == _channel.bankroller);
-        _channel.playerBalance = _playerBalance;
+
+        _channel.playerBalance     = _playerBalance;
         _channel.bankrollerBalance = _bankrollerBalance;
-        _channel.session = _session;
-        _channel.totalBet = _totalBet;
+        _channel.session           = _session;
+        _channel.totalBet          = _totalBet;
+
         emit logChannel("close by consent", _id, _playerBalance, _bankrollerBalance, _session);
         closeChannel(_id);
     }
@@ -268,7 +270,7 @@ contract oneStepGame is gameInterface {
     }
 
     /**
-    @notice To open a dispute 
+    @notice To open a dispute
     @param _id Unique channel identifier
     @param _session Number of the game session
     @param _disputeSeed seed for generate random
@@ -278,11 +280,11 @@ contract oneStepGame is gameInterface {
     */
     function openDispute(
         bytes32 _id,
-        uint _session,
-        uint _disputeBet,
-        uint[] _gameData,
+        uint    _session,
+        uint    _disputeBet,
+        uint[]  _gameData,
         bytes32 _disputeSeed,
-        bytes _sign
+        bytes   _sign
     )
         public active(channels[_id])
     {
@@ -292,16 +294,16 @@ contract oneStepGame is gameInterface {
         require(_signer == _channel.player);
         require(checkGameData(_gameData, _disputeBet));
         require(getProfit(_gameData, _disputeBet) <= _channel.bankrollerBalance);
-        
+
         if (_channel.endBlock.sub(block.number) < safeTime) {
             _channel.endBlock = block.number.add(safeTime);
         }
 
         Dispute memory _dispute = Dispute({
-            disputeSeed: _disputeSeed,
+            disputeSeed:     _disputeSeed,
             disputeGameData: _gameData,
-            disputeBet: _disputeBet,
-            initiator: msg.sender
+            disputeBet:      _disputeBet,
+            initiator:       msg.sender
         });
         _channel.totalBet = _channel.totalBet.add(_disputeBet);
         disputes[_id] = _dispute;
@@ -312,8 +314,8 @@ contract oneStepGame is gameInterface {
     /**
     @notice Closing of the channel on the dispute
     @param _id Unique channel identifier
-    @param _N N-component of bankroller's rsa public key 
-    @param _E E-component of bankroller's rsa public key 
+    @param _N N-component of bankroller's rsa public key
+    @param _E E-component of bankroller's rsa public key
     @param _rsaSign sign for generate random
     */
     function resolveDispute(
@@ -328,13 +330,13 @@ contract oneStepGame is gameInterface {
         Dispute storage d = disputes[_id];
         require(_channel.state == State.dispute);
         require(msg.sender == _channel.bankroller);
-        if (d.initiator == _channel.player) {  
+        if (d.initiator == _channel.player) {
             require(_channel.endBlock > block.number);
         } else if (d.initiator == _channel.bankroller) {
             require(_channel.endBlock < block.number);
         }
         require(keccak256(abi.encodePacked(keccak256(_N), keccak256(_E))) == _channel.RSAHash);
-        require(rsa.verify(keccak256(abi.encodePacked(_id, _channel.session.add(1), d.disputeBet, d.disputeGameData, d.disputeSeed)), _N, _E, _rsaSign));                     
+        require(rsa.verify(keccak256(abi.encodePacked(_id, _channel.session.add(1), d.disputeBet, d.disputeGameData, d.disputeSeed)), _N, _E, _rsaSign));
         runGame(_id, d.disputeBet, _rsaSign);
     }
 
@@ -356,7 +358,7 @@ contract oneStepGame is gameInterface {
             _channel.playerBalance = _channel.playerBalance.sub(_bet);
             _channel.bankrollerBalance = _channel.bankrollerBalance.add(_bet);
         }
-        emit logChannel("resolve dispute", _id, _channel.playerBalance, _channel.bankrollerBalance, _channel.session); 
+        emit logChannel("resolve dispute", _id, _channel.playerBalance, _channel.bankrollerBalance, _channel.session);
         closeChannel(_id);
     }
 
@@ -366,17 +368,18 @@ contract oneStepGame is gameInterface {
     */
     function closeChannel(bytes32 _id) internal {
         Channel storage _channel = channels[_id];
-        uint _forReward        = _channel.totalBet.mul(20).div(1000);
-        uint _bankrollerReward = _forReward.mul(config.bankrollReward).div(100);
-        uint _forPlayer     = _channel.playerBalance;
-        uint _forBankroller = uint(0);
+        uint _forReward          = _channel.totalBet.mul(20).div(1000);
+        uint _bankrollerReward   = _forReward.mul(config.bankrollReward).div(100);
+        uint _forPlayer          = _channel.playerBalance;
+        uint _forBankroller      = uint(0);
+
         if(_forReward > _channel.bankrollerBalance) {
             _forPlayer = _forPlayer.sub(_forReward);
         } else {
             _forBankroller = ((_channel.bankrollerBalance.add(_bankrollerReward).sub(_forReward)));
         }
         serviceReward(_channel.player, _forReward);
-        token.transfer(_channel.bankroller, _forBankroller);        
+        token.transfer(_channel.bankroller, _forBankroller);
         token.transfer(_channel.player, _forPlayer);
         _channel.state = State.close;
         delete _channel.playerBalance;
@@ -384,7 +387,7 @@ contract oneStepGame is gameInterface {
         if (_channel.state == State.dispute) {
            delete disputes[_id];
         }
-        emit logChannel("close channel", _id, _channel.playerBalance, _channel.bankrollerBalance, _channel.session); 
+        emit logChannel("close channel", _id, _channel.playerBalance, _channel.bankrollerBalance, _channel.session);
     }
 
     /**

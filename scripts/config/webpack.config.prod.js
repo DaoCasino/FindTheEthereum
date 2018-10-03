@@ -22,7 +22,6 @@ const getClientEnvironment  = require('./env')
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
 const publicPath = paths.servedPath
-// const publicPath = "/games/fte/"
 
 // Some apps do not use client-side routing with pushState.
 // For these, "homepage" can be set to "." to enable relative asset paths.
@@ -74,7 +73,7 @@ let front_prod_config = {
 
   // We generate sourcemaps in production. This is slow but gives good results.
   // You can exclude the *.map files from the build during deployment.
-  devtool: 'source-map',
+  // devtool: 'source-map',
 
   // In production, we only want to load the polyfills and the app code.
   entry: ['babel-polyfill', require.resolve('./polyfills'), paths.appIndexJs],
@@ -159,6 +158,9 @@ let front_prod_config = {
           /\.html$/,
           /\.js$/,
           /\.css$/,
+          /\.scss$/,
+          /\.sass$/,
+          /\.styl$/,
           /\.less$/,
           /\.json$/,
           /\.svg$/,
@@ -236,7 +238,7 @@ let front_prod_config = {
               options: {
                 importLoaders : 1,
                 minimize      : true,
-                sourceMap     : true
+                sourceMap     : false
               }
             },
             {
@@ -324,7 +326,7 @@ let front_prod_config = {
       output: {
         comments: false
       },
-      sourceMap: true
+      sourceMap: false
     }),
 
     // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
@@ -379,44 +381,44 @@ if (!process.env.TRAVIS_BUILD && typeof HtmlCriticalPlugin!=='undefined') {
 
 
 // SASS loader
+// front_prod_config.module.rules.push({
+//   test: /\.(scss|sass)$/,
+//   use: [
+//     // creates style nodes from JS strings
+//     { loader: 'style-loader' },
+//     // translates CSS into CommonJS
+//     { loader: 'css-loader'   },
+//     // compiles Sass to CSS
+//     { loader: 'sass-loader'  }
+//   ]
+// })
+
+// LESS loader
 front_prod_config.module.rules.push({
-  test: /\.(scss|sass)$/,
+  test: /\.less$/,
   use: [
     // creates style nodes from JS strings
     { loader: 'style-loader' },
     // translates CSS into CommonJS
     { loader: 'css-loader'   },
-    // compiles Sass to CSS
-    { loader: 'sass-loader'  }
+    // compiles Less to CSS
+    { loader: 'less-loader'  }
   ]
 })
 
-// LESS loader
-//   front_prod_config.module.rules.push({
-//     test: /\.less$/,
-//     use: [
-//       // creates style nodes from JS strings
-//       { loader: 'style-loader' },
-//       // translates CSS into CommonJS
-//       { loader: 'css-loader'   },
-//       // compiles Less to CSS
-//       { loader: 'less-loader'  }
-//     ]
-//   })
-
 
 // STYLUS loader
-//   front_prod_config.module.rules.push({
-//     test: /\.styl$/,
-//     use: [
-//       // creates style nodes from JS strings
-//       { loader: 'style-loader' },
-//       // translates CSS into CommonJS
-//       { loader: 'css-loader'   },
-//       // compiles stylus
-//       { loader: 'stylus-loader'  }
-//     ]
-//   })
+front_prod_config.module.rules.push({
+  test: /\.styl$/,
+  use: [
+    // creates style nodes from JS strings
+    { loader: 'style-loader' },
+    // translates CSS into CommonJS
+    { loader: 'css-loader'   },
+    // compiles stylus
+    { loader: 'stylus-loader'  }
+  ]
+})
 
 
 

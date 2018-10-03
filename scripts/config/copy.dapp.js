@@ -8,7 +8,7 @@ const paths   = require('./paths')
 module.exports = {
   copyDappFiles: function (loc) {
     loc = loc || './config'
-    let dapp_slug = '' 
+    let dapp_slug = ''
     try {
       dapp_slug = require(loc+'/env')('').raw.DAPP_SLUG
     } catch(e){
@@ -16,6 +16,8 @@ module.exports = {
       console.error('Please check this');
       throw e
     }
+
+    (!fs.existsSync(paths.appBuild)) && fs.mkdirSync(paths.appBuild);
 
     // Logic
     let l = fs.readFileSync(paths.DappLogic,'utf8')
@@ -30,9 +32,9 @@ module.exports = {
       dapp_abi_path = require(path.join(root , '/package.json')).paths.dapp.contract_abi
       contract_data = require(root+dapp_abi_path)
     } catch(e){
-      console.error('ERR: Cant find dapp contarct abi in '+dapp_abi_path, e)
+      console.error('ERR: Cant find dapp contract abi in '+dapp_abi_path, e)
     }
-    
+
     let p = dapp_abi_path.replace('./dapp/','./')
 
     // Manifest
