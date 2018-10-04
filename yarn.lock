@@ -16,6 +16,14 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
+"@pm2/agent-node@^1.0.2":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@pm2/agent-node/-/agent-node-1.0.4.tgz#78ba34d9edc06e62c77e92e93eca5bf9d64797f6"
+  dependencies:
+    debug "^3.1.0"
+    eventemitter2 "^5.0.1"
+    ws "^6.0.0"
+
 "@pm2/agent@^0.5.11":
   version "0.5.16"
   resolved "https://registry.yarnpkg.com/@pm2/agent/-/agent-0.5.16.tgz#0d2fcbfa15cd682424409b4b6765c9b8f712dde4"
@@ -30,10 +38,11 @@
     semver "^5.5.0"
     ws "^5.1.0"
 
-"@pm2/io@~2.3.11":
-  version "2.3.11"
-  resolved "https://registry.yarnpkg.com/@pm2/io/-/io-2.3.11.tgz#f9b14b8acc9af816dcbeee6c2d027eb89355d8d1"
+"@pm2/io@~2.4.2":
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/@pm2/io/-/io-2.4.3.tgz#8a58d46f30a64f3eaec834f1f732d241fe2c7aa2"
   dependencies:
+    "@pm2/agent-node" "^1.0.2"
     async "^2.6.1"
     debug "3.1.0"
     deep-metrics "0.0.2"
@@ -885,7 +894,7 @@ babel-polyfill@^6.26.0:
     core-js "^2.5.0"
     regenerator-runtime "^0.10.5"
 
-babel-preset-env@^1.1.8, babel-preset-env@^1.3.2:
+babel-preset-env@^1.1.8, babel-preset-env@^1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/babel-preset-env/-/babel-preset-env-1.7.0.tgz#dea79fa4ebeb883cd35dab07e260c1c9c04df77a"
   dependencies:
@@ -2088,6 +2097,10 @@ data-urls@^1.0.0:
     whatwg-mimetype "^2.1.0"
     whatwg-url "^7.0.0"
 
+date-fns@^1.29.0:
+  version "1.29.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.29.0.tgz#12e609cdcb935127311d04d33334e2960a2a54e6"
+
 date-now@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
@@ -3019,6 +3032,10 @@ eventemitter3@^3.0.0:
 events@^1.0.0:
   version "1.1.1"
   resolved "http://registry.npmjs.org/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
+
+events@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.0.0.tgz#9a0a0dfaf62893d92b875b8f2698ca4114973e88"
 
 eventsource@0.1.6:
   version "0.1.6"
@@ -4970,14 +4987,15 @@ json-parse-better-errors@^1.0.1:
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
 
 json-rpc-engine@^3.4.0, json-rpc-engine@^3.6.0:
-  version "3.7.4"
-  resolved "https://registry.yarnpkg.com/json-rpc-engine/-/json-rpc-engine-3.7.4.tgz#4358969d2e4ed7e216dca8ea4b1136d927c412e4"
+  version "3.8.0"
+  resolved "https://registry.yarnpkg.com/json-rpc-engine/-/json-rpc-engine-3.8.0.tgz#9d4ff447241792e1d0a232f6ef927302bb0c62a9"
   dependencies:
     async "^2.0.1"
-    babel-preset-env "^1.3.2"
+    babel-preset-env "^1.7.0"
     babelify "^7.3.0"
     json-rpc-error "^2.0.0"
     promise-to-callback "^1.0.0"
+    safe-event-emitter "^1.0.1"
 
 json-rpc-error@^2.0.0:
   version "2.0.0"
@@ -6383,11 +6401,11 @@ pm2-multimeter@^0.1.2:
     charm "~0.1.1"
 
 pm2@^3.0.4:
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/pm2/-/pm2-3.1.3.tgz#a9ba247e3b34bab3bc7c6fcdfd04a49955c90874"
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/pm2/-/pm2-3.2.1.tgz#87453c6ccccf9112b41843372f345103e055e3e0"
   dependencies:
     "@pm2/agent" "^0.5.11"
-    "@pm2/io" "~2.3.11"
+    "@pm2/io" "~2.4.2"
     "@pm2/js-api" "^0.5.15"
     async "^2.6.1"
     blessed "^0.1.81"
@@ -6396,6 +6414,7 @@ pm2@^3.0.4:
     cli-table-redemption "^1.0.0"
     commander "2.15.1"
     cron "^1.3"
+    date-fns "^1.29.0"
     debug "^3.1"
     eventemitter2 "5.0.1"
     fclone "1.0.11"
@@ -7384,6 +7403,12 @@ safe-buffer@5.1.1:
 safe-buffer@5.1.2, safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@^5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
+
+safe-event-emitter@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/safe-event-emitter/-/safe-event-emitter-1.0.1.tgz#5b692ef22329ed8f69fdce607e50ca734f6f20af"
+  dependencies:
+    events "^3.0.0"
 
 safe-regex@^1.1.0:
   version "1.1.0"
@@ -8865,7 +8890,7 @@ web3-net@1.0.0-beta.33:
 
 web3-provider-engine@^13.3.2:
   version "13.8.0"
-  resolved "https://registry.yarnpkg.com/web3-provider-engine/-/web3-provider-engine-13.8.0.tgz#4c7c1ad2af5f1fe10343b8a65495879a2f9c00df"
+  resolved "http://registry.npmjs.org/web3-provider-engine/-/web3-provider-engine-13.8.0.tgz#4c7c1ad2af5f1fe10343b8a65495879a2f9c00df"
   dependencies:
     async "^2.5.0"
     clone "^2.0.0"
@@ -9191,6 +9216,12 @@ ws@^3.0.0:
 ws@^5.1.0, ws@^5.1.1, ws@^5.2.0:
   version "5.2.2"
   resolved "https://registry.yarnpkg.com/ws/-/ws-5.2.2.tgz#dffef14866b8e8dc9133582514d1befaf96e980f"
+  dependencies:
+    async-limiter "~1.0.0"
+
+ws@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-6.0.0.tgz#eaa494aded00ac4289d455bac8d84c7c651cef35"
   dependencies:
     async-limiter "~1.0.0"
 

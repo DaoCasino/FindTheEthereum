@@ -19,7 +19,7 @@ window.DCLIB_CONFIG = {
   }
 }
 
-if (process.env.DC_NETWORK === 'ropsten') {
+if (process.env.DAPP_DC_NETWORK === 'ropsten') {
   window.DCLIB_CONFIG = {
     network: 'ropsten',
     rpc_url: 'https://ropsten.infura.io/JCnK5ifEPH9qcQkX0Ahl'
