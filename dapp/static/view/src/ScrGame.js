@@ -480,14 +480,20 @@ var ScrGame = function(){
 			_self.refreshBalance();
 			
 			if(_balanceEth == 0 || _balanceBet == 0){
-				_self.onArcadeMode();				
+				//_self.onArcadeMode();
+				_self.showError("error_balance_bet", function () {
+					_self.removeAllListener();
+					window.open("https://platform.stage.dao.casino/", "_self");
+					//window.open("/", "_self");
+				});		
 				return;
 			}
 			
 			if(_balanceEth < 0.1 && !options_arcade){
 				_self.showError("error_balance_eth", function(){
-						_self.removeAllListener();
-						window.open("/", "_self");
+					_self.removeAllListener();
+					window.open("https://platform.stage.dao.casino/", "_self");
+					//window.open("/", "_self");
 					});
 			} else {
 				// load game

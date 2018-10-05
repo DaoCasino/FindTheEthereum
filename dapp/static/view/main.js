@@ -130,11 +130,11 @@ function createScreenLoader() {
 
 function loadManifest() {
     preloader = new PIXI.loaders.Loader();
-    var urlImg = "static/img/bg/";
-    var urlTexture = "static/img/texture/";
-    if (network == "local") {
-        urlImg = "../static/img/bg/";
-        urlTexture = "../static/img/texture/";
+    var urlImg = "../static/img/bg/";
+    var urlTexture = "../static/img/texture/";
+    if (network == "ropsten") {
+        urlImg = "../fte/static/img/bg/";
+        urlTexture = "../fte/static/img/texture/";
     }
 
     preloader.add("bgMenu", urlImg+"bgMenu.jpg");
@@ -165,9 +165,9 @@ function spritesLoad() {
 }
 
 function textureLoad() {
-    var urlTexture = "static/img/texture/";
-    if (network == "local") {
-        urlTexture = "../static/img/texture/";
+    var urlTexture = "../static/img/texture/";
+    if(network == "ropsten"){
+        urlTexture = "../fte/static/img/texture/";
     }
     iniSetArt(urlTexture + "BoxesTexture.json");
     iniSetArt(urlTexture +"ItemsTexture.json");
