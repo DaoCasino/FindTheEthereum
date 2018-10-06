@@ -483,7 +483,7 @@ var ScrGame = function(){
 				//_self.onArcadeMode();
 				_self.showError("error_balance_bet", function () {
 					_self.removeAllListener();
-					window.open("https://platform.stage.dao.casino/", "_self");
+					//window.open("https://platform.stage.dao.casino/", "_self");
 					//window.open("/", "_self");
 				});		
 				return;
@@ -492,7 +492,7 @@ var ScrGame = function(){
 			if(_balanceEth < 0.1 && !options_arcade){
 				_self.showError("error_balance_eth", function(){
 					_self.removeAllListener();
-					window.open("https://platform.stage.dao.casino/", "_self");
+					//window.open("https://platform.stage.dao.casino/", "_self");
 					//window.open("/", "_self");
 					});
 			} else {
@@ -794,6 +794,7 @@ var ScrGame = function(){
 	}
 	
 	_self.connectToBankroll = function (objConnect, deposit) {
+		console.log("connectToBankroll:", objConnect)
 		DApp.connect(objConnect, function (connected, info) {
 			//console.log('connect result:', connected)
 			//console.log('connect info:', info)
