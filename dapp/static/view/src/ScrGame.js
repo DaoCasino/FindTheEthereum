@@ -765,23 +765,6 @@ var ScrGame = function(){
 		var valPlayer = 0;
 		var gameData = {type:'uint', value:[betGame, valPlayer]};
 		_depositPlayer = deposit;
-		if(options_arcade){
-			_balanceSession = deposit;
-			_self.refreshBalance();
-			_idChannel = DCLib.Utils.makeSeed();
-			
-			_logic = new ArcadeLogic(deposit);
-			
-			_self.refreshButtons();
-			if(_tooltip){
-				_tooltip.visible = false;
-			}
-			_objGame = _self.getGame();
-			_self.closeWindow();
-			_self.createTreasure();
-			_self.showWndBet();
-			return;
-		}
 		
 		_self.showWndWarning(getText("search_bankroller"));
 		_timeSearchBankroller = TIME_SEARCH_BANKROLLER;
@@ -794,7 +777,6 @@ var ScrGame = function(){
 	}
 	
 	_self.connectToBankroll = function (objConnect, deposit) {
-		console.log("connectToBankroll:", objConnect)
 		DApp.connect(objConnect, function (connected, info) {
 			//console.log('connect result:', connected)
 			//console.log('connect info:', info)
@@ -835,10 +817,7 @@ var ScrGame = function(){
 					_self.saveGame();
 				})
 			} else {
-				_self.showError(getText("error_bankroll_offline_to_arcade"), function () {
-					options_arcade = true;
-					_self.startChannelGame(_depositPlayer);
-				});
+				_self.showError(getText("error_bankroll_offline_to_arcade"));
 			}
 		})
 	}

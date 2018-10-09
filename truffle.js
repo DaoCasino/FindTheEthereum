@@ -12,7 +12,7 @@ module.exports = {
     },
     ropsten: {
       gas           : 5500000,
-      gasPrice      : 100000000000,
+      gasPrice      : 10000000000,
       provider      : new HDWalletProvider(process.env.MNEMONIC || require('./secrets.json').ropsten.mnemonic, 'https://ropsten.infura.io'),
       network_id    : 3,
       skipDryRun    : true,
