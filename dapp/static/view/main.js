@@ -27,7 +27,7 @@ var options_arcade = false;
 var options_pause = false;
 var options_fullscreen = false;
 var options_dispute = false;
-var network = "local"; // "local", "ropsten"
+var network = "ropsten"; // "local", "ropsten"
 var options_iframe = false;
 
 function init(params) {
