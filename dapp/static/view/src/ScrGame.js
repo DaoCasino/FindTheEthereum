@@ -777,9 +777,10 @@ var ScrGame = function(){
 	}
 	
 	_self.connectToBankroll = function (objConnect, deposit) {
+		console.log('connectToBankroll:', objConnect)
 		DApp.connect(objConnect, function (connected, info) {
-			//console.log('connect result:', connected)
-			//console.log('connect info:', info)
+			console.log('connect result:', connected)
+			console.log('connect info:', info)
 
 			_timeResponse = 0;
 			_tfOpenTime.setText("");
