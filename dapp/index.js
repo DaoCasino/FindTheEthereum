@@ -8,10 +8,10 @@ console.groupEnd();
 
 function loadLib() {
     //console.log('DCLib.web3.version:', DCLib.web3.version)
-    //console.log("DC_NETWORK:", process.env.DC_NETWORK);
-    if (process.env.DC_NETWORK !== 'ropsten') {
+    console.log("DC_NETWORK:", process.env.DC_NETWORK);
+    /*if (process.env.DC_NETWORK !== 'ropsten') {
         DCLib.Account.create('0xc88b703fb08cbea894b6aeff5a544fb92e78a18e19814cd85da83b71f772aa6c', '1234')
-    }
+    }*/
 
     if (window.DApp && window.DApp.web3) {
         console.warn('Dapp allready created')
