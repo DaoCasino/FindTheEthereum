@@ -6,6 +6,9 @@ The player makes a deposit and chooses a bet.
 Purpose of the game: guess the casket with the etherium. 
 When the player finishes the game, he withdraws the money.
 
+#### Win
+- x2
+
 ## Dependencies:
 - "dc-webapi": "^0.1.35"
 - "pixi.js": "4.8.2"
@@ -20,9 +23,6 @@ cd ./fte
 
 yarn install & yarn start
 ```
-
-#### Win
-- x2
 
 ## Table of Contents
 - [File structure](#-file-structure)
