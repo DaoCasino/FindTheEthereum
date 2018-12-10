@@ -10,6 +10,17 @@ When the player finishes the game, he withdraws the money.
 - "dc-webapi": "^0.1.35"
 - "pixi.js": "4.8.2"
 
+## Quick start
+
+Clone the sample game repository and start the DC-CLI in it:
+
+```javascript
+git clone --depth=1 https://github.com/DaoCasino/FindTheEthereum ./fte
+cd ./fte
+
+yarn install & yarn start
+```
+
 #### Win
 - x2
 
