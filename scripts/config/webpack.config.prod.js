@@ -16,12 +16,12 @@ const ModuleScopePlugin     = require('react-dev-utils/ModuleScopePlugin')
 // const HtmlCriticalPlugin    = require('html-critical-webpack-plugin')
 
 const paths                 = require('./paths')
-const getClientEnvironment  = require('./env')
 
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
 const publicPath = paths.servedPath
+// const publicPath = "/games/fte/"
 
 // Some apps do not use client-side routing with pushState.
 // For these, "homepage" can be set to "." to enable relative asset paths.
@@ -34,8 +34,7 @@ const publicUrl = publicPath.slice(0, -1)
 
 
 // Get environment variables to inject into our app.
-const env = getClientEnvironment(publicUrl)
-let htmlReplacements = env.raw
+let htmlReplacements = {}
 
 // Read favicons html
 htmlReplacements.META_INFORMATION = ''
@@ -46,11 +45,6 @@ try {
   htmlReplacements.META_INFORMATION = ''
 }
 
-// Assert this just to be safe.
-// Development builds are slow and not intended for production.
-if (env.stringified['process.env'].NODE_ENV !== '"production"') {
-  throw new Error('Production builds must have NODE_ENV=production.')
-}
 
 // Note: defined here because it will be used more than once.
 const cssFilename = 'static/css/[name].[contenthash:8].css'
@@ -73,7 +67,7 @@ let front_prod_config = {
 
   // We generate sourcemaps in production. This is slow but gives good results.
   // You can exclude the *.map files from the build during deployment.
-  // devtool: 'source-map',
+  devtool: 'source-map',
 
   // In production, we only want to load the polyfills and the app code.
   entry: ['babel-polyfill', require.resolve('./polyfills'), paths.appIndexJs],
@@ -101,7 +95,7 @@ let front_prod_config = {
     // https://github.com/facebookincubator/create-react-app/issues/253
     modules: ['node_modules', paths.appNodeModules].concat(
         // It is guaranteed to exist because we tweak it in `env.js`
-        process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
+       // process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
     ).concat(paths.myModules),
 
     // These are the reasonable defaults supported by the Node ecosystem.
@@ -129,21 +123,7 @@ let front_prod_config = {
       // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
       { parser: { requireEnsure: false } },
 
-      // First, run the linter.
-      // It's important to do this before Babel processes the JS.
-      {
-        test: /\.(js)$/,
-        enforce: 'pre',
-        use: [
-          {
-            options: {
-              formatter: eslintFormatter
-            },
-            loader: require.resolve('eslint-loader')
-          }
-        ],
-        include: paths.appSrc
-      },
+    
 
       // ** ADDING/UPDATING LOADERS **
       // The "file" loader handles all assets unless explicitly excluded.
@@ -158,9 +138,6 @@ let front_prod_config = {
           /\.html$/,
           /\.js$/,
           /\.css$/,
-          /\.scss$/,
-          /\.sass$/,
-          /\.styl$/,
           /\.less$/,
           /\.json$/,
           /\.svg$/,
@@ -238,7 +215,7 @@ let front_prod_config = {
               options: {
                 importLoaders : 1,
                 minimize      : true,
-                sourceMap     : false
+                sourceMap     : true
               }
             },
             {
@@ -277,10 +254,6 @@ let front_prod_config = {
     new webpack.ProvidePlugin({
     }),
 
-    new SWPlugin({
-      entry: paths.appIndexSW,
-      // filename:  paths.dist_appIndexSW
-    }),
 
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
@@ -307,27 +280,35 @@ let front_prod_config = {
       }
     }),
 
-    // Makes some environment variables available to the JS code, for example:
-    // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
-    // It is absolutely essential that NODE_ENV was set to production here.
-    // Otherwise React will be compiled in the very slow development mode.
-    new webpack.DefinePlugin(env.stringified),
-
     // Minify the code.
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false,
-        // Disabled because of an issue with Uglify breaking seemingly valid code:
-        // https://github.com/facebookincubator/create-react-app/issues/2376
-        // Pending further investigation:
-        // https://github.com/mishoo/UglifyJS2/issues/2011
-        comparisons: false
+    // new webpack.optimize.UglifyJsPlugin({
+    //   compress: {
+    //     warnings: false,
+    //     // Disabled because of an issue with Uglify breaking seemingly valid code:
+    //     // https://github.com/facebookincubator/create-react-app/issues/2376
+    //     // Pending further investigation:
+    //     // https://github.com/mishoo/UglifyJS2/issues/2011
+    //     comparisons: false
+    //   },
+    //   output: {
+    //     comments: false
+    //   },
+    //   sourceMap: true
+    // }),
+
+    // copy custom static assets
+    /*new CopyWebpackPlugin([
+      {
+        from: path.join(__dirname, '../../dapp/dapp.logic.js'),
+        to: path.join(__dirname, '../../build'),
+        ignore: ['.*']
       },
-      output: {
-        comments: false
-      },
-      sourceMap: false
-    }),
+      {
+        from: path.join(__dirname, '../../dapp/dapp.manifest.js'),
+        to: path.join(__dirname, '../../build'),
+        ignore: ['.*']
+      }
+    ]),*/
 
     // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
     new ExtractTextPlugin({
@@ -358,67 +339,48 @@ let front_prod_config = {
   }
 }
 
-if (!process.env.TRAVIS_BUILD && typeof HtmlCriticalPlugin!=='undefined') {
-  front_prod_config.plugins.push(new HtmlCriticalPlugin({
-     /* The path of the Webpack bundle */
-    base : paths.appBuild ,
-    src  : 'index.html'   ,
-    dest : 'index.html'   ,
-
-    inline  : true ,
-    minify  : true ,
-    extract : true ,
-
-    /* iPhone 6 dimensions, use whatever you like */
-    width  : 375 ,
-    height : 565 ,
-
-    penthouse: {
-    }
-  }))
-}
 
 
 
 // SASS loader
-// front_prod_config.module.rules.push({
-//   test: /\.(scss|sass)$/,
-//   use: [
-//     // creates style nodes from JS strings
-//     { loader: 'style-loader' },
-//     // translates CSS into CommonJS
-//     { loader: 'css-loader'   },
-//     // compiles Sass to CSS
-//     { loader: 'sass-loader'  }
-//   ]
-// })
-
-// LESS loader
 front_prod_config.module.rules.push({
-  test: /\.less$/,
+  test: /\.(scss|sass)$/,
   use: [
     // creates style nodes from JS strings
     { loader: 'style-loader' },
     // translates CSS into CommonJS
     { loader: 'css-loader'   },
-    // compiles Less to CSS
-    { loader: 'less-loader'  }
+    // compiles Sass to CSS
+    { loader: 'sass-loader'  }
   ]
 })
+
+// LESS loader
+  front_prod_config.module.rules.push({
+    test: /\.less$/,
+    use: [
+      // creates style nodes from JS strings
+      { loader: 'style-loader' },
+      // translates CSS into CommonJS
+      { loader: 'css-loader'   },
+      // compiles Less to CSS
+      { loader: 'less-loader'  }
+    ]
+  })
 
 
 // STYLUS loader
-front_prod_config.module.rules.push({
-  test: /\.styl$/,
-  use: [
-    // creates style nodes from JS strings
-    { loader: 'style-loader' },
-    // translates CSS into CommonJS
-    { loader: 'css-loader'   },
-    // compiles stylus
-    { loader: 'stylus-loader'  }
-  ]
-})
+//   front_prod_config.module.rules.push({
+//     test: /\.styl$/,
+//     use: [
+//       // creates style nodes from JS strings
+//       { loader: 'style-loader' },
+//       // translates CSS into CommonJS
+//       { loader: 'css-loader'   },
+//       // compiles stylus
+//       { loader: 'stylus-loader'  }
+//     ]
+//   })
 
 
 

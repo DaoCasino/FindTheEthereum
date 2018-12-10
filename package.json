@@ -1,46 +1,27 @@
 {
-  "name": "dc-sdk-box",
-  "version": "0.0.3",
+  "name": "FindTheEthereum",
+  "version": "1.0.1",
   "description": "DApp on dao casino protocol example",
-  "author": "Alex Step",
+  "author": "Sergey Pomorin",
   "license": "MIT",
   "meta": {
     "_": "This section data used for generate manifest.json and meta-tags html",
     "start_url": "./",
-    "appName": "Dapp example",
+    "appName": "Find the ethereum",
     "appDescription": "Example DApp on dao casino protocol",
     "background": "#1c2026",
     "theme_color": "#1c2026",
     "display": "standalone",
     "orientation": "portrait"
   },
-  "paths": {
-    "dapp": {
-      "contract_abi": "./dapp/config/dapp.contract.json"
-    },
-    "truffle": {
-      "contracts_directory": "./contracts",
-      "migrations_directory": "./migrations",
-      "contracts_build_directory": "./dapp/config/contracts/"
-    }
-  },
   "scripts": {
-    "meta:generate": "cd ./scripts/tools/metainfo && npm i && npm start",
-    "meta:clean": "rm -rf  ./dapp/static/meta",
-    "watch_contracts": "node ./scripts/watch_contracts.js",
-    "start": "sh ./scripts/start.sh",
-    "dev": "dc-scripts run --sdk && truffle migrate --reset --compile-all && node ./scripts/devserver.js",
-    "stop": "dc-scripts stop",
-    "build": "node ./scripts/build.js",
-    "deploy:contracts:local": "truffle migrate --network development --reset --compile-all",
-    "deploy:contracts:ropsten": "truffle migrate --network ropsten --reset --compille-all",
-    "deploy:frontend:ipfs": "cd ./scripts/tools/deploy_ipfs && npm run deploy",
-    "deploy": "npm run deploy:frontend:ipfs",
-    "publish": "echo 'Publish to dao.casino marketeplace - coming soon'",
-    "logs:bankroller": "dc-scripts logs dc_bankroller",
-    "logs:rpc": "dc-scripts logs dc_protocol",
-    "lint": "eslint ./",
-    "test": "truffle test"
+    "start": "node ./scripts/devserver.js",
+    "build": "node --max-old-space-size=4096 ./scripts/build.js"
+  },
+  "dependencies": {
+    "dc-webapi": "^0.1.35",
+    "pixi.js": "4.8.2",
+    "serviceworker-webpack-plugin": "1.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
@@ -51,21 +32,11 @@
     "babel-preset-env": "^1.1.8",
     "babel-register": "^6.22.0",
     "case-sensitive-paths-webpack-plugin": "2.1.2",
-    "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.26.2",
-    "dc-scripts": "github:daocasino/dc-scripts",
     "dotenv": "6.0.0",
-    "eslint": "^3.14.0",
-    "eslint-config-standard": "^6.0.0",
-    "eslint-loader": "2.1.0",
-    "eslint-plugin-babel": "^4.0.0",
-    "eslint-plugin-mocha": "^4.8.0",
-    "eslint-plugin-promise": "^3.0.0",
-    "eslint-plugin-standard": "^2.0.0",
     "extra-watch-webpack-plugin": "1.0.3",
     "extract-text-webpack-plugin": "3.0.2",
     "file-loader": "1.1.11",
-    "fs-extra": "7.0.0",
     "html-webpack-plugin": "^2.28.0",
     "js-cryptico": "1.0.2",
     "json-loader": "^0.5.4",
@@ -73,18 +44,16 @@
     "less-loader": "4.1.0",
     "postcss-loader": "2.1.6",
     "promise": "8.0.1",
-    "react-dev-utils": "5",
+    "react-dev-utils": "3.0.2",
     "sass-loader": "7.1.0",
-    "serviceworker-webpack-plugin": "0.2.3",
     "style-loader": "^0.13.2",
     "stylus": "0.54.5",
     "stylus-loader": "3.0.2",
-    "truffle": "^5.0.0-beta.0",
-    "truffle-hdwallet-provider": "^1.0.0-web3one.0",
     "url-loader": "1.0.1",
     "webpack": "3.12.0",
     "webpack-dev-server": "2.11.2",
     "webpack-manifest-plugin": "2.0.3",
     "whatwg-fetch": "2.0.4"
-  }
+  },
+  "gitHead": "3e5dcaecc303cdce6b606ab1fc570c530592eef4"
 }

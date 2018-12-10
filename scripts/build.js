@@ -11,8 +11,7 @@ process.on('unhandledRejection', err => {
   throw err
 })
 
-// Ensure environment variables are read.
-require('./config/env')
+
 
 const path                     = require('path')
 const chalk                    = require('chalk')
@@ -47,7 +46,7 @@ measureFileSizesBeforeBuild(paths.appBuild)
     copyPublicFolder()
 
     // Copy parse dapp.manifest and dapp.logic
-    require('./config/copy.dapp').copyDappFiles('./')
+    //require('./config/copy.dapp').copyDappFiles('./')
 
     // Start the webpack build
     return build(previousFileSizes)
@@ -72,7 +71,7 @@ measureFileSizesBeforeBuild(paths.appBuild)
       }
 
       console.log('File sizes after gzip:\n')
-      printFileSizesAfterBuild(stats, previousFileSizes, paths.appBuild)
+      // printFileSizesAfterBuild(stats, previousFileSizes, paths.appBuild)
       console.log()
 
       const appPackage  = require(paths.appPackageJson)
@@ -111,13 +110,14 @@ function build (previousFileSizes) {
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
       if (err) {
+        console.error(err)
         return reject(err)
       }
       const messages = formatWebpackMessages(stats.toJson({}, true))
       if (messages.errors.length) {
         return reject(new Error(messages.errors.join('\n\n')))
       }
-      if (process.env.CI && messages.warnings.length) {
+      if (process.env.CI == true && messages.warnings.length) {
         console.log(chalk.yellow(
           '\nTreating warnings as errors because process.env.CI = true.\n' +
           'Most CI servers set it automatically.\n'

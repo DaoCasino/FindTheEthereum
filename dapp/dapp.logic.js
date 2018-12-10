@@ -1,54 +1,22 @@
-/*global DCLib*/
+export default function () {
+  return {
+    play: function (userBets, gameData, randoms) {
+      const USER_BET = userBets[0]
+      const USER_NUM = gameData.custom.playerNumbers.v[0]
+      const RANDOM_NUM = randoms[0]
 
-DCLib.defineDAppLogic("DCGame_FTE_v1", function (payChannel){
-    const MIN_VALUE = 1;
-    const MAX_VALUE = 3;
+      let profit = -USER_BET
+      let log = []
+      log.push({ user: USER_NUM, random: RANDOM_NUM, win: Number(USER_NUM) === Number(RANDOM_NUM) })
+      if (Number(USER_NUM) === Number(RANDOM_NUM)) {
+        profit = USER_BET * 2
+      }
 
-    let history = [];
-
-    let clickBox = function (userBet, valPlayer, randomHash){
-        if (valPlayer < MIN_VALUE || valPlayer > MAX_VALUE) {
-            console.warn('Invalid usernum, min: ' + MIN_VALUE + ' , max ' + MAX_VALUE + '');
-            return;
-        }
-
-        // convert 1BET to 100000000
-        userBet = DCLib.Utils.bet2dec(userBet);
-        // generate random number
-        const randomNum = DCLib.numFromHash(randomHash, MIN_VALUE, MAX_VALUE);
-
-        let profit = -userBet;
-        // if user win
-        if (valPlayer == randomNum) {
-            profit = userBet;
-        }
-        // add result to paychannel
-        payChannel.addTX(profit);
-
-        // console log current paychannel state
-        payChannel.printLog();
-
-        // push all data to our log
-        // just FOR DEBUG
-        const obj = {
-            // !IMPORTANT Time can be different on client and bankroller sides
-            // not use time in your primary game logic
-            // timestamp: new Date().getTime(),
-
-            userBet: userBet,
-            profit: profit,
-            valPlayer: valPlayer,
-            balance: payChannel.getBalance(),
-            randomHash: randomHash,
-            randomNum: randomNum
-        }
-        history.push(obj)
-
-        return obj;
+      return {
+        profit,
+        data: log
+      }
     }
+  }
+}
 
-    return {
-        Game: clickBox,
-        history: history
-    }
-})

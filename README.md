@@ -6,6 +6,10 @@ The player makes a deposit and chooses a bet.
 Purpose of the game: guess the casket with the etherium. 
 When the player finishes the game, he withdraws the money.
 
+## Dependencies:
+- "dc-webapi": "^0.1.35"
+- "pixi.js": "4.8.2"
+
 #### Win
 - x2
 
