@@ -66,7 +66,7 @@ export default class WndDeposit extends InterfaceObject {
         this.arButtons.push(this._headScroll);
 
         this._tfDesc = API.addText("", 26, style.colorDesc, undefined, "center", 500, 3)
-        this._tfDesc.y = -125;
+        this._tfDesc.y = -132;
         this.addChild(this._tfDesc);
         this._tfBet = API.addText("0 BET", 40, "#FFFFFF", undefined, "center", 350, 4)
         this._tfBet.y = -5 - this._tfBet.height / 2;

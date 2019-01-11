@@ -19,7 +19,7 @@
     "build": "node --max-old-space-size=4096 ./scripts/build.js"
   },
   "dependencies": {
-    "dc-webapi": "^0.1.35",
+    "@daocasino/dc-webapi": "0.2.4",
     "pixi.js": "4.8.2",
     "serviceworker-webpack-plugin": "1.0.1"
   },

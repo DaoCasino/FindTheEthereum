@@ -19,7 +19,7 @@ class _API extends PIXI.Container {
         this.arClips = [];
         this.options_pause = false;
         this.options_debug = false;
-        this.options_platform = false;
+        this.options_platform = window.self !== window.top;
 
         this.colorFilter = new PIXI.filters.ColorMatrixFilter();
         this.colorFilter.desaturate();
@@ -117,7 +117,7 @@ class _API extends PIXI.Container {
         _align = "center",
         width = 600,
         px = 2,
-        font = this.fontMain) {
+        font = "Tahoma") {
 
         let style;
         

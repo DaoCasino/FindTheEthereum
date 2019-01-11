@@ -91,8 +91,8 @@ export default class Game extends InterfaceObject {
             this._openkey = "0x000000000000000000000000000000000000000"
             this.DC_NETWORK = "local"
         } else {
-            this._openkey = window.webapi.account.address
-            this.DC_NETWORK = window.webapi.account._params.config.blockchainNetwork
+            this._openkey = window.account._address
+            this.DC_NETWORK = window.account._params.config.blockchainNetwork
         }
 
         this.urlEtherscan = "https://" + this.DC_NETWORK + ".etherscan.io/"
@@ -316,7 +316,7 @@ export default class Game extends InterfaceObject {
             callback()
         } else {
             if (this._openkey){
-                webapi._Eth.getBalances().then(function (res) {
+                window.account.getBalances().then(function (res) {
                     _self._balanceEth = Number(res.eth.balance)
                     _self._balanceBet = Number(res.bet.balance)
 
@@ -542,7 +542,7 @@ export default class Game extends InterfaceObject {
     }
 
     // CHANNEL
-    createGame(deposit) {
+    async createGame(deposit) {
         deposit = Number(deposit)
         
         if (this._idTutor == 1) {
@@ -560,7 +560,7 @@ export default class Game extends InterfaceObject {
         }
         
         if(API.options_debug == false){
-            window.game = window.webapi.createGame(params)
+            await window.game.createGame(params)
         }
 
         this.showWndWarning(API.getText("search_bankroller"))
@@ -573,7 +573,6 @@ export default class Game extends InterfaceObject {
             return
         }
         try {
-            await window.game.start()
             const resultConnect = await window.game.connect({playerDeposit: deposit})
             if (resultConnect.channelBalances) {
                 this._depositBankroll = resultConnect.channelBalances.bankroller
@@ -584,7 +583,7 @@ export default class Game extends InterfaceObject {
             this.connected(deposit)
         } catch (error) {
             let str = error.message || error
-            this.showError(str)
+            this.showError(API.getText(str))
             console.error(error)
         }
     }

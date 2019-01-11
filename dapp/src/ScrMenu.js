@@ -1,7 +1,5 @@
-import DCWebapi from "dc-webapi"
 import InterfaceObject from "./InterfaceObject.js"
 import WndInstruction from "./WndInstruction.js"
-import WndNetwork from "./WndNetwork.js"
 import API from "./API.js"
 
 export default class Menu extends InterfaceObject {

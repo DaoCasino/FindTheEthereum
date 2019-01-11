@@ -90,7 +90,7 @@ export default class Main {
     loadManifest() {
         let loader = PIXI.loader;
         this.loader = loader;
-
+        let _self = this
         loader
             .add("bgMenu", require('../img/bg/bgMenu.jpg'))
             .add("bgGame", require('../img/bg/bgGame.jpg'))
@@ -147,8 +147,16 @@ export default class Main {
             //.add("BoxesTexture.json")
             //.add("ItemsTexture.json");
 
-        loader.onError.add(this.handleProgress.bind(this));
+        // loader.onError.add(this.handleProgress.bind(this));
         loader.load(this.handleComplete.bind(this));
+        loader.on('progress', function (loader, res){
+            let percent = Math.round(loader.progress);
+            _self.loadBack.barLoading.scale.x = percent / 100;
+            if (_self.loadPercent) {
+                _self.loadPercent.setText(percent + "%");
+            }
+            // console.log(percent)
+        })
     }
 
     textureLoad() {
