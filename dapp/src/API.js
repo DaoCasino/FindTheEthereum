@@ -7,13 +7,12 @@ class _API extends PIXI.Container {
     constructor() {
         super();
         
-        this.version = "1.0.1";
+        this.version = "1.0.2";
         this._W = 1920;
         this._H = 1080;
         this.globalScale = 1;
         this.renderSize = 1;
         this.stageScale = 1;
-        this.network = "ropsten"
         this.dataAnima = [];
         this.dataMovie = [];
         this.arClips = [];

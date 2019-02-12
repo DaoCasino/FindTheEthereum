@@ -10,7 +10,7 @@ When the player finishes the game, he withdraws the money.
 - x2
 
 ## Dependencies:
-- "dc-webapi": "^0.1.35"
+- "dc-webapi": "0.2.8"
 - "pixi.js": "4.8.2"
 
 ## Quick start

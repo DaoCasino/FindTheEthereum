@@ -53,8 +53,6 @@ export default class WndNetwork extends InterfaceObject {
             item_mc.scale.y = 1 * item_mc.sc;
         }
 
-        API.network = item_mc.name
-
         this.prnt.closeWindow(this);
         if (this._callback) {
             this._callback(this.prnt);

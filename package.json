@@ -1,6 +1,6 @@
 {
   "name": "FindTheEthereum",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "DApp on dao casino protocol example",
   "author": "Sergey Pomorin",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "build": "node --max-old-space-size=4096 ./scripts/build.js"
   },
   "dependencies": {
-    "@daocasino/dc-webapi": "0.2.4",
+    "@daocasino/dc-webapi": "0.2.8",
     "pixi.js": "4.8.2",
     "serviceworker-webpack-plugin": "1.0.1"
   },
